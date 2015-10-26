@@ -141,7 +141,8 @@ class Swarm( breve.Control ):
 		# uniform mutation
 		for i in range(len(newBird.geno)):
 			prob = random.random()
-			newBird.geno[i] += random.uniform(-0.5,0.5)
+			if prob <= 0.05:
+				newBird.geno[i] += random.uniform(-0.5,0.5)
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
