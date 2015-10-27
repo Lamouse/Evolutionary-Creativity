@@ -14,13 +14,13 @@ class Node:
         self.parent = None
 
         if specie == 'Bird':
-            self.leaf = ["self.alignment()", "self.cohesion()", "self.separation()", "self.target()", "self.flee()",
-                         "self.currentVelocity()", "self.centerOfWorld()", "self.mostEnergizedNeighbor()",
-                         "self.randV()"]
+            self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
+                         "indiv.currentVelocity()", "indiv.centerOfWorld()", "indiv.mostEnergizedNeighbor()",
+                         "indiv.randV()"]
         elif specie == 'Predator':
-            self.leaf = ["self.alignment()", "self.cohesion()", "self.separation()", "self.target()",
-                         "self.currentVelocity()", "self.centerOfWorld()", "self.mostEnergizedNeighbor()",
-                         "self.randV()"]
+            self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
+                         "indiv.currentVelocity()", "indiv.centerOfWorld()", "indiv.mostEnergizedNeighbor()",
+                         "indiv.randV()"]
         self.node = ["+", "-", "*", "/"]
 
         self.fill_data()
@@ -38,7 +38,7 @@ class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
 		self.numBirds = 150
-		self.numPred = 25
+		self.numPred = 0
 		self.numBirdsBirth = 0
 
 		# World
@@ -162,17 +162,10 @@ class Swarm( breve.Control ):
 		return candidate
 
 	def crossover(self, newBird1, newBird2, parent1, parent2):
-		# one point crossover
-		pos = random.randint(0, len(newBird1.geno))
-		newBird1.geno = parent1.geno[0:pos] + parent2.geno[pos:]
-		newBird2.geno = parent2.geno[0:pos] + parent1.geno[pos:]
+		newBird1.geno, newBird2.geno = self.tree_crossover(parent1.geno, parent2.geno)
 
 	def mutate(self, newBird):
-		# uniform mutation
-		for i in range(len(newBird.geno)):
-			prob = random.random()
-			if prob <= 0.05:
-				newBird.geno[i] += random.uniform(-0.5,0.5)
+		self.tree_mutation(newBird.geno)
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
@@ -229,14 +222,19 @@ class Swarm( breve.Control ):
 			self.deadBirds.append(newBird1)
 			self.deadBirds.append(newBird2)
 
+	def create_random_tree(self, depth, specie):
+		if depth < 1:
+		    return None
+		return Node(self.create_random_tree(depth-1, specie), self.create_random_tree(depth-1, specie), specie)
+
 	def fill_parents(self, tree):
 	    if tree.right is not None:
 	        # node
 	        tree.left.parent = tree
 	        tree.right.parent = tree
 
-	        fill_parents(tree.left)
-	        fill_parents(tree.right)
+	        self.fill_parents(tree.left)
+	        self.fill_parents(tree.right)
 
 
 	def print_tree(self, tree):
@@ -252,22 +250,31 @@ class Swarm( breve.Control ):
 	        print ")",
 
 
-	def run_code(self, tree):
+	def run_code(self, indiv, tree):
 	    if tree.right is None:
 	        # leaf
-	        # it should execute the code
-	        # return exec(tree.data)
-	        return [random.uniform(-5, 5), random.uniform(-5, 5)]
+	        exec "x, y = " + tree.data
+	        print x, y
+	        return [x, y]
 	    else:
-	        # node
-	        return [eval('x'+tree.data+'y') for x, y in zip(run_code(tree.left), run_code(tree.right))]
+	        # node_list
+	        # for some reason this don't work, probability because it don't work in python 2.3
+	        # return [0 if tree.data == "/" and y == 0 else eval('x'+tree.data+'y') for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right))]
+
+	        result = []
+	        for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right)):
+	        	if tree.data == "/" and y == 0:
+	        		result.append(0)
+	        	else:
+	        		result.append(eval('x'+tree.data+'y'))
+	        return result
 
 
 	def select_random_node(self, tree, list_nodes):
 	    if tree.right is not None:
 	        list_nodes.append(tree)
-	        select_random_node(tree.left, list_nodes)
-	        select_random_node(tree.right, list_nodes)
+	        self.select_random_node(tree.left, list_nodes)
+	        self.select_random_node(tree.right, list_nodes)
 
 
 	def replace_tree(self, old_sub_tree, new_sub_tree):
@@ -284,8 +291,8 @@ class Swarm( breve.Control ):
 	        return None
 
 	    current_node = copy.deepcopy(parent1)
-	    current_node.left = tree_copy(parent1.left)
-	    current_node.right = tree_copy(parent1.right)
+	    current_node.left = self.tree_copy(parent1.left)
+	    current_node.right = self.tree_copy(parent1.right)
 	    return current_node
 
 
@@ -293,35 +300,39 @@ class Swarm( breve.Control ):
 	    prob = random.random()
 	    if prob <= 0.05:
 	        node_list = []
-	        select_random_node(tree, node_list)
+	        self.select_random_node(tree, node_list)
 	        index = random.randint(1, len(node_list)-1)
 	        depth = random.randint(1, 5)
-	        new_sub_tree = create_random_tree(depth, "Bird")
-	        replace_tree(node_list[index], new_sub_tree)
-	        fill_parents(tree)
+	        new_sub_tree = self.create_random_tree(depth, "Bird")
+	        self.replace_tree(node_list[index], new_sub_tree)
+	        self.fill_parents(tree)
 
 
 	def tree_crossover(self, parent1, parent2):
-	    tree_child1 = tree_copy(parent1)
-	    tree_child2 = tree_copy(parent2)
-	    fill_parents(tree_child1)
-	    fill_parents(tree_child2)
+	    tree_child1 = self.tree_copy(parent1)
+	    tree_child2 = self.tree_copy(parent2)
+	    self.fill_parents(tree_child1)
+	    self.fill_parents(tree_child2)
 
 	    node_list1 = []
-	    select_random_node(tree_child1, node_list1)
+	    self.select_random_node(tree_child1, node_list1)
+	    if len(node_list1)-1 < 1:
+	    	return tree_child1, tree_child2
 	    index1 = random.randint(1, len(node_list1)-1)
 
 	    node_list2 = []
-	    select_random_node(tree_child2, node_list2)
+	    self.select_random_node(tree_child2, node_list2)
+	    if len(node_list2)-1 < 1:
+	    	return tree_child1, tree_child2
 	    index2 = random.randint(1, len(node_list2)-1)
 
 	    subtree_parent1 = node_list1[index1]
 	    subtree_parent2 = node_list2[index2]
 
-	    replace_tree(subtree_parent1, subtree_parent2)
-	    replace_tree(subtree_parent2, subtree_parent1)
-	    fill_parents(tree_child1)
-	    fill_parents(tree_child2)
+	    self.replace_tree(subtree_parent1, subtree_parent2)
+	    self.replace_tree(subtree_parent2, subtree_parent1)
+	    self.fill_parents(tree_child1)
+	    self.fill_parents(tree_child2)
 
 	    return tree_child1, tree_child2
 
@@ -489,7 +500,6 @@ class Bird( breve.Mobile ):
 		self.gener = 'm'
 		self.radius = 2
 		self.geno = None
-		#self.geno = [0.005, 0.01, 1, 0.005, 1]
 
 		self.lastScale = 1
 		Bird.init( self )
@@ -503,7 +513,7 @@ class Bird( breve.Mobile ):
 		self.gener = gener
 
 		self.changePos(x,y)
-		self.geno = [random.uniform(-5, 5) for x in range(6)]
+		self.geno = self.controller.create_random_tree(3, "Bird")
 		vel_x = random.uniform(-self.maxVel, self.maxVel)
 		vel_y = random.uniform(-self.maxVel, self.maxVel)
 		self.changeVel(vel_x, vel_y)
@@ -559,18 +569,64 @@ class Bird( breve.Mobile ):
 		self.isAlive = False
 		self.controller.deadBirds.append(self)
 
-	def fly(self):
+	def alignment(self):
+		neighbors = self.getNeighbors()
+		a_x = 0
+		a_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
+				# alignment
+				a_x += neighbor.vel_x
+				a_y += neighbor.vel_y
+				count += 1
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			a_x -= self.vel_x
+			a_y -= self.vel_y
+		return [a_x, a_y]
+
+	def cohesion(self):
+		neighbors = self.getNeighbors()
+		c_x = 0
+		c_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
+				# cohesion
+				c_x += neighbor.pos_x
+				c_y += neighbor.pos_y
+				count += 1
+
+		if count > 0:
+			c_x /= count
+			c_y /= count
+			c_x -= self.pos_x
+			c_y -= self.pos_y
+		return [c_x, c_y]
+
+	def separation(self):
+		neighbors = self.getNeighbors()
+		s_x = 0
+		s_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if 0 < norm < self.radius:
+					# separation
+					v_x = (self.pos_x - neighbor.pos_x) / norm**2
+					v_y = (self.pos_y - neighbor.pos_y) / norm**2
+					s_x += v_x*self.lastScale**2
+					s_y += v_y*self.lastScale**2
+		return [s_x, s_y]
+
+	def target(self):
 		neighbors = self.getNeighbors()
 		t_x = 0
 		t_y = 0
-		f_x = 0
-		f_y = 0
-		s_x = 0
-		s_y = 0
-		a_x = 0
-		a_y = 0
-		c_x = 0
-		c_y = 0
 		dist = 99999
 		count = 0
 		for neighbor in neighbors:
@@ -581,60 +637,67 @@ class Bird( breve.Mobile ):
 					dist = norm*(1-neighbor.energy)
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
+		return [t_x, t_y]
 
-				if norm <= max(neighbor.lastScale,3):
-					self.eat(neighbor) 
+	def flee(self):
+		neighbors = self.getNeighbors()
+		f_x = 0
+		f_y = 0
 
-			elif neighbor.isA( 'Bird' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.radius:
-					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-				# alignment
-				a_x += neighbor.vel_x
-				a_y += neighbor.vel_y
-				c_x += neighbor.pos_x
-				# cohesion
-				c_y += neighbor.pos_y
-				count += 1
-
-			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
+		for neighbor in neighbors:
+			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
 				v_x = (self.pos_x - neighbor.pos_x) / norm**2
 				v_y = (self.pos_y - neighbor.pos_y) / norm**2
 				f_x += v_x*self.lastScale**2
 				f_y += v_y*self.lastScale**2
+		return [f_x, f_y]
 
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
+	def currentVelocity(self):
+		return [self.vel_x,self.vel_y]
 
-			c_x /= count
-			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
+	def centerOfWorld(self):
+		return [-self.pos_x,-self.pos_y]
 
+	def mostEnergizedNeighbor(self):
+		neighbors = self.getNeighbors()
+		me_x = 0
+		me_y = 0
+		energy = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
+				if neighbor.energy > energy:
+					me_x = neighbor.pos_x-self.pos_x
+					me_y = neighbor.pos_y-self.pos_y
+					energy = neighbor.energy
+		return [me_x, me_y]
+
+	def randV(self):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
+		return [rand_x, rand_y]
 
-		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*f_x+self.geno[5]*rand_x
-		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*f_y+self.geno[5]*rand_y
-		self.changeAccel(accel_x, accel_y)
+	def fly(self):
+		pos = self.getLocation()
+		self.changePos(pos.x, pos.y)
+		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
+
 		vel = self.getVelocity()
 		vel_x = vel.x
 		vel_y = vel.y
 		self.changeVel(vel_x, vel_y)
 
-		pos = self.getLocation()
-		self.changePos(pos.x, pos.y)
-		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
+		accel_x, accel_y = self.controller.run_code(self, self.geno)
+		self.changeAccel(accel_x, accel_y)
 		
+		# eat
+		neighbors = self.getNeighbors()
+		for neighbor in neighbors:
+			if neighbor.isA( 'Feeder' ):
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if norm <= max(neighbor.lastScale,3):
+					self.eat(neighbor) 
 
 		self.addEnergy(-0.01)
 		self.adjustSize()
@@ -703,7 +766,7 @@ class Predator( breve.Mobile ):
 		self.gener = gener
 
 		self.changePos(x,y)
-		self.geno = [random.uniform(-5, 5) for x in range(5)]
+		self.geno = self.controller.create_random_tree(3, "Predator")
 		vel_x = random.uniform(-self.maxVel, self.maxVel)
 		vel_y = random.uniform(-self.maxVel, self.maxVel)
 		self.changeVel(vel_x, vel_y)
@@ -760,61 +823,7 @@ class Predator( breve.Mobile ):
 		self.controller.deadBirds.append(self)
 
 	def fly(self):
-		neighbors = self.getNeighbors()
-		t_x = 0
-		t_y = 0
-		s_x = 0
-		s_y = 0
-		a_x = 0
-		a_y = 0
-		c_x = 0
-		c_y = 0
-		dist = 99999
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				#target
-				if norm*(1-neighbor.energy) < dist:
-					dist = norm*(1-neighbor.energy)
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
-
-				if norm <= max(neighbor.lastScale,3):
-					self.eat(neighbor) 
-
-			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.radius:
-					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-				# alignment
-				a_x += neighbor.vel_x
-				a_y += neighbor.vel_y
-				c_x += neighbor.pos_x
-				# cohesion
-				c_y += neighbor.pos_y
-				count += 1
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-			c_x /= count
-			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
-
-		rand_x = random.uniform(0, 1)
-		rand_y = random.uniform(0, 1)
-
-		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*rand_x
-		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*rand_y
+		accel_x, accel_y = self.controller.run_code(self, self.geno)
 		self.changeAccel(accel_x, accel_y)
 		vel = self.getVelocity()
 		vel_x = vel.x

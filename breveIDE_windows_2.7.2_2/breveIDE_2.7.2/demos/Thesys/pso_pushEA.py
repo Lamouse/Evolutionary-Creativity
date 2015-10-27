@@ -358,8 +358,8 @@ class Bird( breve.Mobile ):
 		self.pushInterpreter.addInstruction( self, 'cohension' )
 		self.pushInterpreter.addInstruction( self, 'target' )
 		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
-		self.pushInterpreter.addInstruction( self, 'myVelocity' )
-		self.pushInterpreter.addInstruction( self, 'centerWorld' )
+		self.pushInterpreter.addInstruction( self, 'currentVelocity' )
+		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
 		self.pushInterpreter.addInstruction( self, 'randV' )
 		self.pushInterpreter.addInstruction( self, 'flee' )
 
@@ -386,7 +386,9 @@ class Bird( breve.Mobile ):
 
 	# Functions used by Push
 	def randV( self ):
-		self.pushInterpreter.pushVector( ( breve.randomExpression( ( 2 * breve.vector( 1.000000, 1.000000, 1.000000 ) ) ) - breve.vector( 1.000000, 1.000000, 1.000000 ) ) )
+		rand_x = random.uniform(0, 1)
+		rand_y = random.uniform(0, 1)
+		self.pushInterpreter.pushVector( breve.vector(self.rand_x,self.rand_y,0) )
 
 	def mostEnergizedNeighbor(self):
 		neighbors = self.getNeighbors()
@@ -484,10 +486,10 @@ class Bird( breve.Mobile ):
 					t_y = neighbor.pos_y-self.pos_y
 		self.pushInterpreter.pushVector( breve.vector(9*t_x,9*t_y,0) )
 
-	def myVelocity(self):
+	def currentVelocity(self):
 		self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
-	def centerWorld( self ):
+	def centerOfWorld( self ):
 		self.pushInterpreter.pushVector( breve.vector(-self.pos_x,-self.pos_y,0) )
 
 	# end of the functions used by Push
@@ -544,22 +546,22 @@ class Bird( breve.Mobile ):
 		self.controller.deadBirds.append(self)
 
 	def fly(self):
+		pos = self.getLocation()
+		self.changePos(pos.x, pos.y)
+		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
+
+		vel = self.getVelocity()
+		vel_x = vel.x
+		vel_y = vel.y
+		self.changeVel(vel_x, vel_y)
+
 		self.pushInterpreter.run( self.pushCode )
 		accel = self.pushInterpreter.getVectorStackTop()
 		if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
 				accel = breve.vector( 0.000000, 0.000000, 0.000000 )
 		self.changeAccel(accel.x, accel.y)
-		vel = self.getVelocity()
-		vel_x = vel.x
-		vel_y = vel.y
 		
-		self.changeVel(vel_x, vel_y)
-
-		pos = self.getLocation()
-		self.changePos(pos.x, pos.y)
-		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
-		
-		#
+		# eat
 		neighbors = self.getNeighbors()
 		for neighbor in neighbors:
 			if neighbor.isA( 'Feeder' ):
@@ -636,8 +638,8 @@ class Predator( breve.Mobile ):
 		self.pushInterpreter.addInstruction( self, 'cohension' )
 		self.pushInterpreter.addInstruction( self, 'target' )
 		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
-		self.pushInterpreter.addInstruction( self, 'myVelocity' )
-		self.pushInterpreter.addInstruction( self, 'centerWorld' )
+		self.pushInterpreter.addInstruction( self, 'currentVelocity' )
+		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
 		self.pushInterpreter.addInstruction( self, 'randV' )
 		self.pushInterpreter.setEvaluationLimit( 75 )
 		self.pushInterpreter.setListLimit( 75 )
@@ -662,7 +664,9 @@ class Predator( breve.Mobile ):
 
 	# Functions used by Push
 	def randV( self ):
-		self.pushInterpreter.pushVector( ( breve.randomExpression( ( 2 * breve.vector( 1.000000, 1.000000, 1.000000 ) ) ) - breve.vector( 1.000000, 1.000000, 1.000000 ) ) )
+		rand_x = random.uniform(0, 1)
+		rand_y = random.uniform(0, 1)
+		self.pushInterpreter.pushVector( breve.vector(self.rand_x,self.rand_y,0) )
 
 	def mostEnergizedNeighbor(self):
 		neighbors = self.getNeighbors()
@@ -746,10 +750,10 @@ class Predator( breve.Mobile ):
 					t_y = neighbor.pos_y-self.pos_y
 		self.pushInterpreter.pushVector( breve.vector(t_x,t_y,0) )
 
-	def myVelocity(self):
+	def currentVelocity(self):
 		self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
-	def centerWorld( self ):
+	def centerOfWorld( self ):
 		self.pushInterpreter.pushVector( breve.vector(-self.pos_x,-self.pos_y,0) )
 
 	# end of the functions used by Push
@@ -806,22 +810,22 @@ class Predator( breve.Mobile ):
 		self.controller.deadBirds.append(self)
 
 	def fly(self):
+		pos = self.getLocation()
+		self.changePos(pos.x, pos.y)
+		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
+
+		vel = self.getVelocity()
+		vel_x = vel.x
+		vel_y = vel.y
+		self.changeVel(vel_x, vel_y)
+
 		self.pushInterpreter.run( self.pushCode )
 		accel = self.pushInterpreter.getVectorStackTop()
 		if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
 				accel = breve.vector( 0.000000, 0.000000, 0.000000 )
 		self.changeAccel(accel.x, accel.y)
-		vel = self.getVelocity()
-		vel_x = vel.x
-		vel_y = vel.y
 		
-		self.changeVel(vel_x, vel_y)
-
-		pos = self.getLocation()
-		self.changePos(pos.x, pos.y)
-		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
-		
-		#
+		# eat
 		neighbors = self.getNeighbors()
 		for neighbor in neighbors:
 			if neighbor.isA( 'Bird' ):

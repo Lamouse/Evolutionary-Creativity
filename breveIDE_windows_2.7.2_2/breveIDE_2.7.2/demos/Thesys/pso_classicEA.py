@@ -471,8 +471,8 @@ class Bird( breve.Mobile ):
 				# alignment
 				a_x += neighbor.vel_x
 				a_y += neighbor.vel_y
-				c_x += neighbor.pos_x
 				# cohesion
+				c_x += neighbor.pos_x
 				c_y += neighbor.pos_y
 				count += 1
 
@@ -509,7 +509,6 @@ class Bird( breve.Mobile ):
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
-		
 
 		self.addEnergy(-0.01)
 		self.adjustSize()
@@ -634,7 +633,7 @@ class Predator( breve.Mobile ):
 		self.isAlive = False
 		self.controller.deadBirds.append(self)
 
-	def fly(self):
+	def calculateAccel(self):
 		neighbors = self.getNeighbors()
 		t_x = 0
 		t_y = 0
@@ -690,15 +689,20 @@ class Predator( breve.Mobile ):
 
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*rand_y
-		self.changeAccel(accel_x, accel_y)
+		return [accel_x, accel_y]
+
+	def fly(self):
+		pos = self.getLocation()
+		self.changePos(pos.x, pos.y)
+		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
+
 		vel = self.getVelocity()
 		vel_x = vel.x
 		vel_y = vel.y
 		self.changeVel(vel_x, vel_y)
 
-		pos = self.getLocation()
-		self.changePos(pos.x, pos.y)
-		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
+		accel_x, accel_y = self.calculateAccel()
+		self.changeAccel(accel_x, accel_y)
 
 		self.addEnergy(-0.01)
 		self.adjustSize()
