@@ -1,8 +1,37 @@
 import breve
 import random
 import math
+import copy
 
 __author__ = 'Paulo Pereira'
+
+
+class Node:
+    def __init__(self, left, right, specie):
+        self.left = left
+        self.right = right
+        self.data = None
+        self.parent = None
+
+        if specie == 'Bird':
+            self.leaf = ["self.alignment()", "self.cohesion()", "self.separation()", "self.target()", "self.flee()",
+                         "self.currentVelocity()", "self.centerOfWorld()", "self.mostEnergizedNeighbor()",
+                         "self.randV()"]
+        elif specie == 'Predator':
+            self.leaf = ["self.alignment()", "self.cohesion()", "self.separation()", "self.target()",
+                         "self.currentVelocity()", "self.centerOfWorld()", "self.mostEnergizedNeighbor()",
+                         "self.randV()"]
+        self.node = ["+", "-", "*", "/"]
+
+        self.fill_data()
+
+    def fill_data(self):
+        if self.right is None:
+            # leaf
+            self.data = self.leaf[random.randint(0, len(self.leaf)-1)]
+        else:
+            # node
+            self.data = self.node[random.randint(0, len(self.node)-1)]
 
 
 class Swarm( breve.Control ):
@@ -20,7 +49,7 @@ class Swarm( breve.Control ):
 		self.delta = 1
 
 		# Feeder
-		self.maxFoodSupply = 600
+		self.maxFoodSupply = 400
 		self.minCreatedFoodSupply = 15
 		self.maxCreatedFoodSupply = 25
 		self.totalFoodSupply = 0
@@ -36,7 +65,7 @@ class Swarm( breve.Control ):
 		dist = 0
 		x = 0
 		y = 0
-		while dist < 5:
+		while dist < 10:
 			dist = 99999
 			x = random.uniform(self.minX, self.maxX)
 			y = random.uniform(self.minY, self.maxY)
@@ -102,13 +131,14 @@ class Swarm( breve.Control ):
 
 		# funcions used by breeding
 	def selectNearParent( self, parent1, specie):
-		#neighbour = parent1.getNeighbors()
+		# neighbour = parent1.getNeighbors()
 		birds = breve.objectList()
 		neighbour = breve.allInstances( specie )
 
 		for item in neighbour:
 			if item.isA( specie ) and item.isAlive:
 				birds.append( item )
+
 		parent2 = self.tournament(birds, 5)
 		return parent2
 
@@ -131,16 +161,18 @@ class Swarm( breve.Control ):
 				candidate = candidate2
 		return candidate
 
-	def crossover(self, newBird, parent1, parent2):
-		c1 = parent1.pushCode
-		c2 = parent2.pushCode
-		parent1.pushInterpreter.copyCodeStackTop( c1 )
-		parent2.pushInterpreter.copyCodeStackTop( c2 )
-		newBird.pushCode.crossover( c1, c2, newBird.pushInterpreter )
+	def crossover(self, newBird1, newBird2, parent1, parent2):
+		# one point crossover
+		pos = random.randint(0, len(newBird1.geno))
+		newBird1.geno = parent1.geno[0:pos] + parent2.geno[pos:]
+		newBird2.geno = parent2.geno[0:pos] + parent1.geno[pos:]
 
 	def mutate(self, newBird):
-		prob = random.randint(0,15)
-		newBird.pushCode.mutate( newBird.pushInterpreter, prob )
+		# uniform mutation
+		for i in range(len(newBird.geno)):
+			prob = random.random()
+			if prob <= 0.05:
+				newBird.geno[i] += random.uniform(-0.5,0.5)
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
@@ -159,26 +191,139 @@ class Swarm( breve.Control ):
 				newBird.setColor( breve.vector( 0.58, 0.08, 1 ) )
 			else:
 				newBird.setColor( breve.vector( 1, 0, 0 ) )
-		newBird.pushInterpreter.pushVector( breve.vector(newBird.vel_x, newBird.vel_y, 0) )
 		
 	def evolutionayAlgorithm(self):
-		newBird = self.deadBirds[0]
-		self.deadBirds.remove(newBird)
+		if len(self.deadBirds) < 2:
+			return
+
+		newBird1 = self.deadBirds[0]
+		self.deadBirds.remove(newBird1)
+
+		newBird2 = None
+		for dead in self.deadBirds:
+			if dead.getType() == newBird1.getType():
+				newBird2 = dead
+				self.deadBirds.remove(newBird2)
+				break
+
+		if newBird2 is None:
+			self.deadBirds.append(newBird1)
+			return
+
 		created = False
 		# classic evolutionay algorithm
-		parent1 = self.selectParent(newBird.getType())
+		parent1 = self.selectParent(newBird1.getType())
 		if parent1 is not None:
-			parent2 = self.selectNearParent(parent1, newBird.getType())
+			parent2 = self.selectNearParent(parent1, newBird1.getType())
 			if parent2 is not None:
-				self.crossover(newBird, parent1, parent2)
-				self.mutate(newBird)
-				self.createNewBird(newBird, parent1, parent2)
+				self.crossover(newBird1, newBird2, parent1, parent2)
+				self.mutate(newBird1)
+				self.mutate(newBird2)
+				self.createNewBird(newBird1, parent2, parent1)
+				self.createNewBird(newBird2, parent1, parent2)
 
-				self.numBirdsBirth += 1
+				self.numBirdsBirth += 2
 				created = True
 
 		if not created:
-			self.deadBirds.append(newBird)
+			self.deadBirds.append(newBird1)
+			self.deadBirds.append(newBird2)
+
+	def fill_parents(self, tree):
+	    if tree.right is not None:
+	        # node
+	        tree.left.parent = tree
+	        tree.right.parent = tree
+
+	        fill_parents(tree.left)
+	        fill_parents(tree.right)
+
+
+	def print_tree(self, tree):
+	    if tree.right is None:
+	        # leaf
+	        print tree.data, 
+	    else:
+	        # node
+	        print "(",
+	        print_tree(tree.left)
+	        print tree.data,
+	        print_tree(tree.right)
+	        print ")",
+
+
+	def run_code(self, tree):
+	    if tree.right is None:
+	        # leaf
+	        # it should execute the code
+	        # return exec(tree.data)
+	        return [random.uniform(-5, 5), random.uniform(-5, 5)]
+	    else:
+	        # node
+	        return [eval('x'+tree.data+'y') for x, y in zip(run_code(tree.left), run_code(tree.right))]
+
+
+	def select_random_node(self, tree, list_nodes):
+	    if tree.right is not None:
+	        list_nodes.append(tree)
+	        select_random_node(tree.left, list_nodes)
+	        select_random_node(tree.right, list_nodes)
+
+
+	def replace_tree(self, old_sub_tree, new_sub_tree):
+	    parent = old_sub_tree.parent
+
+	    if parent.left == old_sub_tree:
+	        parent.left = new_sub_tree
+	    else:
+	        parent.right = new_sub_tree
+
+
+	def tree_copy(self, parent1):
+	    if parent1 is None:
+	        return None
+
+	    current_node = copy.deepcopy(parent1)
+	    current_node.left = tree_copy(parent1.left)
+	    current_node.right = tree_copy(parent1.right)
+	    return current_node
+
+
+	def tree_mutation(self, tree):
+	    prob = random.random()
+	    if prob <= 0.05:
+	        node_list = []
+	        select_random_node(tree, node_list)
+	        index = random.randint(1, len(node_list)-1)
+	        depth = random.randint(1, 5)
+	        new_sub_tree = create_random_tree(depth, "Bird")
+	        replace_tree(node_list[index], new_sub_tree)
+	        fill_parents(tree)
+
+
+	def tree_crossover(self, parent1, parent2):
+	    tree_child1 = tree_copy(parent1)
+	    tree_child2 = tree_copy(parent2)
+	    fill_parents(tree_child1)
+	    fill_parents(tree_child2)
+
+	    node_list1 = []
+	    select_random_node(tree_child1, node_list1)
+	    index1 = random.randint(1, len(node_list1)-1)
+
+	    node_list2 = []
+	    select_random_node(tree_child2, node_list2)
+	    index2 = random.randint(1, len(node_list2)-1)
+
+	    subtree_parent1 = node_list1[index1]
+	    subtree_parent2 = node_list2[index2]
+
+	    replace_tree(subtree_parent1, subtree_parent2)
+	    replace_tree(subtree_parent2, subtree_parent1)
+	    fill_parents(tree_child1)
+	    fill_parents(tree_child2)
+
+	    return tree_child1, tree_child2
 
 	def iterate( self ):
 		self.updateNeighbors()
@@ -342,31 +487,13 @@ class Bird( breve.Mobile ):
 		self.maxVel = 0.5
 		self.maxAccel = 2
 		self.gener = 'm'
-		self.radius = 5
+		self.radius = 2
+		self.geno = None
+		#self.geno = [0.005, 0.01, 1, 0.005, 1]
 
-		self.pushInterpreter = None
-		self.pushCode = None
-		
 		self.lastScale = 1
 		Bird.init( self )
 
-	def createPush(self):
-		self.pushInterpreter = breve.createInstances( breve.PushInterpreter, 1 )
-		self.pushInterpreter.readConfig( 'pushConfigFile.config' )
-		self.pushInterpreter.addInstruction( self, 'separation' )
-		self.pushInterpreter.addInstruction( self, 'alignment' )
-		self.pushInterpreter.addInstruction( self, 'cohension' )
-		self.pushInterpreter.addInstruction( self, 'target' )
-		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
-		self.pushInterpreter.addInstruction( self, 'myVelocity' )
-		self.pushInterpreter.addInstruction( self, 'centerWorld' )
-		self.pushInterpreter.addInstruction( self, 'randV' )
-		self.pushInterpreter.addInstruction( self, 'flee' )
-
-		self.pushInterpreter.setEvaluationLimit( 75 )
-		self.pushInterpreter.setListLimit( 75 )
-		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 100 )
 
 	def initializeRandomly( self, x, y, gener):
 		if gener == 'f':
@@ -376,121 +503,11 @@ class Bird( breve.Mobile ):
 		self.gener = gener
 
 		self.changePos(x,y)
-
+		self.geno = [random.uniform(-5, 5) for x in range(6)]
 		vel_x = random.uniform(-self.maxVel, self.maxVel)
 		vel_y = random.uniform(-self.maxVel, self.maxVel)
 		self.changeVel(vel_x, vel_y)
 
-		self.createPush()
-		self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
-
-	# Functions used by Push
-	def randV( self ):
-		self.pushInterpreter.pushVector( ( breve.randomExpression( ( 2 * breve.vector( 1.000000, 1.000000, 1.000000 ) ) ) - breve.vector( 1.000000, 1.000000, 1.000000 ) ) )
-
-	def mostEnergizedNeighbor(self):
-		neighbors = self.getNeighbors()
-		me_x = 0
-		me_y = 0
-		energy = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
-				if neighbor.energy > energy:
-					me_x = neighbor.pos_x-self.pos_x
-					me_y = neighbor.pos_y-self.pos_y
-					energy = neighbor.energy
-		self.pushInterpreter.pushVector( breve.vector(me_x,me_y,0) )
-
-	def flee(self):
-		neighbors = self.getNeighbors()
-		s_x = 0
-		s_y = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				d = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if 0 <= d < 5:
-					v_x = (self.pos_x - neighbor.pos_x) / d**2
-					v_y = (self.pos_y - neighbor.pos_y) / d**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-		self.pushInterpreter.pushVector( breve.vector(s_x,s_y,0) )
-
-	def separation(self):
-		neighbors = self.getNeighbors()
-		s_x = 0
-		s_y = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
-				d = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if 0 < d < self.radius:
-					v_x = (self.pos_x - neighbor.pos_x) / d**2
-					v_y = (self.pos_y - neighbor.pos_y) / d**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-		self.pushInterpreter.pushVector( breve.vector(s_x,s_y,0) )
-
-	def alignment(self):
-		neighbors = self.getNeighbors()
-		a_x = 0
-		a_y = 0
-		count = 0
-
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
-				a_x += neighbor.vel_x
-				a_y += neighbor.vel_y
-				count += 1
-		
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-		self.pushInterpreter.pushVector( breve.vector(a_x,a_y,0) )
-
-	def cohension(self):
-		neighbors = self.getNeighbors()
-		c_x = 0
-		c_y = 0
-		count = 0
-
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
-				c_x += neighbor.pos_x
-				c_y += neighbor.pos_y
-				count += 1
-			
-		if count > 0:
-			c_x /= count
-			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
-		self.pushInterpreter.pushVector( breve.vector(c_x,c_y,0) )
-
-	def target(self):
-		#neighbors = breve.allInstances( "Feeder" )
-		neighbors = self.getNeighbors()
-		t_x = 0
-		t_y = 0
-		dist = 99999
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Feeder' ):
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-
-				if norm*(1-neighbor.energy) < dist:
-					dist = norm*(1-neighbor.energy)
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
-		self.pushInterpreter.pushVector( breve.vector(9*t_x,9*t_y,0) )
-
-	def myVelocity(self):
-		self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
-
-	def centerWorld( self ):
-		self.pushInterpreter.pushVector( breve.vector(-self.pos_x,-self.pos_y,0) )
-
-	# end of the functions used by Push
 	def changePos(self, x, y):
 		self.pos_x = x
 		self.pos_y = y
@@ -537,35 +554,87 @@ class Bird( breve.Mobile ):
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
 		self.changePos(-500,500)
-		self.pushInterpreter.clearStacks()
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
 		self.controller.deadBirds.append(self)
 
 	def fly(self):
-		self.pushInterpreter.run( self.pushCode )
-		accel = self.pushInterpreter.getVectorStackTop()
-		if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
-				accel = breve.vector( 0.000000, 0.000000, 0.000000 )
-		self.changeAccel(accel.x, accel.y)
+		neighbors = self.getNeighbors()
+		t_x = 0
+		t_y = 0
+		f_x = 0
+		f_y = 0
+		s_x = 0
+		s_y = 0
+		a_x = 0
+		a_y = 0
+		c_x = 0
+		c_y = 0
+		dist = 99999
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Feeder' ):
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				#target
+				if norm*(1-neighbor.energy) < dist:
+					dist = norm*(1-neighbor.energy)
+					t_x = neighbor.pos_x-self.pos_x
+					t_y = neighbor.pos_y-self.pos_y
+
+				if norm <= max(neighbor.lastScale,3):
+					self.eat(neighbor) 
+
+			elif neighbor.isA( 'Bird' ) and neighbor.isAlive:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if 0 < norm < self.radius:
+					# separation
+					v_x = (self.pos_x - neighbor.pos_x) / norm**2
+					v_y = (self.pos_y - neighbor.pos_y) / norm**2
+					s_x += v_x*self.lastScale**2
+					s_y += v_y*self.lastScale**2
+				# alignment
+				a_x += neighbor.vel_x
+				a_y += neighbor.vel_y
+				c_x += neighbor.pos_x
+				# cohesion
+				c_y += neighbor.pos_y
+				count += 1
+
+			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				#flee
+				v_x = (self.pos_x - neighbor.pos_x) / norm**2
+				v_y = (self.pos_y - neighbor.pos_y) / norm**2
+				f_x += v_x*self.lastScale**2
+				f_y += v_y*self.lastScale**2
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			a_x -= self.vel_x
+			a_y -= self.vel_y
+
+			c_x /= count
+			c_y /= count
+			c_x -= self.pos_x
+			c_y -= self.pos_y
+
+		rand_x = random.uniform(0, 1)
+		rand_y = random.uniform(0, 1)
+
+		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*f_x+self.geno[5]*rand_x
+		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*f_y+self.geno[5]*rand_y
+		self.changeAccel(accel_x, accel_y)
 		vel = self.getVelocity()
 		vel_x = vel.x
 		vel_y = vel.y
-		
 		self.changeVel(vel_x, vel_y)
 
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
 		
-		#
-		neighbors = self.getNeighbors()
-		for neighbor in neighbors:
-			if neighbor.isA( 'Feeder' ):
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm <= max(neighbor.lastScale,3):
-					self.eat(neighbor) 
 
 		self.addEnergy(-0.01)
 		self.adjustSize()
@@ -621,28 +690,10 @@ class Predator( breve.Mobile ):
 		self.maxAccel = 2
 		self.gener = 'm'
 		self.radius = 2
-
-		self.pushInterpreter = None
-		self.pushCode = None
+		self.geno = None
 		
 		self.lastScale = 1
 		Predator.init( self )
-
-	def createPush(self):
-		self.pushInterpreter = breve.createInstances( breve.PushInterpreter, 1 )
-		self.pushInterpreter.readConfig( 'pushConfigFile.config' )
-		self.pushInterpreter.addInstruction( self, 'separation' )
-		self.pushInterpreter.addInstruction( self, 'alignment' )
-		self.pushInterpreter.addInstruction( self, 'cohension' )
-		self.pushInterpreter.addInstruction( self, 'target' )
-		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
-		self.pushInterpreter.addInstruction( self, 'myVelocity' )
-		self.pushInterpreter.addInstruction( self, 'centerWorld' )
-		self.pushInterpreter.addInstruction( self, 'randV' )
-		self.pushInterpreter.setEvaluationLimit( 75 )
-		self.pushInterpreter.setListLimit( 75 )
-		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 100 )
 
 	def initializeRandomly( self, x, y, gener):
 		if gener == 'f':
@@ -652,107 +703,11 @@ class Predator( breve.Mobile ):
 		self.gener = gener
 
 		self.changePos(x,y)
-
+		self.geno = [random.uniform(-5, 5) for x in range(5)]
 		vel_x = random.uniform(-self.maxVel, self.maxVel)
 		vel_y = random.uniform(-self.maxVel, self.maxVel)
 		self.changeVel(vel_x, vel_y)
 
-		self.createPush()
-		self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
-
-	# Functions used by Push
-	def randV( self ):
-		self.pushInterpreter.pushVector( ( breve.randomExpression( ( 2 * breve.vector( 1.000000, 1.000000, 1.000000 ) ) ) - breve.vector( 1.000000, 1.000000, 1.000000 ) ) )
-
-	def mostEnergizedNeighbor(self):
-		neighbors = self.getNeighbors()
-		me_x = 0
-		me_y = 0
-		energy = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				if neighbor.energy > energy:
-					me_x = neighbor.pos_x-self.pos_x
-					me_y = neighbor.pos_y-self.pos_y
-					energy = neighbor.energy
-		self.pushInterpreter.pushVector( breve.vector(me_x,me_y,0) )
-
-	def separation(self):
-		neighbors = self.getNeighbors()
-		s_x = 0
-		s_y = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				d = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if 0 < d < self.radius:
-					v_x = (self.pos_x - neighbor.pos_x) / d**2
-					v_y = (self.pos_y - neighbor.pos_y) / d**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-		self.pushInterpreter.pushVector( breve.vector(s_x,s_y,0) )
-
-	def alignment(self):
-		neighbors = self.getNeighbors()
-		a_x = 0
-		a_y = 0
-		count = 0
-
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				a_x += neighbor.vel_x
-				a_y += neighbor.vel_y
-				count += 1
-		
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-		self.pushInterpreter.pushVector( breve.vector(a_x,a_y,0) )
-
-	def cohension(self):
-		neighbors = self.getNeighbors()
-		c_x = 0
-		c_y = 0
-		count = 0
-
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				c_x += neighbor.pos_x
-				c_y += neighbor.pos_y
-				count += 1
-		
-		if count > 0:
-			c_x /= count
-			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
-		self.pushInterpreter.pushVector( breve.vector(c_x,c_y,0) )
-
-	def target(self):
-		#neighbors = breve.allInstances( "Bird" )
-		neighbors = self.getNeighbors()
-		t_x = 0
-		t_y = 0
-		dist = 99999
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ):
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-
-				if norm < dist:
-					dist = norm*(1-neighbor.energy)
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
-		self.pushInterpreter.pushVector( breve.vector(t_x,t_y,0) )
-
-	def myVelocity(self):
-		self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
-
-	def centerWorld( self ):
-		self.pushInterpreter.pushVector( breve.vector(-self.pos_x,-self.pos_y,0) )
-
-	# end of the functions used by Push
 	def changePos(self, x, y):
 		self.pos_x = x
 		self.pos_y = y
@@ -799,35 +754,76 @@ class Predator( breve.Mobile ):
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
 		self.changePos(-500,500)
-		self.pushInterpreter.clearStacks()
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
 		self.controller.deadBirds.append(self)
 
 	def fly(self):
-		self.pushInterpreter.run( self.pushCode )
-		accel = self.pushInterpreter.getVectorStackTop()
-		if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
-				accel = breve.vector( 0.000000, 0.000000, 0.000000 )
-		self.changeAccel(accel.x, accel.y)
+		neighbors = self.getNeighbors()
+		t_x = 0
+		t_y = 0
+		s_x = 0
+		s_y = 0
+		a_x = 0
+		a_y = 0
+		c_x = 0
+		c_y = 0
+		dist = 99999
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				#target
+				if norm*(1-neighbor.energy) < dist:
+					dist = norm*(1-neighbor.energy)
+					t_x = neighbor.pos_x-self.pos_x
+					t_y = neighbor.pos_y-self.pos_y
+
+				if norm <= max(neighbor.lastScale,3):
+					self.eat(neighbor) 
+
+			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if 0 < norm < self.radius:
+					# separation
+					v_x = (self.pos_x - neighbor.pos_x) / norm**2
+					v_y = (self.pos_y - neighbor.pos_y) / norm**2
+					s_x += v_x*self.lastScale**2
+					s_y += v_y*self.lastScale**2
+				# alignment
+				a_x += neighbor.vel_x
+				a_y += neighbor.vel_y
+				c_x += neighbor.pos_x
+				# cohesion
+				c_y += neighbor.pos_y
+				count += 1
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			a_x -= self.vel_x
+			a_y -= self.vel_y
+
+			c_x /= count
+			c_y /= count
+			c_x -= self.pos_x
+			c_y -= self.pos_y
+
+		rand_x = random.uniform(0, 1)
+		rand_y = random.uniform(0, 1)
+
+		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*rand_x
+		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*rand_y
+		self.changeAccel(accel_x, accel_y)
 		vel = self.getVelocity()
 		vel_x = vel.x
 		vel_y = vel.y
-		
 		self.changeVel(vel_x, vel_y)
 
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
-		
-		#
-		neighbors = self.getNeighbors()
-		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ):
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm <= max(neighbor.lastScale,3):
-					self.eat(neighbor) 
 
 		self.addEnergy(-0.01)
 		self.adjustSize()
@@ -864,5 +860,3 @@ class Predator( breve.Mobile ):
 breve.Predator = Predator
 
 Swarm()
-
-

@@ -1,8 +1,9 @@
-__author__ = 'Paulo Pereira'
-
 import breve
 import random
 import math
+
+__author__ = 'Paulo Pereira'
+
 
 class Swarm( breve.Control ):
 	def __init__( self ):
@@ -66,7 +67,7 @@ class Swarm( breve.Control ):
 				temp_bird = breve.createInstances( breve.Bird, 1)
 				temp_bird.initializeRandomly(x,y,'m')
 
-	def createPredadors(self, num):
+	def createPredators(self, num):
 		# latin hypercubes
 		if num < 1:
 			return
@@ -79,7 +80,7 @@ class Swarm( breve.Control ):
 			for j in range(size):
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
-				temp_bird = breve.createInstances( breve.Predador, 1)
+				temp_bird = breve.createInstances( breve.Predator, 1)
 				temp_bird.initializeRandomly(x,y,'m')
 
 	def init( self ):
@@ -90,7 +91,7 @@ class Swarm( breve.Control ):
 
 		self.addRandomFeederIfNecessary()
 		self.createBirds(self.numBirds)
-		self.createPredadors(self.numPred)
+		self.createPredators(self.numPred)
 
 	def addTotalFoodSupply(self, num):
 		self.totalFoodSupply += num;
@@ -206,9 +207,9 @@ class Swarm( breve.Control ):
 			if bird.isAlive:
 				bird.fly()
 
-		for predador in breve.allInstances( "Predador" ):
-			if predador.isAlive:
-				predador.fly()
+		for predator in breve.allInstances( "Predator" ):
+			if predator.isAlive:
+				predator.fly()
 
 		self.totalFoodSupply = 0
 		for feeder in breve.allInstances( "Feeder" ):
@@ -475,7 +476,7 @@ class Bird( breve.Mobile ):
 				c_y += neighbor.pos_y
 				count += 1
 
-			elif neighbor.isA( 'Predador' ) and neighbor.isAlive:
+			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
 				v_x = (self.pos_x - neighbor.pos_x) / norm**2
@@ -544,7 +545,7 @@ class Bird( breve.Mobile ):
 
 breve.Bird = Bird
 
-class Predador( breve.Mobile ):
+class Predator( breve.Mobile ):
 	def __init__( self ):
 		breve.Mobile.__init__( self )
 		self.shape = None
@@ -567,7 +568,7 @@ class Predador( breve.Mobile ):
 		self.geno = None
 		
 		self.lastScale = 1
-		Predador.init( self )
+		Predator.init( self )
 
 	def initializeRandomly( self, x, y, gener):
 		if gener == 'f':
@@ -657,7 +658,7 @@ class Predador( breve.Mobile ):
 				if norm <= max(neighbor.lastScale,3):
 					self.eat(neighbor) 
 
-			elif neighbor.isA( 'Predador' ) and neighbor.isAlive:
+			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.radius:
 					# separation
@@ -731,6 +732,6 @@ class Predador( breve.Mobile ):
 		self.adjustSize()
 		self.setNeighborhoodSize( 10.0 )
 
-breve.Predador = Predador
+breve.Predator = Predator
 
 Swarm()
