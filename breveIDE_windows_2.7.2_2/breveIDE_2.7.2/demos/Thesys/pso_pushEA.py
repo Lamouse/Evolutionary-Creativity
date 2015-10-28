@@ -132,11 +132,11 @@ class Swarm( breve.Control ):
 		return candidate
 
 	def crossover(self, newBird, parent1, parent2):
-		c1 = parent1.pushCode
-		c2 = parent2.pushCode
-		parent1.pushInterpreter.copyCodeStackTop( c1 )
-		parent2.pushInterpreter.copyCodeStackTop( c2 )
-		newBird.pushCode.crossover( c1, c2, newBird.pushInterpreter )
+		# c1 = parent1.pushCode
+		# c2 = parent2.pushCode
+		# parent1.pushInterpreter.copyCodeStackTop( c1 )
+		# parent2.pushInterpreter.copyCodeStackTop( c2 )
+		newBird.pushCode.crossover( parent1.pushCode, parent2.pushCode, newBird.pushInterpreter )
 
 	def mutate(self, newBird):
 		prob = random.randint(0,15)
@@ -159,7 +159,7 @@ class Swarm( breve.Control ):
 				newBird.setColor( breve.vector( 0.58, 0.08, 1 ) )
 			else:
 				newBird.setColor( breve.vector( 1, 0, 0 ) )
-		newBird.pushInterpreter.pushVector( breve.vector(newBird.vel_x, newBird.vel_y, 0) )
+		# newBird.pushInterpreter.pushVector( breve.vector(newBird.vel_x, newBird.vel_y, 0) )
 		
 	def evolutionayAlgorithm(self):
 		newBird = self.deadBirds[0]
@@ -362,7 +362,6 @@ class Bird( breve.Mobile ):
 		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
 		self.pushInterpreter.addInstruction( self, 'randV' )
 		self.pushInterpreter.addInstruction( self, 'flee' )
-
 		self.pushInterpreter.setEvaluationLimit( 75 )
 		self.pushInterpreter.setListLimit( 75 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
