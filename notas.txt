@@ -11,8 +11,9 @@ versao paramentro cauda
 		preferencia de cauda
 			tamanho cauda, velocidade_max, distancia percorrida
 
-meter a probalibilidade numa variavel global
 
+meter a probalibilidade numa variavel global
+criar duas listas para os agentes mortos
 
 
 pode ser utilizado para optimizalção mas o objectivo principal é relacionado com a construção criativa

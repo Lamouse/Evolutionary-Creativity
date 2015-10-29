@@ -27,7 +27,8 @@ class Swarm( breve.Control ):
 		self.totalFoodSupply = 0
 
 		# List
-		self.deadBirds = breve.objectList()
+		self.pollBirds = breve.objectList()
+		self.pollPredators = breve.objectList()
 
 		# Other thing
 		Swarm.init( self )
@@ -65,8 +66,13 @@ class Swarm( breve.Control ):
 			for j in range(size):
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
-				temp_bird = breve.createInstances( breve.Bird, 1)
-				temp_bird.initializeRandomly(x,y,'m')
+				if breve.length(self.pollBirds) < 1:
+					temp_bird = breve.createInstances( breve.Bird, 1)
+					temp_bird.initializeRandomly(x,y,'m')
+				else:
+					temp_bird = self.pollBirds[0]
+					self.pollBirds.remove(temp_bird)
+					temp_bird.initializeRandomly(x,y,'m')
 
 	def createPredators(self, num):
 		# latin hypercubes
@@ -81,8 +87,13 @@ class Swarm( breve.Control ):
 			for j in range(size):
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
-				temp_bird = breve.createInstances( breve.Predator, 1)
-				temp_bird.initializeRandomly(x,y,'m')
+				if breve.length(self.pollPredators) < 1:
+					temp_predator = breve.createInstances( breve.Predator, 1)
+					temp_predator.initializeRandomly(x,y,'m')
+				else:
+					temp_predator = self.pollPredators[0]
+					self.pollPredators.remove(temp_predator)
+					temp_predator.initializeRandomly(x,y,'m')
 
 	def init( self ):
 		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
@@ -162,9 +173,9 @@ class Swarm( breve.Control ):
 				newBird.setColor( breve.vector( 1, 0, 0 ) )
 		# newBird.pushInterpreter.pushVector( breve.vector(newBird.vel_x, newBird.vel_y, 0) )
 		
-	def evolutionayAlgorithm(self):
-		newBird = self.deadBirds[0]
-		self.deadBirds.remove(newBird)
+	def evolutionayAlgorithm(self, array):
+		newBird = array[0]
+		array.remove(newBird)
 		created = False
 		# classic evolutionay algorithm
 		parent1 = self.selectParent(newBird.getType())
@@ -177,7 +188,7 @@ class Swarm( breve.Control ):
 				created = True
 
 		if not created:
-			self.deadBirds.append(newBird)
+			array.append(newBird)
 
 	def iterate( self ):
 		self.updateNeighbors()
@@ -206,8 +217,10 @@ class Swarm( breve.Control ):
 				breve.deleteInstances( corpse.shape )
 				breve.deleteInstances( corpse )
 
-		for i in range(breve.length(self.deadBirds)):
-			self.evolutionayAlgorithm()
+		for i in range(breve.length(self.pollBirds)):
+			self.evolutionayAlgorithm(self.pollBirds)
+		for i in range(breve.length(self.pollPredators)):
+			self.evolutionayAlgorithm(self.pollPredators)
 
 		self.setDisplayText("Dead Birds: "+str(self.num_dead_birds), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 0, theColor = breve.vector( 1, 1, 1 ))
 		self.setDisplayText("Dead Predators: "+str(self.num_dead_predators), xLoc = -0.950000, yLoc = -0.950000, messageNumber = 1, theColor = breve.vector( 1, 1, 1 ))
@@ -522,7 +535,7 @@ class Bird( breve.Mobile ):
 		return self.energy
 
 	def eat( self, feeder ):
-		if self.energy < 1.4:
+		if self.energy < 1.4 and feeder.energy > 0:
 			self.addEnergy(0.05)
 			feeder.addEnergy(-0.05)
 	
@@ -542,7 +555,7 @@ class Bird( breve.Mobile ):
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
-		self.controller.deadBirds.append(self)
+		self.controller.pollBirds.append(self)
 		self.controller.num_dead_birds += 1
 
 	def fly(self):
@@ -741,7 +754,7 @@ class Predator( breve.Mobile ):
 		dist = 99999
 		count = 0
 		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ):
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 
 				if norm < dist:
@@ -787,7 +800,7 @@ class Predator( breve.Mobile ):
 		return self.energy
 
 	def eat( self, bird ):
-		if self.energy < 1.4:
+		if self.energy < 1.4 and bird.energy > 0:
 			self.addEnergy(0.05)
 			bird.addEnergy(-0.05)
 	
@@ -807,7 +820,7 @@ class Predator( breve.Mobile ):
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
-		self.controller.deadBirds.append(self)
+		self.controller.pollPredators.append(self)
 		self.controller.num_dead_predators += 1
 
 	def fly(self):
@@ -829,7 +842,7 @@ class Predator( breve.Mobile ):
 		# eat
 		neighbors = self.getNeighbors()
 		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ):
+			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if norm <= max(neighbor.lastScale,3):
 					self.eat(neighbor) 
