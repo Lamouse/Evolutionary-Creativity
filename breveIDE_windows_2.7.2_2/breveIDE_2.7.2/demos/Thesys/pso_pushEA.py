@@ -139,8 +139,9 @@ class Swarm( breve.Control ):
 		newBird.pushCode.crossover( parent1.pushCode, parent2.pushCode, newBird.pushInterpreter )
 
 	def mutate(self, newBird):
-		prob = random.randint(0,15)
-		newBird.pushCode.mutate( newBird.pushInterpreter, prob )
+		#if random.random() < 0.05:
+			prob = random.randint( 0,15 )
+			newBird.pushCode.mutate( newBird.pushInterpreter, prob )
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
@@ -387,7 +388,7 @@ class Bird( breve.Mobile ):
 	def randV( self ):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
-		self.pushInterpreter.pushVector( breve.vector(self.rand_x,self.rand_y,0) )
+		self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
 
 	def mostEnergizedNeighbor(self):
 		neighbors = self.getNeighbors()
@@ -665,7 +666,7 @@ class Predator( breve.Mobile ):
 	def randV( self ):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
-		self.pushInterpreter.pushVector( breve.vector(self.rand_x,self.rand_y,0) )
+		self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
 
 	def mostEnergizedNeighbor(self):
 		neighbors = self.getNeighbors()
