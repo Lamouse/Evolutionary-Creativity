@@ -27,6 +27,10 @@ class Swarm( breve.Control ):
 		self.totalFoodSupply = 0
 
 		# List
+		self.current_generation = 0
+		self.breeding_season = 50
+		self.breeding_inc = 0.4
+		self.max_pop_predadors = 0.5
 		self.prob_mutation = 0.05
 		self.pollBirds = breve.objectList()
 		self.pollPredators = breve.objectList()
@@ -147,7 +151,7 @@ class Swarm( breve.Control ):
 
 	def crossover(self, newBird1, newBird2, parent1, parent2):
 		# one point crossover
-		pos = random.randint(0, len(newBird1.geno))
+		pos = random.randint(0, len(parent1.geno))
 		newBird1.geno = parent1.geno[0:pos] + parent2.geno[pos:]
 		newBird2.geno = parent2.geno[0:pos] + parent1.geno[pos:]
 
@@ -200,13 +204,17 @@ class Swarm( breve.Control ):
 	def iterate( self ):
 		self.updateNeighbors()
 
+		self.numBirds = 0
 		for bird in breve.allInstances( "Bird" ):
 			if bird.isAlive:
 				bird.fly()
+				self.numBirds += 1
 
+		self.numPred = 0
 		for predator in breve.allInstances( "Predator" ):
 			if predator.isAlive:
 				predator.fly()
+				self.numPred += 1
 
 		self.totalFoodSupply = 0
 		for feeder in breve.allInstances( "Feeder" ):
@@ -224,11 +232,24 @@ class Swarm( breve.Control ):
 				breve.deleteInstances( corpse.shape )
 				breve.deleteInstances( corpse )
 
-		for i in range(breve.length(self.pollBirds)):
-			self.evolutionayAlgorithm(self.pollBirds)
-		for i in range(breve.length(self.pollPredators)):
-			self.evolutionayAlgorithm(self.pollPredators)
+		self.current_generation += 1
+		if self.current_generation % self.breeding_season == 0:
+			if breve.length(self.pollBirds) < self.breeding_inc*self.numBirds:
+				new_birds = int(math.floor(self.breeding_inc*self.numBirds)) - breve.length(self.pollBirds)
+				breve.createInstances( breve.Bird, new_birds).dropDead()
 
+			if breve.length(self.pollPredators) < self.breeding_inc*self.numPred:
+				new_preds = int(math.floor(self.breeding_inc*self.numPred)) - breve.length(self.pollPredators)
+				breve.createInstances( breve.Predator, new_preds).dropDead()
+
+			for i in range(int(math.floor(self.breeding_inc*self.numBirds))/2):
+				self.evolutionayAlgorithm(self.pollBirds)
+			if self.numPred < self.numBirds*self.max_pop_predadors:
+				for i in range(int(min(math.floor(self.breeding_inc*self.numPred), self.numBirds*self.max_pop_predadors))/2):
+					self.evolutionayAlgorithm(self.pollPredators)
+
+		self.setDisplayText("Birds Alive: "+str(self.numBirds), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
+		self.setDisplayText("Predators Alive: "+str(self.numPred), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
 		self.setDisplayText("Dead Birds: "+str(self.num_dead_birds), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 0, theColor = breve.vector( 1, 1, 1 ))
 		self.setDisplayText("Dead Predators: "+str(self.num_dead_predators), xLoc = -0.950000, yLoc = -0.950000, messageNumber = 1, theColor = breve.vector( 1, 1, 1 ))
 
