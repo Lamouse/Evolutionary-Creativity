@@ -1,7 +1,7 @@
 versao de reprodução com o numero da população dinamica (usar poll de agents para a performance)
 	de X em X genrações ocorre reprodução, com a geração de Y novos agentes
 
-versao paramentro cauda
+versao sexuada com o paramentro cauda
 	1-ñ perde energia
 	2-proporcional à perda de energia
 	
