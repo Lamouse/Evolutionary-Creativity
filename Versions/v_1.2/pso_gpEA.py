@@ -102,11 +102,11 @@ class Swarm( breve.Control ):
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
 				if breve.length(self.pollBirds) < 1:
 					temp_bird = breve.createInstances( breve.Bird, 1)
-					temp_bird.initializeRandomly(x,y,'m')
+					temp_bird.initializeRandomly(x, y, random.choice(["m", "f"]))
 				else:
 					temp_bird = self.pollBirds[0]
 					self.pollBirds.remove(temp_bird)
-					temp_bird.initializeRandomly(x,y,'m')
+					temp_bird.initializeRandomly(x, y, random.choice(["m", "f"]))
 
 	def createPredators(self, num):
 		# latin hypercubes
@@ -123,11 +123,11 @@ class Swarm( breve.Control ):
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
 				if breve.length(self.pollPredators) < 1:
 					temp_predator = breve.createInstances( breve.Predator, 1)
-					temp_predator.initializeRandomly(x,y,'m')
+					temp_predator.initializeRandomly(x, y, random.choice(["m", "f"]))
 				else:
 					temp_predator = self.pollPredators[0]
 					self.pollPredators.remove(temp_predator)
-					temp_predator.initializeRandomly(x,y,'m')
+					temp_predator.initializeRandomly(x, y, random.choice(["m", "f"]))
 
 	def init( self ):
 		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
@@ -153,7 +153,7 @@ class Swarm( breve.Control ):
 			candidate = self.selectNearParent(parent1, specie)
 			if candidate.tail < bestCandidate.tail:
 				bestCandidate = candidate
-		print bestCandidate.tail
+		# print bestCandidate.tail
 		return bestCandidate
 
 	def selectNearParent( self, parent1, specie):

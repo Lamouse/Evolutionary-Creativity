@@ -124,7 +124,7 @@ class Swarm( breve.Control ):
 			candidate = self.selectNearParent(parent1, specie)
 			if candidate.tail < bestCandidate.tail:
 				bestCandidate = candidate
-		print bestCandidate.tail
+		# print bestCandidate.tail
 		return bestCandidate
 
 	def selectNearParent( self, parent1, specie):
@@ -135,7 +135,6 @@ class Swarm( breve.Control ):
 		for item in neighbour:
 			if item.isA( specie ) and item.isAlive and item.gener == "m":
 				birds.append( item )
-
 		parent2 = self.tournament(birds, 5)
 		return parent2
 
@@ -246,7 +245,6 @@ class Swarm( breve.Control ):
 				breve.createInstances( breve.Bird, new_birds).dropDead(False)
 
 			if breve.length(self.pollPredators) < self.breeding_inc*self.numPred:
-				print breve.length(self.pollPredators), self.breeding_inc*self.numPred
 				new_preds = int(math.ceil(self.breeding_inc*self.numPred)) - breve.length(self.pollPredators)
 				breve.createInstances( breve.Predator, new_preds).dropDead(False)
 
