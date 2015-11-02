@@ -50,7 +50,7 @@ class Swarm( breve.Control ):
 		self.delta = 1
 
 		# Feeder
-		self.maxFoodSupply = 400
+		self.maxFoodSupply = 600
 		self.minCreatedFoodSupply = 15
 		self.maxCreatedFoodSupply = 25
 		self.totalFoodSupply = 0
@@ -72,7 +72,7 @@ class Swarm( breve.Control ):
 		dist = 0
 		x = 0
 		y = 0
-		while dist < 10:
+		while dist < 7:
 			dist = 99999
 			x = random.uniform(self.minX, self.maxX)
 			y = random.uniform(self.minY, self.maxY)
