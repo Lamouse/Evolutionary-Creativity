@@ -149,11 +149,12 @@ class Swarm( breve.Control ):
 	# funcions used by breeding
 	def selectBestCandidate( self, parent1, specie):
 		bestCandidate = self.selectNearParent(parent1, specie)
-		for i in range(1, 4):
-			candidate = self.selectNearParent(parent1, specie)
-			if candidate.tail < bestCandidate.tail:
-				bestCandidate = candidate
-		# print bestCandidate.tail
+		if bestCandidate is not None:
+			for i in range(1, 4):
+				candidate = self.selectNearParent(parent1, specie)
+				if abs(parent1.tail-candidate.tail) < abs(parent1.tail-bestCandidate.tail):
+					bestCandidate = candidate
+			# print bestCandidate.tail
 		return bestCandidate
 
 	def selectNearParent( self, parent1, specie):
@@ -204,12 +205,13 @@ class Swarm( breve.Control ):
 		newBird.isAlive = True
 		newBird.gener = random.choice(["m", "f"])
 		newBird.setNewColor()
-		if newBird.gener == "m":
-			newBird.tail = parent2.tail + random.uniform(-0.05, 0.05)
-			if newBird.tail < 0:
-				newBird.tail = 0
-		else:
+
+		t = random.uniform(0,1)
+		newBird.tail = t*parent1.tail + (1-t)*parent2.tail
+		if newBird.tail < 0:
 			newBird.tail = 0
+		elif newBird.tail > 1:
+			newBird.tail = 1
 		
 	def evolutionayAlgorithm(self, array):
 		if breve.length(array) < 2:
@@ -545,12 +547,11 @@ class Bird( breve.Mobile ):
 		self.setNewColor()
 
 		self.geno = self.controller.create_random_tree(3, "Bird")
-		if self.gener == "m":
-			self.tail = random.uniform(0, 1)		
+		self.tail = random.uniform(0, 1)		
 
 	def setNewColor( self ):
 		if self.gener == 'f':
-			self.setColor( breve.vector( 0, 1, 1) )
+			self.setColor( breve.vector( 0.5, 0.5, 1) )
 		else:
 			self.setColor( breve.vector( 0, 0, 1 ) )
 
@@ -737,7 +738,10 @@ class Bird( breve.Mobile ):
 				if norm <= max(neighbor.lastScale,3):
 					self.eat(neighbor) 
 
-		self.addEnergy(-0.01-0.01*self.tail)
+		if self.gener == "m":
+			self.addEnergy(-0.01-0.005*self.tail)
+		else:
+			self.addEnergy(-0.01)
 		self.adjustSize()
 		self.age += 1
 		#if self.energy < 0.5 or self.age > 300:
@@ -807,8 +811,7 @@ class Predator( breve.Mobile ):
 		self.setNewColor()
 
 		self.geno = self.controller.create_random_tree(3, "Predator")
-		if self.gener == "m":
-			self.tail = random.uniform(0, 1)
+		self.tail = random.uniform(0, 1)
 
 	def setNewColor( self ):
 		if self.gener == 'f':
@@ -983,7 +986,10 @@ class Predator( breve.Mobile ):
 				if norm <= max(neighbor.lastScale,3):
 					self.eat(neighbor) 
 
-		self.addEnergy(-0.01-0.01*self.tail)
+		if self.gener == "m":
+			self.addEnergy(-0.01-0.005*self.tail)
+		else:
+			self.addEnergy(-0.01)
 		self.adjustSize()
 		self.age += 1
 		#if self.energy < 0.5 or self.age > 300:

@@ -3,7 +3,8 @@ Version Control:
 		- replaced fixed population by dynamic population
 		- the population of the predators only can breed if their numbers are less than half of the population of birds (without that the predators could kill all birs)
 	v_1.2:
-		- implemented sexual breeding for now only the selection of the smallest tail
+		- implemented sexual breeding.
+		- Best candidate selected by the greater tail
 
 
 pso_simple:
