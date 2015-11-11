@@ -1,0 +1,14 @@
+- tirar cauda (selecção natural)
+- aumentar ambiente
+- limitar os recursos
+abaixo de x% criara imigrantes (reviver alguns)
+aceleração linear e angular (prepadores mais rapidos)
+com a idade a perda de energia aumenta
+passar para 2D full
+meter checkpoints (save/load populaçao)
+
+
+
+
+p.s.
+	estou a dar-lhe a perceção da fonte de comida mais proxima no caso de ñ encontrarem nenhuma nas redondezas!!!
