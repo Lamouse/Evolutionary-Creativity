@@ -459,8 +459,8 @@ class Bird( breve.Mobile ):
 
 	def eat( self, feeder ):
 		if self.energy < 1.4 and feeder.energy > 0:
-			self.addEnergy(0.1)
-			feeder.addEnergy(-0.1)
+			self.addEnergy(0.05)
+			feeder.addEnergy(-0.05)
 	
 	def dropDead (self, corpse=True):
 		if corpse:
@@ -593,7 +593,8 @@ class Bird( breve.Mobile ):
 		self.lastScale = newScale
 
 	def init( self ):
-		self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		# self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 3, 0.5, 0.1 )
+		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
 		self.setNeighborhoodSize( self.controller.neighborRadius )
@@ -616,7 +617,7 @@ class Predator( breve.Mobile ):
 		self.isAlive = True
 
 		# static
-		self.maxVel = 0.5
+		self.maxVel = 0.6
 		self.maxAccel = 2
 		self.gener = 'm'
 		self.radius = 2
@@ -802,11 +803,30 @@ class Predator( breve.Mobile ):
 		self.lastScale = newScale
 
 	def init( self ):
-		self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		# self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
 		self.setNeighborhoodSize( self.controller.neighborRadius )
 
 breve.Predator = Predator
+
+
+class myCustomShape( breve.CustomShape ):
+	def __init__( self ):
+		breve.CustomShape.__init__( self )
+		self.vertices = breve.objectList()
+		myCustomShape.init( self )
+
+	def init( self ):
+		self.vertices[ 0 ] = breve.vector( 0.1, 0, 0 )
+		self.vertices[ 1 ] = breve.vector( -0.1, 0, 0 )
+		self.vertices[ 2 ] = breve.vector( 0, 0.5, 0 )
+
+		self.addFace( [ self.vertices[ 0 ], self.vertices[ 1 ], self.vertices[ 2 ] ] )
+		self.finishShape( 1.000000 )
+
+breve.myCustomShape = myCustomShape
+
 
 Swarm()
