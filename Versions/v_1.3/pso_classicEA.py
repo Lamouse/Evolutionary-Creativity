@@ -21,12 +21,12 @@ class Swarm( breve.Control ):
 		self.minY = -100
 		self.maxY = 100
 		self.neighborRadius = 20
-		self.feederMinDistance = 50
 
 		# Feeder
-		self.maxFoodSupply = 300
-		self.minCreatedFoodSupply = 15
-		self.maxCreatedFoodSupply = 30
+		self.feederMinDistance = 25
+		self.maxFoodSupply = 200
+		self.minCreatedFoodSupply = 7
+		self.maxCreatedFoodSupply = 15
 		self.totalFoodSupply = 0
 
 		# List
@@ -128,7 +128,7 @@ class Swarm( breve.Control ):
 		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
 		self.setDisplayTextColor( breve.vector( 1, 1, 1 ) )
 		self.pointCamera( breve.vector( 0, 0, 0 ), breve.vector( 0, 0, 300 ) )
-		self.setIterationStep(1)
+		self.setIterationStep(1.0)
 
 		self.addRandomFeederIfNecessary()
 		self.createBirds(self.initialNumBirds)
@@ -141,7 +141,7 @@ class Swarm( breve.Control ):
 		while (self.maxFoodSupply-self.totalFoodSupply) >= self.maxCreatedFoodSupply:
 			self.createFeeder(1, rapid)
 
-		# funcions used by breeding
+	# funcions used by breeding
 	def selectNearParent( self, parent1, specie):
 		# neighbour = parent1.getNeighbors()
 		birds = breve.objectList()
@@ -337,7 +337,7 @@ class Feeder (breve.Stationary ):
 			return
 
 		newScale = ( newScale / self.lastScale )
-		self.shape.scale( breve.vector( newScale, newScale, 0 ) )
+		self.shape.scale( breve.vector( newScale, newScale, newScale ) )
 		self.lastScale = ( ( radius ) + 0.000010 )
 
 	def init( self ):
@@ -462,7 +462,7 @@ class Bird( breve.Mobile ):
 			self.addEnergy(0.05)
 			feeder.addEnergy(-0.05)
 	
-	def dropDead (self, corpse=True):
+	def dropDead(self, corpse=True):
 		if corpse:
 			c = breve.createInstances( breve.Corpse, 1 )
 			c.move( self.getLocation() )
@@ -617,7 +617,7 @@ class Predator( breve.Mobile ):
 		self.isAlive = True
 
 		# static
-		self.maxVel = 0.6
+		self.maxVel = 0.7
 		self.maxAccel = 2
 		self.gener = 'm'
 		self.radius = 2
@@ -677,7 +677,7 @@ class Predator( breve.Mobile ):
 			self.addEnergy(0.05)
 			bird.addEnergy(-0.05)
 	
-	def dropDead (self, corpse=True):
+	def dropDead(self, corpse=True):
 		if corpse:
 			c = breve.createInstances( breve.Corpse, 1 )
 			c.move( self.getLocation() )
