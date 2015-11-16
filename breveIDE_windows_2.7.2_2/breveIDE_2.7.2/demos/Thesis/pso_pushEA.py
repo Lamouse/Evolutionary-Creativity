@@ -8,30 +8,33 @@ __author__ = 'Paulo Pereira'
 class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
+		self.initialNumBirds = 150
+		self.initialNumPred = 25
 		self.numBirds = 150
 		self.numPred = 25
 		self.num_dead_birds = 0
 		self.num_dead_predators = 0
 
 		# World
-		self.minX = -50
-		self.maxX = 50
-		self.minY = -50
-		self.maxY = 50
-		self.delta = 1
+		self.minX = -200
+		self.maxX = 200
+		self.minY = -100
+		self.maxY = 100
+		self.neighborRadius = 20
 
 		# Feeder
-		self.maxFoodSupply = 600
-		self.minCreatedFoodSupply = 15
-		self.maxCreatedFoodSupply = 25
+		self.feederMinDistance = 25
+		self.maxFoodSupply = 200
+		self.minCreatedFoodSupply = 7
+		self.maxCreatedFoodSupply = 15
 		self.totalFoodSupply = 0
 
 		# List
 		self.current_generation = 0
 		self.breeding_season = 50
 		self.breeding_inc = 0.4
-		self.max_pop_predadors = 0.5
-		self.breeding_inc = 0.5
+		self.max_pop_predadors = 0.6
+		self.prob_mutation = 0.05
 		self.pollBirds = breve.objectList()
 		self.pollPredators = breve.objectList()
 
@@ -43,7 +46,7 @@ class Swarm( breve.Control ):
 		dist = 0
 		x = 0
 		y = 0
-		while dist < 5:
+		while dist < self.feederMinDistance:
 			dist = 99999
 			x = random.uniform(self.minX, self.maxX)
 			y = random.uniform(self.minY, self.maxY)
@@ -100,10 +103,31 @@ class Swarm( breve.Control ):
 					self.pollPredators.remove(temp_predator)
 					temp_predator.initializeRandomly(x,y,'m')
 
+	def revive(self, array, num):
+		if num < 1:
+			return
+
+		size = (int) (math.floor(num**0.5))
+		num_segments_x = (self.maxX-self.minX)/size
+		num_segments_y = (self.maxY-self.minY)/size
+
+		for i in range(size):
+			for j in range(size):
+				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
+				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
+
+				newBird = array[-1]
+				array.remove(newBird)
+				
+				newBird.changePos(x, y)
+				newBird.energy = 1.0
+				newBird.isAlive = True
+				newBird.setNewColor()
+
 	def init( self ):
 		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
 		self.setDisplayTextColor( breve.vector( 1, 1, 1 ) )
-		self.pointCamera( breve.vector( 0, 0, 0 ), breve.vector( 0, 0, 150 ) )
+		self.pointCamera( breve.vector( 0, 0, 0 ), breve.vector( 0, 0, 300 ) )
 		self.setIterationStep(1.0)
 
 		self.addRandomFeederIfNecessary()
@@ -117,7 +141,7 @@ class Swarm( breve.Control ):
 		while (self.maxFoodSupply-self.totalFoodSupply) >= self.maxCreatedFoodSupply:
 			self.createFeeder(1, rapid)
 
-		# funcions used by breeding
+	# funcions used by breeding
 	def selectNearParent( self, parent1, specie):
 		#neighbour = parent1.getNeighbors()
 		birds = breve.objectList()
@@ -153,6 +177,7 @@ class Swarm( breve.Control ):
 		# c2 = parent2.pushCode
 		# parent1.pushInterpreter.copyCodeStackTop( c1 )
 		# parent2.pushInterpreter.copyCodeStackTop( c2 )
+		newBird.pushInterpreter.clearStacks()
 		newBird.pushCode.crossover( parent1.pushCode, parent2.pushCode, newBird.pushInterpreter )
 
 	def mutate(self, newBird):
@@ -233,6 +258,10 @@ class Swarm( breve.Control ):
 				for i in range(int(min(math.ceil(self.breeding_inc*self.numPred), self.numBirds*self.max_pop_predadors))/2):
 					self.evolutionayAlgorithm(self.pollPredators)
 
+		if self.numBirds < 0.2*self.initialNumBirds:
+			self.revive(self.pollBirds, math.ceil(0.1*self.initialNumBirds))	
+		if self.numPred < 0.2*self.initialNumPred:
+			self.revive(self.pollPredators, math.ceil(0.1*self.initialNumPred))
 
 		self.setDisplayText("Birds Alive: "+str(self.numBirds), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
 		self.setDisplayText("Predators Alive: "+str(self.numPred), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
@@ -512,6 +541,16 @@ class Bird( breve.Mobile ):
 					dist = norm*(1-neighbor.energy)
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
+
+		if dist == 99999:
+			feeders = breve.allInstances( "Feeder" )
+			for neighbor in feeders:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if norm < dist:
+					dist = norm
+					t_x = neighbor.pos_x-self.pos_x
+					t_y = neighbor.pos_y-self.pos_y
+
 		self.pushInterpreter.pushVector( breve.vector(9*t_x,9*t_y,0) )
 
 	def currentVelocity(self):
@@ -568,7 +607,7 @@ class Bird( breve.Mobile ):
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
 		self.changePos(-500,500)
-		self.pushInterpreter.clearStacks()
+		# self.pushInterpreter.clearStacks()
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
@@ -626,10 +665,11 @@ class Bird( breve.Mobile ):
 		self.lastScale = newScale
 
 	def init( self ):
-		self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		# self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( 10.0 )
+		self.setNeighborhoodSize( self.controller.neighborRadius )
 
 breve.Bird = Bird
 
@@ -649,7 +689,7 @@ class Predator( breve.Mobile ):
 		self.isAlive = True
 
 		# static
-		self.maxVel = 0.5
+		self.maxVel = 0.7
 		self.maxAccel = 2
 		self.gener = 'm'
 		self.radius = 2
@@ -780,6 +820,16 @@ class Predator( breve.Mobile ):
 					dist = norm*(1-neighbor.energy)
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
+
+		if dist == 99999:
+			feeders = breve.allInstances( "Bird" )
+			for neighbor in feeders:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if norm < dist:
+					dist = norm
+					t_x = neighbor.pos_x-self.pos_x
+					t_y = neighbor.pos_y-self.pos_y
+
 		self.pushInterpreter.pushVector( breve.vector(t_x,t_y,0) )
 
 	def currentVelocity(self):
@@ -823,7 +873,7 @@ class Predator( breve.Mobile ):
 			self.addEnergy(0.05)
 			bird.addEnergy(-0.05)
 	
-	def dropDead (self, cropse=True):
+	def dropDead (self, corpse=True):
 		if corpse:
 			c = breve.createInstances( breve.Corpse, 1 )
 			c.move( self.getLocation() )
@@ -836,7 +886,7 @@ class Predator( breve.Mobile ):
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
 		self.changePos(-500,500)
-		self.pushInterpreter.clearStacks()
+		# self.pushInterpreter.clearStacks()
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
@@ -894,13 +944,30 @@ class Predator( breve.Mobile ):
 		self.lastScale = newScale
 
 	def init( self ):
-		self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		# self.shape = breve.createInstances( breve.PolygonCone, 1 ).initWith( 5, 0.200000, 0.100000 )
+		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( 10.0 )
+		self.setNeighborhoodSize( self.controller.neighborRadius )
 
 breve.Predator = Predator
 
+
+class myCustomShape( breve.CustomShape ):
+	def __init__( self ):
+		breve.CustomShape.__init__( self )
+		self.vertices = breve.objectList()
+		myCustomShape.init( self )
+
+	def init( self ):
+		self.vertices[ 0 ] = breve.vector( 0.1, 0, 0 )
+		self.vertices[ 1 ] = breve.vector( -0.1, 0, 0 )
+		self.vertices[ 2 ] = breve.vector( 0, 0.5, 0 )
+
+		self.addFace( [ self.vertices[ 0 ], self.vertices[ 1 ], self.vertices[ 2 ] ] )
+		self.finishShape( 1.000000 )
+
+breve.myCustomShape = myCustomShape
+
+
 Swarm()
-
-
