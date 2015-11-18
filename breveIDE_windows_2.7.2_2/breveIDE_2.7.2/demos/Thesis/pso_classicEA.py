@@ -20,7 +20,8 @@ class Swarm( breve.Control ):
 		self.maxX = 200
 		self.minY = -100
 		self.maxY = 100
-		self.neighborRadius = 20
+		self.neighborRadius = 50
+		self.neighborRadiusMinor = 20
 
 		# Feeder
 		self.feederMinDistance = 25
@@ -499,8 +500,9 @@ class Bird( breve.Mobile ):
 			if neighbor.isA( 'Feeder' ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#target
-				if norm*(1-neighbor.energy) < dist:
-					dist = norm*(1-neighbor.energy)
+				if norm < dist:
+					#dist = norm*(1-neighbor.energy)
+					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
 
@@ -515,13 +517,15 @@ class Bird( breve.Mobile ):
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
 					s_x += v_x*self.lastScale**2
 					s_y += v_y*self.lastScale**2
-				# alignment
-				a_x += neighbor.vel_x
-				a_y += neighbor.vel_y
-				# cohesion
-				c_x += neighbor.pos_x
-				c_y += neighbor.pos_y
-				count += 1
+
+				if norm < self.controller.neighborRadiusMinor:
+					# alignment
+					a_x += neighbor.vel_x
+					a_y += neighbor.vel_y
+					# cohesion
+					c_x += neighbor.pos_x
+					c_y += neighbor.pos_y
+					count += 1
 
 			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
@@ -545,14 +549,14 @@ class Bird( breve.Mobile ):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
 
-		if dist == 99999:
+		'''if dist == 99999:
 			feeders = breve.allInstances( "Feeder" )
 			for neighbor in feeders:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if norm < dist:
 					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
+					t_y = neighbor.pos_y-self.pos_y'''
 
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*f_x+self.geno[5]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*f_y+self.geno[5]*rand_y
@@ -712,8 +716,8 @@ class Predator( breve.Mobile ):
 			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#target
-				if norm*(1-neighbor.energy) < dist:
-					dist = norm*(1-neighbor.energy)
+				if norm < dist:
+					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
 
@@ -728,13 +732,15 @@ class Predator( breve.Mobile ):
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
 					s_x += v_x*self.lastScale**2
 					s_y += v_y*self.lastScale**2
-				# alignment
-				a_x += neighbor.vel_x
-				a_y += neighbor.vel_y
-				c_x += neighbor.pos_x
-				# cohesion
-				c_y += neighbor.pos_y
-				count += 1
+
+				if norm < self.controller.neighborRadiusMinor:
+					# alignment
+					a_x += neighbor.vel_x
+					a_y += neighbor.vel_y
+					# cohesion
+					c_x += neighbor.pos_x
+					c_y += neighbor.pos_y
+					count += 1
 
 		if count > 0:
 			a_x /= count
@@ -750,14 +756,14 @@ class Predator( breve.Mobile ):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
 
-		if dist == 99999:
+		'''if dist == 99999:
 			feeders = breve.allInstances( "Bird" )
 			for neighbor in feeders:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if norm < dist:
 					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
+					t_y = neighbor.pos_y-self.pos_y'''
 
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*rand_y
