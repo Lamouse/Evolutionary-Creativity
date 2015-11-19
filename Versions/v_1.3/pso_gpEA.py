@@ -60,9 +60,10 @@ class Swarm( breve.Control ):
 		self.totalFoodSupply = 0
 
 		# List
+		self.initial_depth = 3
 		self.current_generation = 0
 		self.breeding_season = 50
-		self.breeding_inc = 0.4
+		self.breeding_inc = 0.5
 		self.max_pop_predadors = 0.6
 		self.prob_mutation = 0.05
 		self.pollBirds = breve.objectList()
@@ -402,9 +403,9 @@ class Swarm( breve.Control ):
 					self.evolutionayAlgorithm(self.pollPredators)
 
 		if self.numBirds < 0.2*self.initialNumBirds:
-			self.revive(self.pollBirds, math.ceil(0.1*self.initialNumBirds))	
+			self.revive(self.pollBirds, math.ceil(0.2*self.initialNumBirds))	
 		if self.numPred < 0.2*self.initialNumPred:
-			self.revive(self.pollPredators, math.ceil(0.1*self.initialNumPred))
+			self.revive(self.pollPredators, math.ceil(0.2*self.initialNumPred))
 
 		self.setDisplayText("Birds Alive: "+str(self.numBirds), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
 		self.setDisplayText("Predators Alive: "+str(self.numPred), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
@@ -557,7 +558,7 @@ class Bird( breve.Mobile ):
 		self.gener = gener
 		self.setNewColor()
 
-		self.geno = self.controller.create_random_tree(3, "Bird")
+		self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Bird")
 
 	def setNewColor( self ):
 		if self.gener == 'f':
@@ -611,7 +612,7 @@ class Bird( breve.Mobile ):
 
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
-		self.changePos(-500,500)
+		self.changePos(-9999,9999)
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
@@ -829,7 +830,7 @@ class Predator( breve.Mobile ):
 		self.gener = gener
 		self.setNewColor()
 
-		self.geno = self.controller.create_random_tree(3, "Predator")
+		self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Predator")
 
 	def setNewColor( self ):
 		if self.gener == 'f':
@@ -883,7 +884,7 @@ class Predator( breve.Mobile ):
 
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
-		self.changePos(-500,500)
+		self.changePos(-9999,9999)
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False

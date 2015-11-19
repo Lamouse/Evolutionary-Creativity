@@ -4,10 +4,9 @@
 - abaixo de x% criara imigrantes (reviver alguns)
 - passar para 2D full
 com a idade a perda de energia aumenta
-aceleração linear e angular (prepadores mais rapidos)
-meter checkpoints (save/load populaçao)
+aceleração linear e angular (prepadores mais rapidos) - ver mobile.setRotationalAcceleration()
+meter checkpoints (save/load populaçao) - ver Object.archiveAsXml/Control.dearchiveXml
 
+(?) o raio dos predadores ser maior do que os das presas
+(?) ao trazer imigrantes uma parte ser random
 (?) a taxa de novos inidviduos depender do numero de individuos da mesma especie e adversaria
-
-p.s.
-	estou a dar-lhe a perceção da fonte de comida mais proxima no caso de ñ encontrarem nenhuma nas redondezas!!!
