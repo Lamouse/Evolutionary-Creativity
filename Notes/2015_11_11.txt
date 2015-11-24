@@ -3,10 +3,17 @@
 - limitar os recursos
 - abaixo de x% criara imigrantes (reviver alguns)
 - passar para 2D full
-com a idade a perda de energia aumenta
-aceleração linear e angular (prepadores mais rapidos) - ver mobile.setRotationalAcceleration()
-meter checkpoints (save/load populaçao) - ver Object.archiveAsXml/Control.dearchiveXml
 
-(?) o raio dos predadores ser maior do que os das presas
-(?) ao trazer imigrantes uma parte ser random
-(?) a taxa de novos inidviduos depender do numero de individuos da mesma especie e adversaria
+Em atraso
+	- com a idade a perda de energia aumenta
+	aceleração linear e angular (prepadores mais rapidos) - ver mobile.setRotationalAcceleration()
+	- meter checkpoints (save/load populaçao) - ver Object.archiveAsXml/Control.dearchiveXml
+											- guardar apenas a populacao
+											- criar classe auxiliar para guardar os dados
+											- resolver bug do tamanho
+											- testar com os 3 modelos
+
+- ao trazer imigrantes uma parte ser random - yes
+(?) a taxa de novos inidviduos depender do numero de individuos da mesma especie e adversaria - logo se vê
+
+trocar raio das presas / coesao e alinhamento

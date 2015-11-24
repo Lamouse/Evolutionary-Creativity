@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE steveObject SYSTEM "steveObject.dtd">
+<instance_archive archiveIndex="651">
+ <instance class="MenuItem" index="652" typesignature="1887007855">
+  <dependencies>
+  </dependencies>
+  <instancedata>
+  </instancedata>
+ </instance>
+ <instance class="MenuItem" index="653" typesignature="1887007855">
+  <dependencies>
+  </dependencies>
+  <instancedata>
+  </instancedata>
+ </instance>
+ <instance class="Bird" index="651" typesignature="1887007855">
+  <dependencies>
+   <object index="654"/>
+   <object index="652"/>
+   <object index="653"/>
+  </dependencies>
+  <instancedata>
+  </instancedata>
+ </instance>
+</instance_archive>
