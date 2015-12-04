@@ -9,22 +9,23 @@ __author__ = 'Paulo Pereira'
 class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
-		self.initialNumBirds = 150
-		self.initialNumPred = 25
-		self.numBirds = 150
-		self.numPred = 25
-		self.num_dead_birds = 0
-		self.num_dead_predators = 0
+		self.initialNumPreys = 150
+		self.initialNumPredators = 25
+		self.numPreys = 150
+		self.numPredators = 25
+		self.numDeadPreys = 0
+		self.numDeadPredators = 0
 
 		# World
 		self.minX = -200
 		self.maxX = 200
 		self.minY = -100
 		self.maxY = 100
-		self.neighborRadius = 50
-		self.neighborRadiusMinor = 20
+		self.targetZone = 50
+		self.socialZone = 20
 
-		self.isToLoad = True
+		self.isToLoad = False
+		self.isToSave = False
 
 		# Feeder
 		self.feederMinDistance = 25
@@ -39,7 +40,7 @@ class Swarm( breve.Control ):
 		self.breeding_inc = 0.5
 		self.max_pop_predadors = 0.6
 		self.prob_mutation = 0.05
-		self.pollBirds = breve.objectList()
+		self.pollPreys = breve.objectList()
 		self.pollPredators = breve.objectList()
 
 		# Other thing
@@ -65,7 +66,7 @@ class Swarm( breve.Control ):
 		temp_feed = breve.createInstances( breve.Feeder, 1)
 		temp_feed.initializeRandomly(x,y,rapid)
 
-	def createBirds(self, num):
+	def createPreys(self, num):
 		# latin hypercubes
 		if num < 1:
 			return
@@ -78,13 +79,14 @@ class Swarm( breve.Control ):
 			for j in range(size):
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
-				if breve.length(self.pollBirds) < 1:
-					temp_bird = breve.createInstances( breve.Bird, 1)
-					temp_bird.initializeRandomly(x,y,'m')
+				if breve.length(self.pollPreys) < 1:
+					temp_prey = breve.createInstances( breve.Prey, 1)
+					temp_prey.initializeRandomly(x,y,'m')
 				else:
-					temp_bird = self.pollBirds[0]
-					self.pollBirds.remove(temp_bird)
-					temp_bird.initializeRandomly(x,y,'m')
+					temp_prey = self.pollPreys[0]
+					temp_prey.isAlive = True
+					self.pollPreys.remove(temp_prey)
+					temp_prey.initializeRandomly(x,y,'m')
 
 	def createPredators(self, num):
 		# latin hypercubes
@@ -104,6 +106,7 @@ class Swarm( breve.Control ):
 					temp_predator.initializeRandomly(x,y,'m')
 				else:
 					temp_predator = self.pollPredators[0]
+					temp_predator.isAlive = True
 					self.pollPredators.remove(temp_predator)
 					temp_predator.initializeRandomly(x,y,'m')
 
@@ -124,7 +127,7 @@ class Swarm( breve.Control ):
 				array.remove(newBird)
 				
 				newBird.changePos(x, y)
-				newBird.changeVel(random.uniform(-newBird.maxVel, newBird.maxVel), random.uniform(-newBird.maxVel, newBird.maxVel))
+				newBird.changeVel(0,0)
 				newBird.changeAccel(0,0)
 
 				newBird.energy = 1.0
@@ -139,9 +142,8 @@ class Swarm( breve.Control ):
 
 		if not self.isToLoad:
 			self.addRandomFeederIfNecessary()
-			self.createBirds(self.initialNumBirds)
-			self.createPredators(self.initialNumPred)
-			self.save_data()
+			self.createPreys(self.initialNumPreys)
+			self.createPredators(self.initialNumPredators)
 		else:
 			self.load_data()
 
@@ -153,17 +155,17 @@ class Swarm( breve.Control ):
 			cPickle.dump(temp_feeder, f)
 		f.close()
 
-		# birds
-		f =  open('data/bird_ga.pkl', 'wb')
-		for bird in breve.allInstances( "Bird" ):
-			if bird.isAlive:
-				temp_accel = bird.getAcceleration()
-				temp_bird = Data_mobile(bird.pos_x, bird.pos_y, bird.vel_x, bird.vel_y, temp_accel.x, temp_accel.y, bird.energy, bird.age, bird.isAlive, bird.maxVel, bird.maxAccel, bird.gener, bird.radius, bird.geno, bird.lastScale)
-				cPickle.dump(temp_bird, f)
-		for bird in self.pollBirds:
-			temp_accel = bird.getAcceleration()
-			temp_bird = Data_mobile(bird.pos_x, bird.pos_y, bird.vel_x, bird.vel_y, temp_accel.x, temp_accel.y, bird.energy, bird.age, bird.isAlive, bird.maxVel, bird.maxAccel, bird.gener, bird.radius, bird.geno, bird.lastScale)
-			cPickle.dump(temp_bird, f)
+		# preys
+		f =  open('data/prey_ga.pkl', 'wb')
+		for prey in breve.allInstances( "Prey" ):
+			if prey.isAlive:
+				temp_accel = prey.getAcceleration()
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, prey.geno, prey.lastScale)
+				cPickle.dump(temp_prey, f)
+		for prey in self.pollPreys:
+			temp_accel = prey.getAcceleration()
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, prey.geno, prey.lastScale)
+			cPickle.dump(temp_prey, f)
 		f.close()
 
 		# prepadors
@@ -191,16 +193,15 @@ class Swarm( breve.Control ):
 				break
 		f.close()
 
-		# birds
-		f =  open('data/bird_ga.pkl', 'rb')
+		# preys
+		f =  open('data/prey_ga.pkl', 'rb')
 		while True:
 			try:
-				data_bird = cPickle.load(f)
-				temp_bird = breve.createInstances( breve.Bird, 1)
-				temp_bird.initializeFromData(data_bird.pos_x, data_bird.pos_y, data_bird.vel_x, data_bird.vel_y, data_bird.accel_x, data_bird.accel_y, data_bird.energy, data_bird.age, data_bird.isAlive, data_bird.maxVel, data_bird.maxAccel, data_bird.gener, data_bird.radius, data_bird.geno, data_bird.lastScale)
-			
-				if not temp_bird.isAlive:
-					temp_bird.dropDead(False)
+				data_prey = cPickle.load(f)
+				temp_prey = breve.createInstances( breve.Prey, 1)
+				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.gener, data_prey.radius, data_prey.geno, data_prey.lastScale)
+				if not temp_prey.isAlive:
+					temp_prey.dropDead(False)
 			except EOFError:
 				break
 		f.close()
@@ -212,7 +213,6 @@ class Swarm( breve.Control ):
 				data_predator = cPickle.load(f)
 				temp_predator = breve.createInstances( breve.Predator, 1)
 				temp_predator.initializeFromData(data_predator.pos_x, data_predator.pos_y, data_predator.vel_x, data_predator.vel_y, data_predator.accel_x, data_predator.accel_y, data_predator.energy, data_predator.age, data_predator.isAlive, data_predator.maxVel, data_predator.maxAccel, data_predator.gener, data_predator.radius, data_predator.geno, data_predator.lastScale)
-			
 				if not temp_predator.isAlive:
 					temp_predator.dropDead(False)
 			except EOFError:
@@ -304,18 +304,21 @@ class Swarm( breve.Control ):
 	def iterate( self ):
 		self.updateNeighbors()
 
-		self.numBirds = 0
-		for bird in breve.allInstances( "Bird" ):
-			if bird.isAlive:
-				bird.fly()
-				self.numBirds += 1
+		# moviment of Prey
+		self.numPreys = 0
+		for prey in breve.allInstances( "Prey" ):
+			if prey.isAlive:
+				prey.fly()
+				self.numPreys += 1
 
-		self.numPred = 0
+		# moviment of Predator
+		self.numPredators = 0
 		for predator in breve.allInstances( "Predator" ):
 			if predator.isAlive:
 				predator.fly()
-				self.numPred += 1
+				self.numPredators += 1
 
+		# management of the energy from feeders
 		self.totalFoodSupply = 0
 		for feeder in breve.allInstances( "Feeder" ):
 			if feeder.rapid:
@@ -326,50 +329,60 @@ class Swarm( breve.Control ):
 				breve.deleteInstances( feeder )
 		self.addRandomFeederIfNecessary(rapid=True)
 
+		# vanish corpse
 		for corpse in breve.allInstances( "Corpse" ):
 			corpse.changeColor()
 			if sum(corpse.getColor()) <= 0:	
 				breve.deleteInstances( corpse.shape )
 				breve.deleteInstances( corpse )
+			print corpse.getColor()
+
 
 		self.current_generation += 1
+		# breeding
 		if self.current_generation % self.breeding_season == 0:
-			if breve.length(self.pollBirds) < self.breeding_inc*self.numBirds:
-				new_birds = int(math.ceil(self.breeding_inc*self.numBirds)) - breve.length(self.pollBirds)
-				breve.createInstances( breve.Bird, new_birds).dropDead(False)
+			# preys
+			tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
+			if breve.length(self.pollPreys) < tam_prey*2:
+				new_prey = tam_prey - breve.length(self.pollPreys)
+				breve.createInstances( breve.Prey, new_prey).dropDead(False)
+			for i in range(tam_prey):
+				self.evolutionayAlgorithm(self.pollPreys)
 
-			if breve.length(self.pollPredators) < self.breeding_inc*self.numPred:
-				new_preds = int(math.ceil(self.breeding_inc*self.numPred)) - breve.length(self.pollPredators)
+			# predators
+			predator_max = self.numPreys*self.max_pop_predadors
+			predator_breed = self.breeding_inc*self.numPredators
+			tam_predator = int(math.ceil(min(predator_max, predator_breed)/2))
+			if breve.length(self.pollPredators) < tam_predator*2:
+				new_preds = tam_predator - breve.length(self.pollPredators)
 				breve.createInstances( breve.Predator, new_preds).dropDead(False)
-
-			for i in range(int(math.ceil(self.breeding_inc*self.numBirds))/2):
-				self.evolutionayAlgorithm(self.pollBirds)
-			if self.numPred < self.numBirds*self.max_pop_predadors:
-				for i in range(int(math.ceil(min(self.breeding_inc*self.numPred, self.numBirds*self.max_pop_predadors)))/2):
-					self.evolutionayAlgorithm(self.pollPredators)
-
+			for i in range(tam_predator):
+				self.evolutionayAlgorithm(self.pollPredators)
 		# immigrants
-		if self.numBirds < 0.2*self.initialNumBirds:
-			self.revive(self.pollBirds, math.floor(0.15*self.initialNumBirds))
-			self.createBirds(math.floor(0.05*self.initialNumBirds))
-		if self.numPred < 0.2*self.initialNumPred:
-			self.revive(self.pollPredators, math.floor(0.15*self.initialNumPred))
-			self.createPredators(math.floor(0.05*self.initialNumPred))
+		else:
+			if self.numPreys < 0.2*self.initialNumPreys:
+				self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
+				self.createPreys(math.floor(0.05*self.initialNumPreys))
+			if self.numPredators < 0.2*self.initialNumPredators:
+				self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
+				self.createPredators(math.floor(0.05*self.initialNumPredators))
 		
+
 		# checkpoint
-		if self.current_generation % (self.breeding_season*25) == 0:
+		if self.isToSave and self.current_generation % (self.breeding_season*25) == 0:
 			self.save_data()
 
+
+		# to display on screen
 		self.setDisplayText("Generation: "+str((int) (math.ceil(self.current_generation/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
-		self.setDisplayText("Birds Alive: "+str(self.numBirds), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 4, theColor = breve.vector( 1, 1, 1 ))
-		self.setDisplayText("Predators Alive: "+str(self.numPred), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
-		self.setDisplayText("Dead Birds: "+str(self.num_dead_birds), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
-		self.setDisplayText("Dead Predators: "+str(self.num_dead_predators), xLoc = -0.950000, yLoc = -0.950000, messageNumber = 1, theColor = breve.vector( 1, 1, 1 ))
+		self.setDisplayText("Preys Alive: "+str(self.numPreys), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 4, theColor = breve.vector( 1, 1, 1 ))
+		self.setDisplayText("Predators Alive: "+str(self.numPredators), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
+		self.setDisplayText("Dead Preys: "+str(self.numDeadPreys), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
+		self.setDisplayText("Dead Predators: "+str(self.numDeadPredators), xLoc = -0.950000, yLoc = -0.950000, messageNumber = 1, theColor = breve.vector( 1, 1, 1 ))
 
 		# needed to move the agents with velocity and acceleration
 		# also needed to detect collisions
 		# print str(self.numBirdsBirth)
-
 		breve.Control.iterate( self )
 
 
@@ -486,7 +499,7 @@ class Corpse( breve.Mobile ):
 
 breve.Corpse = Corpse
 
-class Bird( breve.Mobile ):
+class Prey( breve.Mobile ):
 	def __init__( self ):
 		breve.Mobile.__init__( self )
 		self.shape = None
@@ -510,14 +523,14 @@ class Bird( breve.Mobile ):
 		#self.geno = [0.005, 0.01, 1, 0.005, 1]
 
 		self.lastScale = 1
-		Bird.init( self )
+		Prey.init( self )
 
 
 	def initializeRandomly( self, x, y, gener):
 		self.changePos(x,y)
-		vel_x = random.uniform(-self.maxVel, self.maxVel)
-		vel_y = random.uniform(-self.maxVel, self.maxVel)
-		self.changeVel(vel_x, vel_y)
+		# vel_x = random.uniform(-self.maxVel, self.maxVel)
+		# vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(0,0)
 		self.changeAccel(0,0)
 
 		self.gener = gener
@@ -562,8 +575,8 @@ class Bird( breve.Mobile ):
 		if  norm > self.maxAccel:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
-		self.setAcceleration( breve.vector(x,y,0) )
-
+		self.setAcceleration( breve.vector(x, y, 0) )
+			
 	def changeVel(self, x, y):
 		norm = (x**2 + y**2)**0.5
 		if  norm > self.maxVel:
@@ -572,6 +585,13 @@ class Bird( breve.Mobile ):
 		self.vel_x = x
 		self.vel_y = y
 		self.setVelocity( breve.vector(x,y,0) )
+
+	def normalizeVector(self, x, y):
+		norm = (x**2 + y**2)**0.5
+		if norm > 0:
+			x = x/norm * self.maxAccel
+			y = y/norm * self.maxAccel
+		return [x, y]
 
 	def addEnergy(self, num):
 		self.energy += num
@@ -604,8 +624,8 @@ class Bird( breve.Mobile ):
 		self.age = 0
 		self.energy = 1
 		self.isAlive = False
-		self.controller.pollBirds.append(self)
-		self.controller.num_dead_birds += 1
+		self.controller.pollPreys.append(self)
+		self.controller.numDeadPreys += 1
 
 	def calculateAccel(self):
 		neighbors = self.getNeighbors()
@@ -634,7 +654,7 @@ class Bird( breve.Mobile ):
 				if norm <= max(neighbor.lastScale,3):
 					self.eat(neighbor) 
 
-			elif neighbor.isA( 'Bird' ) and neighbor.isAlive:
+			elif neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.radius:
 					# separation
@@ -643,7 +663,7 @@ class Bird( breve.Mobile ):
 					s_x += v_x*self.lastScale**2
 					s_y += v_y*self.lastScale**2
 
-				if norm < self.controller.neighborRadiusMinor:
+				if norm < self.controller.socialZone:
 					# alignment
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
@@ -683,6 +703,13 @@ class Bird( breve.Mobile ):
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y'''
 
+		c_x, c_y = self.normalizeVector(c_x, c_y)
+		a_x, a_y = self.normalizeVector(a_x, a_y)
+		s_x, s_y = self.normalizeVector(s_x, s_y)
+		t_x, t_y = self.normalizeVector(t_x, t_y)
+		f_x, f_y = self.normalizeVector(f_x, f_y)
+		rand_x, rand_y = self.normalizeVector(rand_x, rand_y)
+
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*f_x+self.geno[5]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*f_y+self.geno[5]*rand_y
 		return [accel_x, accel_y]
@@ -705,7 +732,7 @@ class Bird( breve.Mobile ):
 		self.age += 1
 		#if self.energy < 0.5 or self.age > 300:
 		if self.energy < 0.5:
-			self.dropDead()
+			self.dropDead(False)
 
 	def cross( self, v1, v2 ):
 		x = ( ( v1.y * v2.z ) - ( v1.z * v2.y ) )
@@ -731,9 +758,9 @@ class Bird( breve.Mobile ):
 		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( self.controller.neighborRadius )
+		self.setNeighborhoodSize( self.controller.targetZone )
 
-breve.Bird = Bird
+breve.Prey = Prey
 
 class Predator( breve.Mobile ):
 	def __init__( self ):
@@ -762,9 +789,9 @@ class Predator( breve.Mobile ):
 
 	def initializeRandomly( self, x, y, gener):
 		self.changePos(x,y)
-		vel_x = random.uniform(-self.maxVel, self.maxVel)
-		vel_y = random.uniform(-self.maxVel, self.maxVel)
-		self.changeVel(vel_x, vel_y)
+		# vel_x = random.uniform(-self.maxVel, self.maxVel)
+		# vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(0,0)
 		self.changeAccel(0,0)
 		
 		self.gener = gener
@@ -809,7 +836,7 @@ class Predator( breve.Mobile ):
 		if  norm > self.maxAccel:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
-		self.setAcceleration( breve.vector(x,y,0) )
+		self.setAcceleration( breve.vector(x, y, 0) )
 
 	def changeVel(self, x, y):
 		norm = (x**2 + y**2)**0.5
@@ -820,6 +847,13 @@ class Predator( breve.Mobile ):
 		self.vel_y = y
 		self.setVelocity( breve.vector(x,y,0) )
 
+	def normalizeVector(self, x, y):
+		norm = (x**2 + y**2)**0.5
+		if norm > 0:
+			x = x/norm * self.maxAccel
+			y = y/norm * self.maxAccel
+		return [x, y]
+
 	def addEnergy(self, num):
 		self.energy += num
 		if self.energy < 0:
@@ -828,10 +862,10 @@ class Predator( breve.Mobile ):
 	def getEnergy(self):
 		return self.energy
 
-	def eat( self, bird ):
-		if self.energy < 1.4 and bird.energy > 0:
+	def eat( self, prey ):
+		if self.energy < 1.4 and prey.energy > 0:
 			self.addEnergy(0.05)
-			bird.addEnergy(-0.05)
+			prey.addEnergy(-0.05)
 	
 	def dropDead(self, corpse=True):
 		if corpse:
@@ -852,7 +886,7 @@ class Predator( breve.Mobile ):
 		self.energy = 1
 		self.isAlive = False
 		self.controller.pollPredators.append(self)
-		self.controller.num_dead_predators += 1
+		self.controller.numDeadPredators += 1
 
 	def calculateAccel(self):
 		neighbors = self.getNeighbors()
@@ -867,7 +901,7 @@ class Predator( breve.Mobile ):
 		dist = 99999
 		count = 0
 		for neighbor in neighbors:
-			if neighbor.isA( 'Bird' ) and neighbor.isAlive:
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#target
 				if norm < dist:
@@ -887,7 +921,7 @@ class Predator( breve.Mobile ):
 					s_x += v_x*self.lastScale**2
 					s_y += v_y*self.lastScale**2
 
-				if norm < self.controller.neighborRadiusMinor:
+				if norm < self.controller.socialZone:
 					# alignment
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
@@ -911,13 +945,19 @@ class Predator( breve.Mobile ):
 		rand_y = random.uniform(0, 1)
 
 		'''if dist == 99999:
-			feeders = breve.allInstances( "Bird" )
+			feeders = breve.allInstances( "Prey" )
 			for neighbor in feeders:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if norm < dist:
 					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y'''
+
+		c_x, c_y = self.normalizeVector(c_x, c_y)
+		a_x, a_y = self.normalizeVector(a_x, a_y)
+		s_x, s_y = self.normalizeVector(s_x, s_y)
+		t_x, t_y = self.normalizeVector(t_x, t_y)
+		rand_x, rand_y = self.normalizeVector(rand_x, rand_y)
 
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*rand_y
@@ -941,7 +981,7 @@ class Predator( breve.Mobile ):
 		self.age += 1
 		#if self.energy < 0.5 or self.age > 300:
 		if self.energy < 0.5:
-			self.dropDead()
+			self.dropDead(False)
 
 	def cross( self, v1, v2 ):
 		x = ( ( v1.y * v2.z ) - ( v1.z * v2.y ) )
@@ -967,7 +1007,7 @@ class Predator( breve.Mobile ):
 		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( self.controller.neighborRadius )
+		self.setNeighborhoodSize( self.controller.targetZone )
 
 breve.Predator = Predator
 

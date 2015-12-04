@@ -6,6 +6,7 @@
 
 Em atraso
 	- com a idade a perda de energia aumenta
+		testar com varias funções (exponencial,...)
 	aceleração linear e angular (prepadores mais rapidos) - ver mobile.setRotationalAcceleration()
 	- meter checkpoints (save/load populaçao) - ver Object.archiveAsXml/Control.dearchiveXml
 											- guardar apenas a populacao
@@ -16,4 +17,13 @@ Em atraso
 - ao trazer imigrantes uma parte ser random - yes
 (?) a taxa de novos inidviduos depender do numero de individuos da mesma especie e adversaria - logo se vê
 
-trocar raio das presas / coesao e alinhamento
+trocar raio das presas / coesao e alinhamento - as presas ficam no mesmo sitio e acabam por morrer de fome
+
+
+fix:
+	erro revive logo depois da reprodução
+
+
+alife, artifical life, pso, motores evolucionarios, evalution alife, metricas, swarm, coevolucionario
+
+scholer google save tags
