@@ -9,6 +9,18 @@ __author__ = 'Paulo Pereira'
 class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
+
+		self.showCorpse = True
+		self.isToLoad = False
+		self.isToSave = False
+		self.isToRecord = True
+		self.movie = None
+
+		# Representation
+		self.repr = 0
+		self.reprType = [ga, gp, push]
+
+		# Simulation
 		self.initialNumPreys = 150
 		self.initialNumPredators = 25
 		self.numPreys = 150
@@ -23,12 +35,6 @@ class Swarm( breve.Control ):
 		self.maxY = 100
 		self.targetZone = 50
 		self.socialZone = 20
-
-		self.showCorpse = True
-		self.isToLoad = False
-		self.isToSave = False
-		self.isToRecord = True
-		self.movie = None
 
 		# Feeder
 		self.feederMinDistance = 25
@@ -349,7 +355,6 @@ class Swarm( breve.Control ):
 				if sum(corpse.getColor()) <= 0:	
 					breve.deleteInstances( corpse.shape )
 					breve.deleteInstances( corpse )
-				print corpse.getColor()
 
 
 			self.current_generation += 1
@@ -759,7 +764,7 @@ class Prey( breve.Mobile ):
 		self.changeAccel(accel_x, accel_y)
 
 		# self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
-		self.addEnergy(-0.02)
+		self.addEnergy(-0.01)
 		self.adjustSize()
 		self.age += 1
 
@@ -955,7 +960,7 @@ class Predator( breve.Mobile ):
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
 
-				if norm <= 3:
+				if norm < self.radius:
 					self.eat(neighbor) 
 
 			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
@@ -1023,7 +1028,7 @@ class Predator( breve.Mobile ):
 		self.changeAccel(accel_x, accel_y)
 
 		#self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
-		self.addEnergy(-0.02)
+		self.addEnergy(-0.01)
 		self.adjustSize()
 		self.age += 1
 
