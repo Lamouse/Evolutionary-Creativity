@@ -36,6 +36,7 @@ class Swarm( breve.Control ):
 		self.maxY = 100
 		self.targetZone = 50
 		self.socialZone = 20
+		self.separationZone = 2
 
 		# Feeder
 		self.feederMinDistance = 25
@@ -847,7 +848,7 @@ class Prey( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.radius:
+				if 0 < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
@@ -954,7 +955,7 @@ class Prey( breve.Mobile ):
 
 			elif neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.radius:
+				if norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
@@ -1267,7 +1268,7 @@ class Predator( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.radius:
+				if norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
@@ -1347,12 +1348,12 @@ class Predator( breve.Mobile ):
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
 
-				if norm < self.radius:
+				if norm < self.controller.separationZone:
 					self.eat(neighbor) 
 
 			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.radius:
+				if norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
@@ -1422,7 +1423,7 @@ class Predator( breve.Mobile ):
 			for neighbor in neighbors:
 				if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-					if norm <= max(neighbor.lastScale,3):
+					if norm < self.controller.separationZone:
 						self.eat(neighbor) 			
 		
 		self.changeAccel(accel_x, accel_y)
