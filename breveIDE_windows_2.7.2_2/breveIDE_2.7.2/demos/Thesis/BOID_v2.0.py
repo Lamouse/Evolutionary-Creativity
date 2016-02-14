@@ -18,7 +18,7 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -61,6 +61,8 @@ class Swarm( breve.Control ):
 
 		# Other thing
 		Swarm.init( self )
+
+		self.setDisplayText(self.reprType[self.repr].upper(), xLoc = -0.950000, yLoc = -0.400000, messageNumber = 6, theColor = breve.vector( 1, 1, 1 ))
 
 	def createFeeder(self, num, rapid ):
 		# Simple Sequential Inhibition
@@ -180,12 +182,22 @@ class Swarm( breve.Control ):
 		f =  open('data/prey_'+suffix+'.pkl', 'wb')
 		for prey in breve.allInstances( "Prey" ):
 			if prey.isAlive:
+				if self.controller.repr == 2:
+					geno = prey.pushCode.getList()
+				else:
+					geno = prey.geno
+
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, prey.geno, prey.lastScale)
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, geno, prey.lastScale)
 				cPickle.dump(temp_prey, f)
 		for prey in self.pollPreys:
+			if self.controller.repr == 2:
+				geno = prey.pushCode.getList()
+			else:
+				geno = prey.geno
+
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, prey.geno, prey.lastScale)
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, geno, prey.lastScale)
 			cPickle.dump(temp_prey, f)
 		f.close()
 
@@ -193,12 +205,22 @@ class Swarm( breve.Control ):
 		f =  open('data/predator_'+suffix+'.pkl', 'wb')
 		for predator in breve.allInstances( "Predator" ):
 			if predator.isAlive:
+				if self.controller.repr == 2:
+					geno = predator.pushCode.getList()
+				else:
+					geno = predator.geno
+
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, predator.radius, predator.geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, predator.radius, geno, predator.lastScale)
 				cPickle.dump(temp_predator, f)
 		for predator in self.pollPredators:
+			if self.controller.repr == 2:
+				geno = predator.pushCode.getList()
+			else:
+				geno = predator.geno
+
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, predator.radius, predator.geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, predator.radius, geno, predator.lastScale)
 			cPickle.dump(temp_predator, f)
 		f.close()
 
@@ -290,6 +312,13 @@ class Swarm( breve.Control ):
 		elif self.controller.repr == 1:
 			newBird1.geno, newBird2.geno = self.tree_crossover(parent1.geno, parent2.geno)
 
+		elif self.controller.repr == 2:
+			newBird1.pushInterpreter.clearStacks()
+			newBird1.pushCode.crossover( parent1.pushCode, parent2.pushCode, newBird1.pushInterpreter )
+
+			newBird2.pushInterpreter.clearStacks()
+			newBird2.pushCode.crossover( parent2.pushCode, parent1.pushCode, newBird2.pushInterpreter )
+
 	def mutate(self, newBird):
 		if self.controller.repr == 0:
 			# uniform mutation
@@ -302,6 +331,10 @@ class Swarm( breve.Control ):
 			prob = random.random()
 			if prob <= self.prob_mutation:
 				self.tree_mutation(newBird.geno, newBird.getType())
+
+		elif self.controller.repr == 2:
+			prob = random.randint( 0, 15 )
+			newBird.pushCode.mutate( newBird.pushInterpreter, prob )
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
@@ -683,8 +716,32 @@ class Prey( breve.Mobile ):
 		self.radius = 2
 		self.geno = None
 
+		# PUSH
+		if self.controller.repr == 2:
+			self.pushInterpreter = None
+			self.pushCode = None
+			self.createPush()
+
 		self.lastScale = 1
 		Prey.init( self )
+
+	# PUSH
+	def createPush(self):
+		self.pushInterpreter = breve.createInstances( breve.PushInterpreter, 1 )
+		self.pushInterpreter.readConfig( 'pushConfigFile.config' )
+		self.pushInterpreter.addInstruction( self, 'separation' )
+		self.pushInterpreter.addInstruction( self, 'alignment' )
+		self.pushInterpreter.addInstruction( self, 'cohesion' )
+		self.pushInterpreter.addInstruction( self, 'target' )
+		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
+		self.pushInterpreter.addInstruction( self, 'currentVelocity' )
+		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
+		self.pushInterpreter.addInstruction( self, 'randV' )
+		self.pushInterpreter.addInstruction( self, 'flee' )
+		self.pushInterpreter.setEvaluationLimit( 75 )
+		self.pushInterpreter.setListLimit( 75 )
+		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 100 )
 
 
 	def initializeRandomly( self, x, y, gener):
@@ -701,6 +758,8 @@ class Prey( breve.Mobile ):
 			self.geno = [random.uniform(-5, 5) for x in range(6)]
 		elif self.controller.repr == 1:
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Prey")
+		elif self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, radius, geno, lastScale):
 		self.maxVel = maxVel
@@ -721,7 +780,11 @@ class Prey( breve.Mobile ):
 		# self.adjustSize()
 		self.setNewColor()
 		
-		self.geno = geno
+		if self.controller.repr == 2:
+			self.pushInterpreter.clearStacks()
+			self.pushCode.setFrom(geno)
+		else:
+			self.geno = geno
 
 	def setNewColor( self ):
 		if self.gener == 'f':
@@ -736,14 +799,14 @@ class Prey( breve.Mobile ):
 
 	def changeAccel(self, x, y):
 		norm = (x**2 + y**2)**0.5
-		if  norm > self.maxAccel:
+		if norm > self.maxAccel:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
 			
 	def changeVel(self, x, y):
 		norm = (x**2 + y**2)**0.5
-		if  norm > self.maxVel:
+		if norm > self.maxVel:
 			x = x/norm * self.maxVel
 			y = y/norm * self.maxVel
 		self.vel_x = x
@@ -818,6 +881,10 @@ class Prey( breve.Mobile ):
 			a_y /= count
 			a_x -= self.vel_x
 			a_y -= self.vel_y
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
+			return
 		return [a_x, a_y]
 
 	def cohesion(self):
@@ -838,6 +905,10 @@ class Prey( breve.Mobile ):
 			c_y /= count
 			c_x -= self.pos_x
 			c_y -= self.pos_y
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
+			return
 		return [c_x, c_y]
 
 	def separation(self):
@@ -848,12 +919,16 @@ class Prey( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < self.controller.separationZone:
+				if 0 < norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
 					s_x += v_x*self.lastScale**2
 					s_y += v_y*self.lastScale**2
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(s_x, s_y, 0) )
+			return
 		return [s_x, s_y]
 
 	def target(self):
@@ -879,6 +954,10 @@ class Prey( breve.Mobile ):
 					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y'''
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(t_x, t_y, 0) )
+			return
 		return [t_x, t_y]
 
 	def flee(self):
@@ -896,13 +975,22 @@ class Prey( breve.Mobile ):
 					f_x = self.pos_x - neighbor.pos_x
 					f_y = self.pos_y - neighbor.pos_y
 		
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(f_x, f_y, 0) )
+			return
 		return [f_x, f_y]
 
 	def currentVelocity(self):
-		return [self.vel_x,self.vel_y]
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(self.vel_x, self.vel_y, 0) )
+			return
+		return [self.vel_x, self.vel_y]
 
 	def centerOfWorld(self):
-		return [-self.pos_x,-self.pos_y]
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(-self.pos_x, -self.pos_y, 0) )
+			return
+		return [-self.pos_x, -self.pos_y]
 
 	def mostEnergizedNeighbor(self):
 		neighbors = self.getNeighbors()
@@ -916,11 +1004,18 @@ class Prey( breve.Mobile ):
 					me_x = neighbor.pos_x-self.pos_x
 					me_y = neighbor.pos_y-self.pos_y
 
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(me_x, me_y, 0) )
+			return
 		return [me_x, me_y]
 
 	def randV(self):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
+			return
 		return [rand_x, rand_y]
 
 
@@ -955,7 +1050,7 @@ class Prey( breve.Mobile ):
 
 			elif neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm < self.controller.separationZone:
+				if 0 < norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
@@ -1028,6 +1123,13 @@ class Prey( breve.Mobile ):
 		else:
 			if self.controller.repr == 1:
 				accel_x, accel_y = self.controller.run_code(self, self.geno)
+			elif self.controller.repr == 2:
+				self.pushInterpreter.run( self.pushCode )
+				accel = self.pushInterpreter.getVectorStackTop()
+				if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
+					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
+				accel_x = accel.x
+				accel_y = accel.y
 
 			# eat
 			neighbors = self.getNeighbors()
@@ -1100,8 +1202,32 @@ class Predator( breve.Mobile ):
 		self.radius = 2
 		self.geno = None
 		
+		# PUSH
+		if self.controller.repr == 2:
+			self.pushInterpreter = None
+			self.pushCode = None
+			self.createPush()
+
 		self.lastScale = 1
 		Predator.init( self )
+
+	# PUSH
+	def createPush(self):
+		self.pushInterpreter = breve.createInstances( breve.PushInterpreter, 1 )
+		self.pushInterpreter.readConfig( 'pushConfigFile.config' )
+		self.pushInterpreter.addInstruction( self, 'separation' )
+		self.pushInterpreter.addInstruction( self, 'alignment' )
+		self.pushInterpreter.addInstruction( self, 'cohesion' )
+		self.pushInterpreter.addInstruction( self, 'target' )
+		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
+		self.pushInterpreter.addInstruction( self, 'currentVelocity' )
+		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
+		self.pushInterpreter.addInstruction( self, 'randV' )
+		self.pushInterpreter.setEvaluationLimit( 75 )
+		self.pushInterpreter.setListLimit( 75 )
+		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 100 )
+
 
 	def initializeRandomly( self, x, y, gener):
 		self.changePos(x,y)
@@ -1117,6 +1243,8 @@ class Predator( breve.Mobile ):
 			self.geno = [random.uniform(-5, 5) for x in range(5)]
 		elif self.controller.repr == 1:
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Predator")
+		elif self.controller.reprType == 2:
+			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, radius, geno, lastScale):
 		self.maxVel = maxVel
@@ -1137,7 +1265,11 @@ class Predator( breve.Mobile ):
 		# self.adjustSize()
 		self.setNewColor()
 		
-		self.geno = geno
+		if self.controller.repr == 2:
+			self.pushInterpreter.clearStacks()
+			self.pushCode.setFrom(geno)
+		else:
+			self.geno = geno
 
 	def setNewColor( self ):
 		if self.gener == 'f':
@@ -1152,7 +1284,7 @@ class Predator( breve.Mobile ):
 
 	def changeAccel(self, x, y):
 		norm = (x**2 + y**2)**0.5
-		if  norm > self.maxAccel:
+		if norm > self.maxAccel:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
@@ -1238,6 +1370,10 @@ class Predator( breve.Mobile ):
 			a_y /= count
 			a_x -= self.vel_x
 			a_y -= self.vel_y
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
+			return
 		return [a_x, a_y]
 
 	def cohesion(self):
@@ -1258,6 +1394,10 @@ class Predator( breve.Mobile ):
 			c_y /= count
 			c_x -= self.pos_x
 			c_y -= self.pos_y
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
+			return
 		return [c_x, c_y]
 
 	def separation(self):
@@ -1268,12 +1408,16 @@ class Predator( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm < self.controller.separationZone:
+				if 0 < norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
 					s_x += v_x*self.lastScale**2
 					s_y += v_y*self.lastScale**2
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(s_x, s_y, 0) )
+			return
 		return [s_x, s_y]
 
 	def target(self):
@@ -1299,14 +1443,23 @@ class Predator( breve.Mobile ):
 					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y'''
-					
+		
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(t_x, t_y, 0) )
+			return	
 		return [t_x, t_y]
 
 	def currentVelocity(self):
-		return [self.vel_x,self.vel_y]
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(self.vel_x, self.vel_y, 0) )
+			return
+		return [self.vel_x, self.vel_y]
 
 	def centerOfWorld(self):
-		return [-self.pos_x,-self.pos_y]
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(-self.pos_x, -self.pos_y, 0) )
+			return
+		return [-self.pos_x, -self.pos_y]
 
 	def mostEnergizedNeighbor(self):
 		neighbors = self.getNeighbors()
@@ -1319,11 +1472,19 @@ class Predator( breve.Mobile ):
 					me_x = neighbor.pos_x-self.pos_x
 					me_y = neighbor.pos_y-self.pos_y
 					energy = neighbor.energy
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(me_x, me_y, 0) )
+			return
 		return [me_x, me_y]
 
 	def randV(self):
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
+			return
 		return [rand_x, rand_y]
 
 	# GA
@@ -1353,7 +1514,7 @@ class Predator( breve.Mobile ):
 
 			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm < self.controller.separationZone:
+				if 0 < norm < self.controller.separationZone:
 					# separation
 					v_x = (self.pos_x - neighbor.pos_x) / norm**2
 					v_y = (self.pos_y - neighbor.pos_y) / norm**2
@@ -1417,6 +1578,13 @@ class Predator( breve.Mobile ):
 		else:
 			if self.controller.repr == 1:
 				accel_x, accel_y = self.controller.run_code(self, self.geno)
+			elif self.controller.repr == 2:
+				self.pushInterpreter.run( self.pushCode )
+				accel = self.pushInterpreter.getVectorStackTop()
+				if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
+					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
+				accel_x = accel.x
+				accel_y = accel.y
 			
 			# eat
 			neighbors = self.getNeighbors()

@@ -16,10 +16,6 @@ class Swarm( breve.Control ):
 		self.isToRecord = True
 		self.movie = None
 
-		# Representation
-		self.repr = 0
-		self.reprType = [ga, gp, push]
-
 		# Simulation
 		self.initialNumPreys = 150
 		self.initialNumPredators = 25
