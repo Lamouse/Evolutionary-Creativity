@@ -18,7 +18,7 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -863,30 +863,6 @@ class Prey( breve.Mobile ):
 
 
 	# GP and PUSH
-	def alignment(self):
-		neighbors = self.getNeighbors()
-		a_x = 0
-		a_y = 0
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
-				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
-					a_x += neighbor.vel_x
-					a_y += neighbor.vel_y
-					count += 1
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-		if self.controller.repr == 2:
-			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
-			return
-		return [a_x, a_y]
-
 	def cohesion(self):
 		neighbors = self.getNeighbors()
 		c_x = 0
@@ -910,6 +886,30 @@ class Prey( breve.Mobile ):
 			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
 			return
 		return [c_x, c_y]
+
+	def alignment(self):
+		neighbors = self.getNeighbors()
+		a_x = 0
+		a_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
+				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
+				if norm < self.controller.socialZone:
+					a_x += neighbor.vel_x
+					a_y += neighbor.vel_y
+					count += 1
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			a_x -= self.vel_x
+			a_y -= self.vel_y
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
+			return
+		return [a_x, a_y]
 
 	def separation(self):
 		neighbors = self.getNeighbors()
@@ -964,16 +964,16 @@ class Prey( breve.Mobile ):
 		neighbors = self.getNeighbors()
 		f_x = 0
 		f_y = 0
-		dist = 99999
 
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
-				if norm < dist:
-					dist = norm
-					f_x = self.pos_x - neighbor.pos_x
-					f_y = self.pos_y - neighbor.pos_y
+				if norm > 0:
+					v_x = (self.pos_x - neighbor.pos_x) / norm**2
+					v_y = (self.pos_y - neighbor.pos_y) / norm**2
+					f_x += v_x*self.lastScale**2
+					f_y += v_y*self.lastScale**2
 		
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(f_x, f_y, 0) )
@@ -1021,88 +1021,12 @@ class Prey( breve.Mobile ):
 
 	# GA
 	def calculateAccel(self):
-		neighbors = self.getNeighbors()
-		t_x = 0
-		t_y = 0
-		f_x = 0
-		f_y = 0
-		s_x = 0
-		s_y = 0
-		a_x = 0
-		a_y = 0
-		c_x = 0
-		c_y = 0
-		dist = 99999
-		dist2 = 99999
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Feeder' ):
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				#target
-				if norm < dist:
-					#dist = norm*(1-neighbor.energy)
-					dist = norm
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
-
-				if norm <= max(neighbor.lastScale,3):
-					self.eat(neighbor) 
-
-			elif neighbor.isA( 'Prey' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.controller.separationZone:
-					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-
-				if norm < self.controller.socialZone:
-					# alignment
-					a_x += neighbor.vel_x
-					a_y += neighbor.vel_y
-					# cohesion
-					c_x += neighbor.pos_x
-					c_y += neighbor.pos_y
-					count += 1
-
-			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				#flee
-				if norm < dist2:
-					dist2 = norm
-					f_x = (self.pos_x - neighbor.pos_x)
-					f_y = (self.pos_y - neighbor.pos_y)
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-			c_x /= count
-			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
-
-		rand_x = random.uniform(0, 1)
-		rand_y = random.uniform(0, 1)
-
-		'''if dist == 99999:
-			feeders = breve.allInstances( "Feeder" )
-			for neighbor in feeders:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm < dist:
-					dist = norm
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y'''
-
-		c_x, c_y = self.normalizeVector(c_x, c_y)
-		a_x, a_y = self.normalizeVector(a_x, a_y)
-		s_x, s_y = self.normalizeVector(s_x, s_y)
-		t_x, t_y = self.normalizeVector(t_x, t_y)
-		f_x, f_y = self.normalizeVector(f_x, f_y)
-		rand_x, rand_y = self.normalizeVector(rand_x, rand_y)
+		c_x, c_y = self.cohesion()
+		a_x, a_y = self.alignment()
+		s_x, s_y = self.separation()
+		t_x, t_y = self.target()
+		f_x, f_y = self.flee()
+		rand_x, rand_y = self.randV()
 
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*f_x+self.geno[5]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*f_y+self.geno[5]*rand_y
@@ -1131,16 +1055,16 @@ class Prey( breve.Mobile ):
 				accel_x = accel.x
 				accel_y = accel.y
 
-			# eat
-			neighbors = self.getNeighbors()
-			for neighbor in neighbors:
-				if neighbor.isA( 'Feeder' ):
-					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-					if norm <= max(neighbor.lastScale,3):
-						self.eat(neighbor) 			
-
 		self.changeAccel(accel_x, accel_y)
 
+		# eat
+		neighbors = self.getNeighbors()
+		for neighbor in neighbors:
+			if neighbor.isA( 'Feeder' ):
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if norm <= max(neighbor.lastScale,3):
+					self.eat(neighbor)
+		
 		# self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
 		self.addEnergy(-0.01)
 		self.adjustSize()
@@ -1352,30 +1276,6 @@ class Predator( breve.Mobile ):
 
 
 	# GP and PUSH
-	def alignment(self):
-		neighbors = self.getNeighbors()
-		a_x = 0
-		a_y = 0
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
-					a_x += neighbor.vel_x
-					a_y += neighbor.vel_y
-					count += 1
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-		if self.controller.repr == 2:
-			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
-			return
-		return [a_x, a_y]
-
 	def cohesion(self):
 		neighbors = self.getNeighbors()
 		c_x = 0
@@ -1399,6 +1299,30 @@ class Predator( breve.Mobile ):
 			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
 			return
 		return [c_x, c_y]
+
+	def alignment(self):
+		neighbors = self.getNeighbors()
+		a_x = 0
+		a_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
+				if norm < self.controller.socialZone:
+					a_x += neighbor.vel_x
+					a_y += neighbor.vel_y
+					count += 1
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			a_x -= self.vel_x
+			a_y -= self.vel_y
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
+			return
+		return [a_x, a_y]
 
 	def separation(self):
 		neighbors = self.getNeighbors()
@@ -1489,75 +1413,11 @@ class Predator( breve.Mobile ):
 
 	# GA
 	def calculateAccel(self):
-		neighbors = self.getNeighbors()
-		t_x = 0
-		t_y = 0
-		s_x = 0
-		s_y = 0
-		a_x = 0
-		a_y = 0
-		c_x = 0
-		c_y = 0
-		dist = 99999
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				#target
-				if norm < dist:
-					dist = norm
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y
-
-				if norm < self.controller.separationZone:
-					self.eat(neighbor) 
-
-			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if 0 < norm < self.controller.separationZone:
-					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
-
-				if norm < self.controller.socialZone:
-					# alignment
-					a_x += neighbor.vel_x
-					a_y += neighbor.vel_y
-					# cohesion
-					c_x += neighbor.pos_x
-					c_y += neighbor.pos_y
-					count += 1
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-			c_x /= count
-			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
-
-		rand_x = random.uniform(0, 1)
-		rand_y = random.uniform(0, 1)
-
-		'''if dist == 99999:
-			feeders = breve.allInstances( "Prey" )
-			for neighbor in feeders:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm < dist:
-					dist = norm
-					t_x = neighbor.pos_x-self.pos_x
-					t_y = neighbor.pos_y-self.pos_y'''
-
-		c_x, c_y = self.normalizeVector(c_x, c_y)
-		a_x, a_y = self.normalizeVector(a_x, a_y)
-		s_x, s_y = self.normalizeVector(s_x, s_y)
-		t_x, t_y = self.normalizeVector(t_x, t_y)
-		rand_x, rand_y = self.normalizeVector(rand_x, rand_y)
+		c_x, c_y = self.cohesion()
+		a_x, a_y = self.alignment()
+		s_x, s_y = self.separation()
+		t_x, t_y = self.target()
+		rand_x, rand_y = self.randV()
 
 		accel_x = self.geno[0]*c_x+self.geno[1]*a_x+self.geno[2]*s_x+self.geno[3]*t_x+self.geno[4]*rand_x
 		accel_y = self.geno[0]*c_y+self.geno[1]*a_y+self.geno[2]*s_y+self.geno[3]*t_y+self.geno[4]*rand_y
@@ -1585,16 +1445,16 @@ class Predator( breve.Mobile ):
 					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
 				accel_x = accel.x
 				accel_y = accel.y
-			
-			# eat
-			neighbors = self.getNeighbors()
-			for neighbor in neighbors:
-				if neighbor.isA( 'Prey' ) and neighbor.isAlive:
-					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-					if norm < self.controller.separationZone:
-						self.eat(neighbor) 			
-		
+
 		self.changeAccel(accel_x, accel_y)
+
+		# eat
+		neighbors = self.getNeighbors()
+		for neighbor in neighbors:
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
+				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+				if norm < self.controller.separationZone:
+					self.eat(neighbor)
 
 		#self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
 		self.addEnergy(-0.01)
