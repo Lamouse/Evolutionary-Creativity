@@ -35,7 +35,7 @@ class Swarm( breve.Control ):
 		self.minY = -100
 		self.maxY = 100
 		self.targetZone = 50
-		self.socialZone = 20
+		self.socialZone = 10
 		self.separationZone = 2
 
 		# Feeder

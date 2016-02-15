@@ -585,9 +585,9 @@ class Prey( breve.Mobile ):
 
 	def setNewColor( self ):
 		if self.gener == 'f':
-			self.setColor( breve.vector( 0.5, 1, 0.5) )
+			self.setColor( breve.vector( 0.5, 0.5, 1 ) )
 		else:
-			self.setColor( breve.vector( 0, 1, 0 ) )
+			self.setColor( breve.vector( 0, 0, 1 ) )
 
 	def changePos(self, x, y):
 		self.pos_x = x
