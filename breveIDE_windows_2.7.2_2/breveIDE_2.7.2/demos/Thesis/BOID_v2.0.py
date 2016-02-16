@@ -18,7 +18,7 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Representation
-		self.repr = 0
+		self.repr = 2
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -875,7 +875,7 @@ class Prey( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					c_x += neighbor.pos_x
 					c_y += neighbor.pos_y
 					count += 1
@@ -883,8 +883,6 @@ class Prey( breve.Mobile ):
 		if count > 0:
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
@@ -899,7 +897,7 @@ class Prey( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
 					count += 1
@@ -907,9 +905,7 @@ class Prey( breve.Mobile ):
 		if count > 0:
 			a_x /= count
 			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
+			
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
 			return
@@ -925,10 +921,16 @@ class Prey( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count += 1
+
+		if count > 0:
+			s_x /= count
+			s_y /= count
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(s_x, s_y, 0) )
@@ -968,16 +970,23 @@ class Prey( breve.Mobile ):
 		neighbors = self.getNeighbors()
 		f_x = 0
 		f_y = 0
+		count = 0
 
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
-				if norm > 0:
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					f_x += v_x*self.lastScale**2
-					f_y += v_y*self.lastScale**2
+				if 0 < norm:
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					f_x += v_x/norm
+					f_y += v_y/norm
+					count += 1
+
+		if count > 0:
+			f_x /= count
+			f_y /= count
 		
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(f_x, f_y, 0) )
@@ -1038,6 +1047,8 @@ class Prey( breve.Mobile ):
 		c_y = 0
 		dist = 99999
 		count = 0
+		count2 = 0
+		count3 = 0
 		for neighbor in neighbors:
 			if neighbor.isA( 'Feeder' ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
@@ -1055,12 +1066,14 @@ class Prey( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count2 += 1
 
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					# alignment
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
@@ -1073,21 +1086,27 @@ class Prey( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
 				if 0 < norm:
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					f_x += v_x*self.lastScale**2
-					f_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					f_x += v_x/norm
+					f_y += v_y/norm
+					count3 += 1
 
 		if count > 0:
 			a_x /= count
 			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
 
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
+
+		if count2 > 0:
+			s_x /= count2
+			s_y /= count2
+
+		if count3 > 0:
+			f_x /= count3
+			f_y /= count3
 
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
@@ -1364,7 +1383,7 @@ class Predator( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					c_x += neighbor.pos_x
 					c_y += neighbor.pos_y
 					count += 1
@@ -1372,8 +1391,6 @@ class Predator( breve.Mobile ):
 		if count > 0:
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
@@ -1388,7 +1405,7 @@ class Predator( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
 					count += 1
@@ -1396,8 +1413,7 @@ class Predator( breve.Mobile ):
 		if count > 0:
 			a_x /= count
 			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
+			
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
@@ -1410,14 +1426,20 @@ class Predator( breve.Mobile ):
 		s_y = 0
 		count = 0
 		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count += 1
+
+		if count > 0:
+			s_x /= count
+			s_y /= count
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(s_x, s_y, 0) )
@@ -1504,6 +1526,7 @@ class Predator( breve.Mobile ):
 		c_y = 0
 		dist = 99999
 		count = 0
+		count2 = 0
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
@@ -1520,12 +1543,14 @@ class Predator( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count2 += 1
 
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					# alignment
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
@@ -1537,14 +1562,14 @@ class Predator( breve.Mobile ):
 		if count > 0:
 			a_x /= count
 			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
+			
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
 
+		if count2 > 0:
+			s_x /= count2
+			s_y /= count2
+			
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
 
