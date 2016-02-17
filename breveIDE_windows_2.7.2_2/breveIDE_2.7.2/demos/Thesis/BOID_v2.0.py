@@ -11,6 +11,11 @@ class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
 
+		# Random Number Generator
+		random.seed( 5 )
+		self.setRandomSeed( 5 )
+		self.setRandomSeedFromDevRandom()
+
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
@@ -18,7 +23,7 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Representation
-		self.repr = 2
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -1311,10 +1316,10 @@ class Predator( breve.Mobile ):
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
-
+			
 	def changeVel(self, x, y):
 		norm = (x**2 + y**2)**0.5
-		if  norm > self.maxVel:
+		if norm > self.maxVel:
 			x = x/norm * self.maxVel
 			y = y/norm * self.maxVel
 		self.vel_x = x
