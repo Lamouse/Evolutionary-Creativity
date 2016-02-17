@@ -14,7 +14,7 @@ class Swarm( breve.Control ):
 		# Random Number Generator
 		random.seed( 5 )
 		self.setRandomSeed( 5 )
-		self.setRandomSeedFromDevRandom()
+		# self.setRandomSeedFromDevRandom()
 
 		self.showCorpse = True
 		self.isToLoad = False
@@ -55,8 +55,8 @@ class Swarm( breve.Control ):
 		self.pollPredators = breve.objectList()
 
 		# Generation
-		self.maxGeneration = 5000
-		self.current_generation = 0
+		self.maxIteraction = 5000
+		self.current_iteraction = 0
 		self.save_generation = 25
 		self.breeding_season = 50
 		self.breeding_inc = 0.5
@@ -488,12 +488,22 @@ class Swarm( breve.Control ):
 
 
 	def iterate( self ):
-		if self.current_generation < self.maxGeneration:
+		if self.current_iteraction < self.maxIteraction:
+			# to record the simulation in a movie
 			if self.isToRecord and not self.movie:
 				suffix = self.controller.reprType[self.controller.repr].upper()
 				self.movie = breve.createInstances( breve.Movie, 1 )
 				self.movie.record( 'BOID_'+suffix+'.mpeg' )
 
+			# remove dead agents
+			for prey in breve.allInstances( "Prey" ):
+				if prey.isAlive and prey.energy <= 0:
+					prey.dropDead(self.controller.showCorpse)
+			for predator in breve.allInstances( "Predator" ):
+				if predator.isAlive and predator.energy <= 0:
+					predator.dropDead(self.controller.showCorpse)
+
+			# update neighborhoods
 			self.updateNeighbors()
 
 			# moviment of Prey
@@ -529,9 +539,9 @@ class Swarm( breve.Control ):
 					breve.deleteInstances( corpse )
 
 
-			self.current_generation += 1
+			self.current_iteraction += 1
 			# breeding
-			if self.current_generation % self.breeding_season == 0:
+			if self.current_iteraction % self.breeding_season == 0:
 				# preys
 				tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
 				if breve.length(self.pollPreys) < tam_prey*2:
@@ -559,12 +569,12 @@ class Swarm( breve.Control ):
 					self.createPredators(math.floor(0.05*self.initialNumPredators))
 			
 			# checkpoint
-			if self.isToSave and self.current_generation % (self.breeding_season*self.save_generation) == 0:
+			if self.isToSave and self.current_iteraction % (self.breednig_season*self.save_generation) == 0:
 				self.save_data()
 
 
 			# to display on screen
-			self.setDisplayText("Generation: "+str((int) (math.ceil(self.current_generation/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
+			self.setDisplayText("Generation: "+str((int) (math.ceil(self.current_iteraction/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Preys Alive: "+str(self.numPreys), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 4, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Predators Alive: "+str(self.numPredators), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Dead Preys: "+str(self.numDeadPreys), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
@@ -1137,10 +1147,6 @@ class Prey( breve.Mobile ):
 		return [accel_x, accel_y]
 
 	def fly(self):
-		#if self.energy < 0 or self.age > 300:
-		if self.energy <= 0:
-			self.dropDead(self.controller.showCorpse)
-
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -1163,15 +1169,15 @@ class Prey( breve.Mobile ):
 				accel_x = accel.x
 				accel_y = accel.y
 
-		self.changeAccel(accel_x, accel_y)
+			# eat
+			neighbors = self.getNeighbors()
+			for neighbor in neighbors:
+				if neighbor.isA( 'Feeder' ):
+					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+					if norm <= max(neighbor.lastScale,3):
+						self.eat(neighbor)
 
-		# eat
-		neighbors = self.getNeighbors()
-		for neighbor in neighbors:
-			if neighbor.isA( 'Feeder' ):
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm <= max(neighbor.lastScale,3):
-					self.eat(neighbor)
+		self.changeAccel(accel_x, accel_y)
 		
 		# self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
 		self.addEnergy(-0.01)
@@ -1598,10 +1604,6 @@ class Predator( breve.Mobile ):
 		return [accel_x, accel_y]
 
 	def fly(self):
-		#if self.energy < 0.5 or self.age > 300:
-		if self.energy <= 0:
-			self.dropDead(self.controller.showCorpse)
-
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -1624,15 +1626,15 @@ class Predator( breve.Mobile ):
 				accel_x = accel.x
 				accel_y = accel.y
 
-		self.changeAccel(accel_x, accel_y)
+			# eat
+			neighbors = self.getNeighbors()
+			for neighbor in neighbors:
+				if neighbor.isA( 'Prey' ) and neighbor.isAlive:
+					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
+					if norm < self.controller.separationZone:
+						self.eat(neighbor)
 
-		# eat
-		neighbors = self.getNeighbors()
-		for neighbor in neighbors:
-			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
-				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
-				if norm < self.controller.separationZone:
-					self.eat(neighbor)
+		self.changeAccel(accel_x, accel_y)
 
 		#self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
 		self.addEnergy(-0.01)
