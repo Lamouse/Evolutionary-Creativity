@@ -11,6 +11,11 @@ class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
 
+		# Random Number Generator
+		random.seed( 5 )
+		self.setRandomSeed( 5 )
+		# self.setRandomSeedFromDevRandom()
+
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
@@ -50,8 +55,8 @@ class Swarm( breve.Control ):
 		self.pollPredators = breve.objectList()
 
 		# Generation
-		self.maxGeneration = 5000
-		self.current_generation = 0
+		self.maxIteraction = 5000
+		self.current_iteraction = 0
 		self.save_generation = 25
 		self.breeding_season = 50
 		self.breeding_inc = 0.5
@@ -188,7 +193,7 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, geno, prey.lastScale)
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, geno, prey.lastScale)
 				cPickle.dump(temp_prey, f)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -197,7 +202,7 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, prey.radius, geno, prey.lastScale)
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, geno, prey.lastScale)
 			cPickle.dump(temp_prey, f)
 		f.close()
 
@@ -211,7 +216,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, predator.radius, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, geno, predator.lastScale)
 				cPickle.dump(temp_predator, f)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -220,7 +225,7 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, predator.radius, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, geno, predator.lastScale)
 			cPickle.dump(temp_predator, f)
 		f.close()
 
@@ -243,8 +248,9 @@ class Swarm( breve.Control ):
 		while True:
 			try:
 				data_prey = cPickle.load(f)
+				
 				temp_prey = breve.createInstances( breve.Prey, 1)
-				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.gener, data_prey.radius, data_prey.geno, data_prey.lastScale)
+				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.gener, data_prey.geno, data_prey.lastScale)
 				if not temp_prey.isAlive:
 					temp_prey.dropDead(False)
 			except EOFError:
@@ -257,7 +263,7 @@ class Swarm( breve.Control ):
 			try:
 				data_predator = cPickle.load(f)
 				temp_predator = breve.createInstances( breve.Predator, 1)
-				temp_predator.initializeFromData(data_predator.pos_x, data_predator.pos_y, data_predator.vel_x, data_predator.vel_y, data_predator.accel_x, data_predator.accel_y, data_predator.energy, data_predator.age, data_predator.isAlive, data_predator.maxVel, data_predator.maxAccel, data_predator.gener, data_predator.radius, data_predator.geno, data_predator.lastScale)
+				temp_predator.initializeFromData(data_predator.pos_x, data_predator.pos_y, data_predator.vel_x, data_predator.vel_y, data_predator.accel_x, data_predator.accel_y, data_predator.energy, data_predator.age, data_predator.isAlive, data_predator.maxVel, data_predator.maxAccel, data_predator.gener, data_predator.geno, data_predator.lastScale)
 				if not temp_predator.isAlive:
 					temp_predator.dropDead(False)
 			except EOFError:
@@ -483,12 +489,22 @@ class Swarm( breve.Control ):
 
 
 	def iterate( self ):
-		if self.current_generation < self.maxGeneration:
+		if self.current_iteraction < self.maxIteraction:
+			# to record the simulation in a movie
 			if self.isToRecord and not self.movie:
 				suffix = self.controller.reprType[self.controller.repr].upper()
 				self.movie = breve.createInstances( breve.Movie, 1 )
 				self.movie.record( 'BOID_'+suffix+'.mpeg' )
 
+			# remove dead agents
+			for prey in breve.allInstances( "Prey" ):
+				if prey.isAlive and prey.energy <= 0:
+					prey.dropDead(self.controller.showCorpse)
+			for predator in breve.allInstances( "Predator" ):
+				if predator.isAlive and predator.energy <= 0:
+					predator.dropDead(self.controller.showCorpse)
+
+			# update neighborhoods
 			self.updateNeighbors()
 
 			# moviment of Prey
@@ -524,9 +540,9 @@ class Swarm( breve.Control ):
 					breve.deleteInstances( corpse )
 
 
-			self.current_generation += 1
+			self.current_iteraction += 1
 			# breeding
-			if self.current_generation % self.breeding_season == 0:
+			if self.current_iteraction % self.breeding_season == 0:
 				# preys
 				tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
 				if breve.length(self.pollPreys) < tam_prey*2:
@@ -544,6 +560,7 @@ class Swarm( breve.Control ):
 					breve.createInstances( breve.Predator, new_preds).dropDead(False)
 				for i in range(tam_predator):
 					self.evolutionayAlgorithm(self.pollPredators)
+					
 			# immigrants
 			else:
 				if self.numPreys < 0.2*self.initialNumPreys:
@@ -554,12 +571,12 @@ class Swarm( breve.Control ):
 					self.createPredators(math.floor(0.05*self.initialNumPredators))
 			
 			# checkpoint
-			if self.isToSave and self.current_generation % (self.breeding_season*self.save_generation) == 0:
+			if self.isToSave and self.current_iteraction % (self.breeding_season*self.save_generation) == 0:
 				self.save_data()
 
 
 			# to display on screen
-			self.setDisplayText("Generation: "+str((int) (math.ceil(self.current_generation/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
+			self.setDisplayText("Generation: "+str((int) (math.ceil(self.current_iteraction/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Preys Alive: "+str(self.numPreys), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 4, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Predators Alive: "+str(self.numPredators), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Dead Preys: "+str(self.numDeadPreys), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
@@ -609,7 +626,7 @@ class Feeder (breve.Stationary ):
 		self.lastScale = lastScale
 		self.rapid = rapid
 		self.VirtualEnergy = VirtualEnergy
-		self.shape.scale(breve.vector( lastScale, lastScale, lastScale) )
+		self.shape.scale(breve.vector( lastScale, lastScale, lastScale) )  
 
 	def rapidGrow(self):
 		if self.rapid:
@@ -713,7 +730,6 @@ class Prey( breve.Mobile ):
 		self.maxVel = 0.5
 		self.maxAccel = 2
 		self.gener = 'm'
-		self.radius = 2
 		self.geno = None
 
 		# PUSH
@@ -761,23 +777,24 @@ class Prey( breve.Mobile ):
 		elif self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, radius, geno, lastScale):
-		self.maxVel = maxVel
-		self.maxAccel = maxAccel
-
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
 
-		# self.energy = 1.5
-		# self.lastScale = lastScale
-		self.age = 0
+		self.energy = energy
+		self.age = age
 		self.isAlive = isAlive
+		self.maxVel = maxVel
+		self.maxAccel = maxAccel
 		self.gener = gener
-		self.radius = radius
-		
-		# self.energy = energy
-		# self.adjustSize()
+		self.lastScale = lastScale
+
+		breve.deleteInstances( self.shape )
+		self.shape = breve.createInstances( breve.myCustomShape, 1 )
+		self.setShape( self.shape )
+		self.shape.scale( breve.vector( lastScale , 1, lastScale ) )
+
 		self.setNewColor()
 		
 		if self.controller.repr == 2:
@@ -829,9 +846,13 @@ class Prey( breve.Mobile ):
 		return self.energy
 
 	def eat( self, feeder ):
-		if self.energy <= 0.90 and feeder.energy > 0:
-			self.addEnergy(0.1)
-			feeder.addEnergy(-0.1)
+		if feeder.energy > 0:
+			if self.energy <= 0.90:
+				self.addEnergy(0.1)
+				feeder.addEnergy(-0.1)
+			else:
+				feeder.addEnergy(self.energy-1)
+				self.energy = 1.0
 	
 	def dropDead(self, corpse=True):
 		if corpse:
@@ -863,30 +884,6 @@ class Prey( breve.Mobile ):
 
 
 	# GP and PUSH
-	def alignment(self):
-		neighbors = self.getNeighbors()
-		a_x = 0
-		a_y = 0
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
-				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
-					a_x += neighbor.vel_x
-					a_y += neighbor.vel_y
-					count += 1
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-		if self.controller.repr == 2:
-			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
-			return
-		return [a_x, a_y]
-
 	def cohesion(self):
 		neighbors = self.getNeighbors()
 		c_x = 0
@@ -895,7 +892,7 @@ class Prey( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					c_x += neighbor.pos_x
 					c_y += neighbor.pos_y
 					count += 1
@@ -903,13 +900,33 @@ class Prey( breve.Mobile ):
 		if count > 0:
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
 			return
 		return [c_x, c_y]
+
+	def alignment(self):
+		neighbors = self.getNeighbors()
+		a_x = 0
+		a_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
+				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
+				if 0 < norm < self.controller.socialZone:
+					a_x += neighbor.vel_x
+					a_y += neighbor.vel_y
+					count += 1
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
+			return
+		return [a_x, a_y]
 
 	def separation(self):
 		neighbors = self.getNeighbors()
@@ -921,10 +938,16 @@ class Prey( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count += 1
+
+		if count > 0:
+			s_x /= count
+			s_y /= count
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(s_x, s_y, 0) )
@@ -964,16 +987,23 @@ class Prey( breve.Mobile ):
 		neighbors = self.getNeighbors()
 		f_x = 0
 		f_y = 0
-		dist = 99999
+		count = 0
 
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
-				if norm < dist:
-					dist = norm
-					f_x = self.pos_x - neighbor.pos_x
-					f_y = self.pos_y - neighbor.pos_y
+				if 0 < norm:
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					f_x += v_x/norm
+					f_y += v_y/norm
+					count += 1
+
+		if count > 0:
+			f_x /= count
+			f_y /= count
 		
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(f_x, f_y, 0) )
@@ -1033,8 +1063,9 @@ class Prey( breve.Mobile ):
 		c_x = 0
 		c_y = 0
 		dist = 99999
-		dist2 = 99999
 		count = 0
+		count2 = 0
+		count3 = 0
 		for neighbor in neighbors:
 			if neighbor.isA( 'Feeder' ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
@@ -1052,12 +1083,14 @@ class Prey( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count2 += 1
 
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					# alignment
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
@@ -1069,21 +1102,28 @@ class Prey( breve.Mobile ):
 			elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#flee
-				if norm < dist2:
-					dist2 = norm
-					f_x = (self.pos_x - neighbor.pos_x)
-					f_y = (self.pos_y - neighbor.pos_y)
+				if 0 < norm:
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					f_x += v_x/norm
+					f_y += v_y/norm
+					count3 += 1
 
 		if count > 0:
 			a_x /= count
 			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
 
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
+
+		if count2 > 0:
+			s_x /= count2
+			s_y /= count2
+
+		if count3 > 0:
+			f_x /= count3
+			f_y /= count3
 
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
@@ -1137,18 +1177,14 @@ class Prey( breve.Mobile ):
 				if neighbor.isA( 'Feeder' ):
 					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 					if norm <= max(neighbor.lastScale,3):
-						self.eat(neighbor) 			
+						self.eat(neighbor)
 
 		self.changeAccel(accel_x, accel_y)
-
+		
 		# self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
 		self.addEnergy(-0.01)
 		self.adjustSize()
 		self.age += 1
-
-		#if self.energy < 0 or self.age > 300:
-		if self.energy <= 0:
-			self.dropDead(self.controller.showCorpse)
 
 	def cross( self, v1, v2 ):
 		x = ( ( v1.y * v2.z ) - ( v1.z * v2.y ) )
@@ -1199,7 +1235,6 @@ class Predator( breve.Mobile ):
 		self.maxVel = 0.7
 		self.maxAccel = 2
 		self.gener = 'm'
-		self.radius = 2
 		self.geno = None
 		
 		# PUSH
@@ -1246,23 +1281,24 @@ class Predator( breve.Mobile ):
 		elif self.controller.reprType == 2:
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, radius, geno, lastScale):
-		self.maxVel = maxVel
-		self.maxAccel = maxAccel
-
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
 
-		# self.energy = 1.5
-		# self.lastScale = lastScale
-		self.age = 0
+		self.energy = energy
+		self.age = age
 		self.isAlive = isAlive
+		self.maxVel = maxVel
+		self.maxAccel = maxAccel
 		self.gener = gener
-		self.radius = radius
-		
-		# self.energy = energy
-		# self.adjustSize()
+		self.lastScale = lastScale
+
+		breve.deleteInstances( self.shape )
+		self.shape = breve.createInstances( breve.myCustomShape, 1 )
+		self.setShape( self.shape )
+		self.shape.scale( breve.vector( lastScale , 1, lastScale ) )
+
 		self.setNewColor()
 		
 		if self.controller.repr == 2:
@@ -1288,10 +1324,10 @@ class Predator( breve.Mobile ):
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
-
+			
 	def changeVel(self, x, y):
 		norm = (x**2 + y**2)**0.5
-		if  norm > self.maxVel:
+		if norm > self.maxVel:
 			x = x/norm * self.maxVel
 			y = y/norm * self.maxVel
 		self.vel_x = x
@@ -1352,30 +1388,6 @@ class Predator( breve.Mobile ):
 
 
 	# GP and PUSH
-	def alignment(self):
-		neighbors = self.getNeighbors()
-		a_x = 0
-		a_y = 0
-		count = 0
-		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
-				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
-					a_x += neighbor.vel_x
-					a_y += neighbor.vel_y
-					count += 1
-
-		if count > 0:
-			a_x /= count
-			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
-		if self.controller.repr == 2:
-			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
-			return
-		return [a_x, a_y]
-
 	def cohesion(self):
 		neighbors = self.getNeighbors()
 		c_x = 0
@@ -1384,7 +1396,7 @@ class Predator( breve.Mobile ):
 		for neighbor in neighbors:
 			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
 				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					c_x += neighbor.pos_x
 					c_y += neighbor.pos_y
 					count += 1
@@ -1392,13 +1404,34 @@ class Predator( breve.Mobile ):
 		if count > 0:
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(c_x, c_y, 0) )
 			return
 		return [c_x, c_y]
+
+	def alignment(self):
+		neighbors = self.getNeighbors()
+		a_x = 0
+		a_y = 0
+		count = 0
+		for neighbor in neighbors:
+			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				norm = (self.pos_x-neighbor.pos_x)**2+(self.pos_y-neighbor.pos_y)**2
+				if 0 < norm < self.controller.socialZone:
+					a_x += neighbor.vel_x
+					a_y += neighbor.vel_y
+					count += 1
+
+		if count > 0:
+			a_x /= count
+			a_y /= count
+			
+
+		if self.controller.repr == 2:
+			self.pushInterpreter.pushVector( breve.vector(a_x, a_y, 0) )
+			return
+		return [a_x, a_y]
 
 	def separation(self):
 		neighbors = self.getNeighbors()
@@ -1406,14 +1439,20 @@ class Predator( breve.Mobile ):
 		s_y = 0
 		count = 0
 		for neighbor in neighbors:
-			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count += 1
+
+		if count > 0:
+			s_x /= count
+			s_y /= count
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(s_x, s_y, 0) )
@@ -1500,6 +1539,7 @@ class Predator( breve.Mobile ):
 		c_y = 0
 		dist = 99999
 		count = 0
+		count2 = 0
 		for neighbor in neighbors:
 			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
@@ -1516,12 +1556,14 @@ class Predator( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				if 0 < norm < self.controller.separationZone:
 					# separation
-					v_x = (self.pos_x - neighbor.pos_x) / norm**2
-					v_y = (self.pos_y - neighbor.pos_y) / norm**2
-					s_x += v_x*self.lastScale**2
-					s_y += v_y*self.lastScale**2
+					v_x = self.pos_x-neighbor.pos_x
+					v_y = self.pos_y-neighbor.pos_y
+					v_x, v_y = self.normalizeVector(v_x, v_y)
+					s_x += v_x/norm
+					s_y += v_y/norm
+					count2 += 1
 
-				if norm < self.controller.socialZone:
+				if 0 < norm < self.controller.socialZone:
 					# alignment
 					a_x += neighbor.vel_x
 					a_y += neighbor.vel_y
@@ -1533,14 +1575,14 @@ class Predator( breve.Mobile ):
 		if count > 0:
 			a_x /= count
 			a_y /= count
-			a_x -= self.vel_x
-			a_y -= self.vel_y
-
+			
 			c_x /= count
 			c_y /= count
-			c_x -= self.pos_x
-			c_y -= self.pos_y
 
+		if count2 > 0:
+			s_x /= count2
+			s_y /= count2
+			
 		rand_x = random.uniform(0, 1)
 		rand_y = random.uniform(0, 1)
 
@@ -1585,25 +1627,21 @@ class Predator( breve.Mobile ):
 					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
 				accel_x = accel.x
 				accel_y = accel.y
-			
+
 			# eat
 			neighbors = self.getNeighbors()
 			for neighbor in neighbors:
 				if neighbor.isA( 'Prey' ) and neighbor.isAlive:
 					norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 					if norm < self.controller.separationZone:
-						self.eat(neighbor) 			
-		
+						self.eat(neighbor)
+
 		self.changeAccel(accel_x, accel_y)
 
 		#self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
 		self.addEnergy(-0.01)
 		self.adjustSize()
 		self.age += 1
-
-		#if self.energy < 0.5 or self.age > 300:
-		if self.energy <= 0:
-			self.dropDead(self.controller.showCorpse)
 
 	def cross( self, v1, v2 ):
 		x = ( ( v1.y * v2.z ) - ( v1.z * v2.y ) )
@@ -1655,7 +1693,7 @@ breve.myCustomShape = myCustomShape
 
 # auxiliar classes
 class Data_mobile:
-	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, radius, geno, lastScale):
+	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.pos_x = pos_x
 		self.pos_y = pos_y
 		self.vel_x = vel_x
@@ -1672,7 +1710,6 @@ class Data_mobile:
 		self.maxVel = maxVel
 		self.maxAccel = maxAccel
 		self.gener = gener
-		self.radius = radius
 		self.geno = geno
 		
 		self.lastScale = lastScale

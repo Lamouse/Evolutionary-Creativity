@@ -179,7 +179,6 @@ class Swarm( breve.Control ):
 		# feeders
 		f =  open('data/feeder_'+suffix+'.pkl', 'wb')
 		for feeder in breve.allInstances( "Feeder" ):
-			feeder.adjustSize()
 			temp_feeder = Data_Stationary(feeder.pos_x, feeder.pos_y, feeder.energy, feeder.lastScale, feeder.rapid, feeder.VirtualEnergy)
 			cPickle.dump(temp_feeder, f)
 		f.close()
@@ -561,6 +560,7 @@ class Swarm( breve.Control ):
 					breve.createInstances( breve.Predator, new_preds).dropDead(False)
 				for i in range(tam_predator):
 					self.evolutionayAlgorithm(self.pollPredators)
+					
 			# immigrants
 			else:
 				if self.numPreys < 0.2*self.initialNumPreys:
