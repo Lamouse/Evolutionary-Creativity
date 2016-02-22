@@ -5,3 +5,4 @@ features added:
 	Motion rules fixed
 	Save/Load functions completed
 	Random Seed Generator fixed
+	Wrap neighborhood boundary

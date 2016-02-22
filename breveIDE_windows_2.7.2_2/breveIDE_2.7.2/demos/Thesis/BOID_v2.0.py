@@ -39,13 +39,14 @@ class Swarm( breve.Control ):
 		self.maxX = 200
 		self.minY = -100
 		self.maxY = 100
-		self.targetZone = 50
+
+		self.targetZone = 25
 		self.socialZone = 10
 		self.separationZone = 2
 
 		# Feeder
 		self.feederMinDistance = 25
-		self.maxFoodSupply = 200
+		self.maxFoodSupply = 300
 		self.minCreatedFoodSupply = 7
 		self.maxCreatedFoodSupply = 15
 		self.totalFoodSupply = 0
@@ -61,7 +62,7 @@ class Swarm( breve.Control ):
 		self.breeding_season = 50
 		self.breeding_inc = 0.5
 		self.max_pop_predators = 0.6
-		self.prob_mutation = 0.05
+		self.prob_mutation = 0.1
 		self.initial_depth = 3
 
 		# Other thing
@@ -165,6 +166,8 @@ class Swarm( breve.Control ):
 		self.setDisplayTextColor( breve.vector( 1, 1, 1 ) )
 		self.pointCamera( breve.vector( 0, 0, 0 ), breve.vector( 0, 0, 300 ) )
 		self.setIterationStep(1.0)
+		self.enableDrawEveryFrame()
+		self.enableSmoothDrawing()
 
 		if not self.isToLoad:
 			self.addRandomFeederIfNecessary()
@@ -319,11 +322,36 @@ class Swarm( breve.Control ):
 			newBird1.geno, newBird2.geno = self.tree_crossover(parent1.geno, parent2.geno)
 
 		elif self.controller.repr == 2:
-			newBird1.pushInterpreter.clearStacks()
+			'''newBird1.pushInterpreter.clearStacks()
 			newBird1.pushCode.crossover( parent1.pushCode, parent2.pushCode, newBird1.pushInterpreter )
 
 			newBird2.pushInterpreter.clearStacks()
-			newBird2.pushCode.crossover( parent2.pushCode, parent1.pushCode, newBird2.pushInterpreter )
+			newBird2.pushCode.crossover( parent2.pushCode, parent1.pushCode, newBird2.pushInterpreter )'''
+
+			self.crossover_push(newBird1, parent1, parent2)
+			self.crossover_push(newBird2, parent2, parent1)
+
+	def crossover_push(self, newBird, parent1, parent2):
+		c3 = None
+		c2 = None
+		c1 = None
+
+		c1 = breve.createInstances( breve.PushProgram, 1 )
+		c2 = breve.createInstances( breve.PushProgram, 1 )
+		c3 = breve.createInstances( breve.PushProgram, 1 )
+		parent1.pushInterpreter.copyCodeStackTop( c1 )
+		if ( c1.getSize() > 0 ):
+			parent2.pushInterpreter.copyCodeStackTop( c2 )
+			if ( c2.getSize() > 0 ):
+				c3.crossover( c1, c2, newBird.pushInterpreter )
+				newBird.pushInterpreter.pushCode( c3 )
+
+			else:
+				newBird.pushInterpreter.pushCode( c1 )
+
+		breve.deleteInstances( c1 )
+		breve.deleteInstances( c2 )
+		breve.deleteInstances( c3 )
 
 	def mutate(self, newBird):
 		if self.controller.repr == 0:
@@ -331,7 +359,7 @@ class Swarm( breve.Control ):
 			for i in range(len(newBird.geno)):
 				prob = random.random()
 				if prob <= self.prob_mutation:
-					newBird.geno[i] += random.uniform(-0.5,0.5)
+					newBird.geno[i] += random.uniform(-0.5, 0.5)
 
 		elif self.controller.repr == 1:
 			prob = random.random()
@@ -339,8 +367,35 @@ class Swarm( breve.Control ):
 				self.tree_mutation(newBird.geno, newBird.getType())
 
 		elif self.controller.repr == 2:
-			prob = random.randint( 0, 15 )
-			newBird.pushCode.mutate( newBird.pushInterpreter, prob )
+			'''prob = random.random()
+			if prob <= self.prob_mutation:
+				prob = random.randint( 0, 10)
+				newBird.pushCode.mutate( newBird.pushInterpreter, prob )'''
+
+			prob = random.random()
+			if prob <= self.prob_mutation:
+				size = random.randint( 0, 10)
+				if ( size > 0 ):
+					c = breve.createInstances( breve.PushProgram, 1 )
+					newBird.pushInterpreter.copyCodeStackTop( c )
+					c.mutate( newBird.pushInterpreter, size )
+					newBird.pushInterpreter.popIntegerStack()
+					newBird.pushInterpreter.popCodeStack()
+					newBird.pushInterpreter.pushCode( c )
+					breve.deleteInstances( c )
+
+			'''c = None
+			size = 0
+
+			size = ( newBird.pushInterpreter.getIntegerStackTop() % 15 )
+			if ( size > 0 ):
+				c = breve.createInstances( breve.PushProgram, 1 )
+				newBird.pushInterpreter.copyCodeStackTop( c )
+				c.mutate( newBird.pushInterpreter, size )
+				newBird.pushInterpreter.popIntegerStack()
+				newBird.pushInterpreter.popCodeStack()
+				newBird.pushInterpreter.pushCode( c )
+				breve.deleteInstances( c )'''
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
@@ -640,6 +695,15 @@ class Feeder (breve.Stationary ):
 			self.adjustSize()
 
 	def changePos(self, x, y):
+		if x < self.controller.minX-10:
+			x += (self.controller.maxX+10)-(self.controller.minX-10)
+		elif x > self.controller.maxX+10:
+			x -= (self.controller.maxX+10)-(self.controller.minX-10)
+		if y < self.controller.minY-10:
+			y += (self.controller.maxY+10)-(self.controller.minY-10)
+		elif y > self.controller.maxY+10:
+			y -= (self.controller.maxY+10)-(self.controller.minY-10)
+			
 		self.pos_x = x
 		self.pos_y = y
 		self.move( breve.vector(x,y,0) )
@@ -751,13 +815,13 @@ class Prey( breve.Mobile ):
 		self.pushInterpreter.addInstruction( self, 'target' )
 		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
 		self.pushInterpreter.addInstruction( self, 'currentVelocity' )
-		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
+		#self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
 		self.pushInterpreter.addInstruction( self, 'randV' )
 		self.pushInterpreter.addInstruction( self, 'flee' )
-		self.pushInterpreter.setEvaluationLimit( 75 )
-		self.pushInterpreter.setListLimit( 75 )
+		self.pushInterpreter.setEvaluationLimit( 50 )
+		self.pushInterpreter.setListLimit( 50 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 100 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 
 
 	def initializeRandomly( self, x, y, gener):
@@ -810,6 +874,15 @@ class Prey( breve.Mobile ):
 			self.setColor( breve.vector( 0, 1, 0 ) )
 
 	def changePos(self, x, y):
+		if x < self.controller.minX-10:
+			x += (self.controller.maxX+10)-(self.controller.minX-10)
+		elif x > self.controller.maxX+10:
+			x -= (self.controller.maxX+10)-(self.controller.minX-10)
+		if y < self.controller.minY-10:
+			y += (self.controller.maxY+10)-(self.controller.minY-10)
+		elif y > self.controller.maxY+10:
+			y -= (self.controller.maxY+10)-(self.controller.minY-10)
+
 		self.pos_x = x
 		self.pos_y = y
 		self.move( breve.vector(x,y,0) )
@@ -1166,7 +1239,7 @@ class Prey( breve.Mobile ):
 			elif self.controller.repr == 2:
 				self.pushInterpreter.run( self.pushCode )
 				accel = self.pushInterpreter.getVectorStackTop()
-				if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
+				if ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ):
 					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
 				accel_x = accel.x
 				accel_y = accel.y
@@ -1181,8 +1254,7 @@ class Prey( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 		
-		# self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
-		self.addEnergy(-0.01)
+		self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
 		self.adjustSize()
 		self.age += 1
 
@@ -1232,7 +1304,7 @@ class Predator( breve.Mobile ):
 		self.isAlive = True
 
 		# static
-		self.maxVel = 0.7
+		self.maxVel = 0.8
 		self.maxAccel = 2
 		self.gener = 'm'
 		self.geno = None
@@ -1256,12 +1328,12 @@ class Predator( breve.Mobile ):
 		self.pushInterpreter.addInstruction( self, 'target' )
 		self.pushInterpreter.addInstruction( self, 'mostEnergizedNeighbor' )
 		self.pushInterpreter.addInstruction( self, 'currentVelocity' )
-		self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
+		#self.pushInterpreter.addInstruction( self, 'centerOfWorld' )
 		self.pushInterpreter.addInstruction( self, 'randV' )
-		self.pushInterpreter.setEvaluationLimit( 75 )
-		self.pushInterpreter.setListLimit( 75 )
+		self.pushInterpreter.setEvaluationLimit( 50 )
+		self.pushInterpreter.setListLimit( 50 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 100 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 
 
 	def initializeRandomly( self, x, y, gener):
@@ -1314,6 +1386,15 @@ class Predator( breve.Mobile ):
 			self.setColor( breve.vector( 1, 0, 0 ) )
 
 	def changePos(self, x, y):
+		if x < self.controller.minX-10:
+			x += (self.controller.maxX+10)-(self.controller.minX-10)
+		elif x > self.controller.maxX+10:
+			x -= (self.controller.maxX+10)-(self.controller.minX-10)
+		if y < self.controller.minY-10:
+			y += (self.controller.maxY+10)-(self.controller.minY-10)
+		elif y > self.controller.maxY+10:
+			y -= (self.controller.maxY+10)-(self.controller.minY-10)
+		
 		self.pos_x = x
 		self.pos_y = y
 		self.move( breve.vector(x,y,0) )
@@ -1623,7 +1704,7 @@ class Predator( breve.Mobile ):
 			elif self.controller.repr == 2:
 				self.pushInterpreter.run( self.pushCode )
 				accel = self.pushInterpreter.getVectorStackTop()
-				if ( ( ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.z ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.z ) ):
+				if ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ):
 					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
 				accel_x = accel.x
 				accel_y = accel.y
@@ -1638,8 +1719,7 @@ class Predator( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 
-		#self.addEnergy(-0.01 - (1/(1+math.exp(self.age/150)))*0.005 )
-		self.addEnergy(-0.01)
+		self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
 		self.adjustSize()
 		self.age += 1
 
@@ -1667,7 +1747,7 @@ class Predator( breve.Mobile ):
 		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( self.controller.targetZone*1.5 )
+		self.setNeighborhoodSize( self.controller.targetZone*2 )
 
 
 breve.Predator = Predator
@@ -1732,11 +1812,11 @@ class Node:
 
         if specie == 'Prey':
             self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
-                         "indiv.currentVelocity()", "indiv.centerOfWorld()", "indiv.mostEnergizedNeighbor()",
+                         "indiv.currentVelocity()", "indiv.mostEnergizedNeighbor()",
                          "indiv.randV()"]
         elif specie == 'Predator':
             self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
-                         "indiv.currentVelocity()", "indiv.centerOfWorld()", "indiv.mostEnergizedNeighbor()",
+                         "indiv.currentVelocity()", "indiv.mostEnergizedNeighbor()",
                          "indiv.randV()"]
         self.node = ["+", "-", "*", "/"]
 
