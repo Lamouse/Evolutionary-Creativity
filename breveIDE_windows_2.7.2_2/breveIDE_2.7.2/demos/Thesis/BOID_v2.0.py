@@ -111,6 +111,12 @@ class Swarm( breve.Control ):
 					temp_prey.isAlive = True
 					self.pollPreys.remove(temp_prey)
 					temp_prey.initializeRandomly(x,y,'m')
+					
+					if self.controller.repr == 2:
+						temp_prey.createPush()
+						#temp_prey.pushInterpreter.clearStacks()
+						#temp_prey.pushCode.makeRandomCode( temp_prey.pushInterpreter, 30 )
+
 				temp_prey.energy = 0.5
 
 	def createPredators(self, num):
@@ -134,6 +140,12 @@ class Swarm( breve.Control ):
 					temp_predator.isAlive = True
 					self.pollPredators.remove(temp_predator)
 					temp_predator.initializeRandomly(x,y,'m')
+
+					if self.controller.repr == 2:
+						temp_predator.createPush()
+						#temp_predator.pushInterpreter.clearStacks()
+						#temp_predator.pushCode.makeRandomCode( temp_predator.pushInterpreter, 30 )
+						
 				temp_predator.energy = 0.5
 
 	def revive(self, array, num):
@@ -159,6 +171,7 @@ class Swarm( breve.Control ):
 				newBird.changeVel(vel_x,vel_y)
 				newBird.changeAccel(0,0)
 
+				newBird.age = 0
 				newBird.energy = 0.5
 				newBird.isAlive = True
 				newBird.setNewColor()
@@ -307,11 +320,17 @@ class Swarm( breve.Control ):
 		if leng == 0:
 			return None
 		candidate = birds[random.randint(0,leng-1)]
+		fit = self.fitness(candidate)
 		for i in range(dim-1):
-			candidate2 = birds[random.randint(0,leng-1)]
-			if candidate2.energy > candidate.energy:
-				candidate = candidate2
+			temp_candidate = birds[random.randint(0,leng-1)]
+			temp_fit = self.fitness(temp_candidate)
+			if temp_fit > fit:
+				candidate = temp_candidate
+				fit = temp_fit
 		return candidate
+
+	def fitness(self, bird):
+		return bird.energy * (1/(1+math.exp(- ((bird.age-100)/12) )))
 
 	def crossover(self, newBird1, newBird2, parent1, parent2):
 		if self.controller.repr == 0:
@@ -324,16 +343,12 @@ class Swarm( breve.Control ):
 			newBird1.geno, newBird2.geno = self.tree_crossover(parent1.geno, parent2.geno)
 
 		elif self.controller.repr == 2:
-			'''newBird1.pushInterpreter.clearStacks()
-			newBird1.pushCode.crossover( parent1.pushCode, parent2.pushCode, newBird1.pushInterpreter )
-
-			newBird2.pushInterpreter.clearStacks()
-			newBird2.pushCode.crossover( parent2.pushCode, parent1.pushCode, newBird2.pushInterpreter )'''
-
 			self.crossover_push(newBird1, parent1, parent2)
 			self.crossover_push(newBird2, parent2, parent1)
 
 	def crossover_push(self, newBird, parent1, parent2):
+		newBird.pushInterpreter.clearStacks()
+
 		c3 = None
 		c2 = None
 		c1 = None
@@ -369,14 +384,9 @@ class Swarm( breve.Control ):
 				self.tree_mutation(newBird.geno, newBird.getType())
 
 		elif self.controller.repr == 2:
-			'''prob = random.random()
-			if prob <= self.prob_mutation:
-				prob = random.randint( 0, 10)
-				newBird.pushCode.mutate( newBird.pushInterpreter, prob )'''
-
 			prob = random.random()
 			if prob <= self.prob_mutation:
-				size = random.randint( 1, 31)
+				size = random.randint(1, 31)
 				if ( size > 0 ):
 					c = breve.createInstances( breve.PushProgram, 1 )
 					newBird.pushInterpreter.copyCodeStackTop( c )
@@ -386,25 +396,13 @@ class Swarm( breve.Control ):
 					newBird.pushInterpreter.pushCode( c )
 					breve.deleteInstances( c )
 
-			'''c = None
-			size = 0
-
-			size = ( newBird.pushInterpreter.getIntegerStackTop() % 15 )
-			if ( size > 0 ):
-				c = breve.createInstances( breve.PushProgram, 1 )
-				newBird.pushInterpreter.copyCodeStackTop( c )
-				c.mutate( newBird.pushInterpreter, size )
-				newBird.pushInterpreter.popIntegerStack()
-				newBird.pushInterpreter.popCodeStack()
-				newBird.pushInterpreter.pushCode( c )
-				breve.deleteInstances( c )'''
-
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
 		v = random.uniform(0,1)
 		newBird.changePos(p*parent1.pos_x+(1-p)*parent2.pos_x,p*parent1.pos_y+(1-p)*parent2.pos_y)
 		newBird.changeVel(v*parent1.vel_x+(1-v)*parent2.vel_x,v*parent1.vel_y+(1-v)*parent2.vel_y)
 		newBird.changeAccel(0,0)
+		newBird.age = 0
 		newBird.energy = 0.5
 		newBird.isAlive = True
 		newBird.setNewColor()
@@ -828,11 +826,13 @@ class Prey( breve.Mobile ):
 
 	def initializeRandomly( self, x, y, gener):
 		self.changePos(x,y)
+
 		vel_x = random.uniform(-self.maxVel, self.maxVel)
 		vel_y = random.uniform(-self.maxVel, self.maxVel)
 		self.changeVel(vel_x,vel_y)
 		self.changeAccel(0,0)
 
+		self.age = 0
 		self.gener = gener
 		self.setNewColor()
 
@@ -935,8 +935,7 @@ class Prey( breve.Mobile ):
 			c.move( self.getLocation() )
 			c.setColor (self.getColor() )
 			c.energy = self.energy
-			#c.lastScale = self.lastScale
-			# c.adjustSize()
+			c.lastScale = self.lastScale
 			c.shape = self.shape
 			c.setShape( c.shape )
 			c.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -1146,7 +1145,6 @@ class Prey( breve.Mobile ):
 				norm = ((self.pos_x-neighbor.pos_x)**2 + (self.pos_y-neighbor.pos_y)**2)**0.5
 				#target
 				if norm < dist:
-					#dist = norm*(1-neighbor.energy)
 					dist = norm
 					t_x = neighbor.pos_x-self.pos_x
 					t_y = neighbor.pos_y-self.pos_y
@@ -1345,7 +1343,8 @@ class Predator( breve.Mobile ):
 		vel_y = random.uniform(-self.maxVel, self.maxVel)
 		self.changeVel(vel_x,vel_y)
 		self.changeAccel(0,0)
-		
+
+		self.age = 0
 		self.gener = gener
 		self.setNewColor()
 
@@ -1448,7 +1447,7 @@ class Predator( breve.Mobile ):
 			c.move( self.getLocation() )
 			c.setColor (self.getColor() )
 			c.energy = self.energy
-			#c.lastScale = self.lastScale
+			c.lastScale = self.lastScale
 			c.shape = self.shape
 			c.setShape( c.shape )
 			c.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -1457,7 +1456,6 @@ class Predator( breve.Mobile ):
 			self.shape = breve.createInstances( breve.myCustomShape, 1 )
 			self.setShape( self.shape )
 			self.adjustSize()
-
 
 		self.setColor(breve.vector(0,0,0))
 		#just to don't overlap the animation 
