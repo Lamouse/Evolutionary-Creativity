@@ -23,7 +23,7 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Representation
-		self.repr = 2
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -154,7 +154,9 @@ class Swarm( breve.Control ):
 				array.remove(newBird)
 				
 				newBird.changePos(x, y)
-				newBird.changeVel(0,0)
+				vel_x = random.uniform(-newBird.maxVel, newBird.maxVel)
+				vel_y = random.uniform(-newBird.maxVel, newBird.maxVel)
+				newBird.changeVel(vel_x,vel_y)
 				newBird.changeAccel(0,0)
 
 				newBird.energy = 0.5
@@ -374,11 +376,11 @@ class Swarm( breve.Control ):
 
 			prob = random.random()
 			if prob <= self.prob_mutation:
-				size = random.randint( 0, 10)
+				size = random.randint( 1, 31)
 				if ( size > 0 ):
 					c = breve.createInstances( breve.PushProgram, 1 )
 					newBird.pushInterpreter.copyCodeStackTop( c )
-					c.mutate( newBird.pushInterpreter, size )
+					c.mutate( newBird.pushInterpreter )
 					newBird.pushInterpreter.popIntegerStack()
 					newBird.pushInterpreter.popCodeStack()
 					newBird.pushInterpreter.pushCode( c )
@@ -821,14 +823,14 @@ class Prey( breve.Mobile ):
 		self.pushInterpreter.setEvaluationLimit( 50 )
 		self.pushInterpreter.setListLimit( 50 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 30 )
 
 
 	def initializeRandomly( self, x, y, gener):
 		self.changePos(x,y)
-		# vel_x = random.uniform(-self.maxVel, self.maxVel)
-		# vel_y = random.uniform(-self.maxVel, self.maxVel)
-		self.changeVel(0,0)
+		vel_x = random.uniform(-self.maxVel, self.maxVel)
+		vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(vel_x,vel_y)
 		self.changeAccel(0,0)
 
 		self.gener = gener
@@ -1113,8 +1115,8 @@ class Prey( breve.Mobile ):
 		return [me_x, me_y]
 
 	def randV(self):
-		rand_x = random.uniform(0, 1)
-		rand_y = random.uniform(0, 1)
+		rand_x = random.uniform(0, 10)
+		rand_y = random.uniform(0, 10)
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
@@ -1333,14 +1335,15 @@ class Predator( breve.Mobile ):
 		self.pushInterpreter.setEvaluationLimit( 50 )
 		self.pushInterpreter.setListLimit( 50 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 30 )
 
 
 	def initializeRandomly( self, x, y, gener):
 		self.changePos(x,y)
-		# vel_x = random.uniform(-self.maxVel, self.maxVel)
-		# vel_y = random.uniform(-self.maxVel, self.maxVel)
-		self.changeVel(0,0)
+		
+		vel_x = random.uniform(-self.maxVel, self.maxVel)
+		vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(vel_x,vel_y)
 		self.changeAccel(0,0)
 		
 		self.gener = gener
@@ -1599,8 +1602,8 @@ class Predator( breve.Mobile ):
 		return [me_x, me_y]
 
 	def randV(self):
-		rand_x = random.uniform(0, 1)
-		rand_y = random.uniform(0, 1)
+		rand_x = random.uniform(0, 10)
+		rand_y = random.uniform(0, 10)
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
@@ -1747,7 +1750,7 @@ class Predator( breve.Mobile ):
 		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( self.controller.targetZone*2 )
+		self.setNeighborhoodSize( self.controller.targetZone*1.5 )
 
 
 breve.Predator = Predator
