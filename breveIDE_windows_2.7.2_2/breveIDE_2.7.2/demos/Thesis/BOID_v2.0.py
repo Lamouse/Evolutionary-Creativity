@@ -22,6 +22,11 @@ class Swarm( breve.Control ):
 		self.isToRecord = True
 		self.movie = None
 
+		# Evaluation
+		self.isToEvaluate = False
+		self.evaluatePrey = False
+		self.evaluatePredator = False		
+
 		# Representation
 		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
@@ -64,11 +69,15 @@ class Swarm( breve.Control ):
 		self.max_pop_predators = 0.6
 		self.prob_mutation = 0.1
 		self.initial_depth = 3
+		self.endSimulation = False
 
 		# Other thing
 		Swarm.init( self )
 
 		self.setDisplayText(self.reprType[self.repr].upper(), xLoc = -0.950000, yLoc = -0.400000, messageNumber = 6, theColor = breve.vector( 1, 1, 1 ))
+
+	def descendingCmp(self, a, b):
+		return - cmp(self.fitness(a), self.fitness(b))
 
 	def createFeeder(self, num, rapid ):
 		# Simple Sequential Inhibition
@@ -186,8 +195,16 @@ class Swarm( breve.Control ):
 
 		if not self.isToLoad:
 			self.addRandomFeederIfNecessary()
+
 			self.createPreys(self.initialNumPreys)
 			self.createPredators(self.initialNumPredators)
+
+			if self.controller.evaluatePrey:
+				self.load_metrics_predators()
+
+			if self.controller.evaluatePredator:
+				self.load_metrics_preys()
+			
 		else:
 			self.load_data()
 
@@ -287,6 +304,149 @@ class Swarm( breve.Control ):
 			except EOFError:
 				break
 		f.close()
+
+	def save_metrics(self):
+		suffix = self.controller.reprType[self.controller.repr]
+
+		preys_alive = []
+		preys_dead = []
+		predators_alive = []
+		predators_dead = []
+
+		# preys
+		for prey in breve.allInstances( "Prey" ):
+			if prey.isAlive:
+				if self.controller.repr == 2:
+					geno = prey.pushCode.getList()
+				else:
+					geno = prey.geno
+
+				temp_accel = prey.getAcceleration()
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, geno, prey.lastScale)
+				preys_alive.append(temp_prey)
+		for prey in self.pollPreys:
+			if self.controller.repr == 2:
+				geno = prey.pushCode.getList()
+			else:
+				geno = prey.geno
+
+			temp_accel = prey.getAcceleration()
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.gener, geno, prey.lastScale)
+			preys_dead.append(temp_prey)
+
+		# prepadors
+		for predator in breve.allInstances( "Predator" ):
+			if predator.isAlive:
+				if self.controller.repr == 2:
+					geno = predator.pushCode.getList()
+				else:
+					geno = predator.geno
+
+				temp_accel = predator.getAcceleration()
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, geno, predator.lastScale)
+				predators_alive.append(temp_predator)
+		for predator in self.pollPredators:
+			if self.controller.repr == 2:
+				geno = predator.pushCode.getList()
+			else:
+				geno = predator.geno
+
+			temp_accel = predator.getAcceleration()
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.gener, geno, predator.lastScale)
+			predators_dead.append(temp_predator)
+
+
+		# order and merge individuals of the same specie
+		preys_final = list(preys_alive)
+		preys_final.sort(self.descendingCmp)
+		preys_final += preys_dead[::-1]
+
+		predators_final = list(predators_alive)
+		predators_final.sort(self.descendingCmp)
+		predators_final += predators_dead[::-1]
+
+
+		# save the data on files
+		f =  open('metrics/data/prey_'+suffix+'.pkl', 'wb')
+		for prey in preys_final:
+			cPickle.dump(prey, f)
+		f.close()
+
+		f =  open('metrics/data/predator_'+suffix+'.pkl', 'wb')
+		for predator in predators_final:
+			cPickle.dump(predator, f)
+		f.close()
+
+	def load_metrics_preys(self):
+		suffix = self.controller.reprType[self.controller.repr]
+
+		preys = breve.allInstances( "Prey" )
+		tam = len(preys)
+
+		preys_list = []
+		index_list = list(range(0, tam))
+
+		# preys
+		f =  open('metrics/data/prey_'+suffix+'.pkl', 'rb')
+		while True:
+			try:
+				data_prey = cPickle.load(f)
+				preys_list.append(data_prey.geno)
+			except EOFError:
+				break
+		f.close()
+
+		if tam < len(preys_list):
+			preys_list = preys_list[0:tam]
+		
+		random.shuffle(preys_list)
+		random.shuffle(index_list)
+		index_list = index_list[0:len(preys_list)]
+	
+		for (index, geno) in zip(index_list, preys_list):
+			temp_prey = preys[index]
+
+			if self.controller.repr == 2:
+				temp_prey.pushInterpreter.clearStacks()
+				temp_prey.pushCode.setFrom(geno)
+			else:
+				temp_prey.geno = geno
+
+	def load_metrics_predators(self):
+		suffix = self.controller.reprType[self.controller.repr]
+
+		predators = breve.allInstances( "Predator" )
+		tam = len(predators)
+
+		predators_list = []
+		index_list = list(range(0, tam))
+
+		# predators
+		f =  open('metrics/data/predator_'+suffix+'.pkl', 'rb')
+		while True:
+			try:
+				data_predator = cPickle.load(f)
+				predators_list.append(data_predator.geno)
+			except EOFError:
+				break
+		f.close()
+
+		if tam < len(predators_list):
+			predators_list = predators_list[0:tam]
+		
+		random.shuffle(predators_list)
+		random.shuffle(index_list)
+		index_list = index_list[0:len(predators_list)]
+	
+		for (index, geno) in zip(index_list, predators_list):
+			temp_predator = predators[index]
+
+			if self.controller.repr == 2:
+				temp_predator.pushInterpreter.clearStacks()
+				temp_predator.pushCode.setFrom(geno)
+			else:
+				temp_predator.geno = geno
+
 
 	def addTotalFoodSupply(self, num):
 		self.totalFoodSupply += num;
@@ -552,12 +712,14 @@ class Swarm( breve.Control ):
 				self.movie.record( 'BOID_'+suffix+'.mpeg' )
 
 			# remove dead agents
-			for prey in breve.allInstances( "Prey" ):
-				if prey.isAlive and prey.energy <= 0:
-					prey.dropDead(self.controller.showCorpse)
-			for predator in breve.allInstances( "Predator" ):
-				if predator.isAlive and predator.energy <= 0:
-					predator.dropDead(self.controller.showCorpse)
+			if not self.evaluatePredator:
+				for prey in breve.allInstances( "Prey" ):
+					if prey.isAlive and prey.energy <= 0:
+						prey.dropDead(self.controller.showCorpse)
+			if not self.evaluatePrey:
+				for predator in breve.allInstances( "Predator" ):
+					if predator.isAlive and predator.energy <= 0:
+						predator.dropDead(self.controller.showCorpse)
 
 			# update neighborhoods
 			self.updateNeighbors()
@@ -599,31 +761,35 @@ class Swarm( breve.Control ):
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
 				# preys
-				tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
-				if breve.length(self.pollPreys) < tam_prey*2:
-					new_prey = tam_prey - breve.length(self.pollPreys)
-					breve.createInstances( breve.Prey, new_prey).dropDead(False)
-				for i in range(tam_prey):
-					self.evolutionayAlgorithm(self.pollPreys)
+				if not self.evaluatePredator:
+					tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
+					if breve.length(self.pollPreys) < tam_prey*2:
+						new_prey = tam_prey - breve.length(self.pollPreys)
+						breve.createInstances( breve.Prey, new_prey).dropDead(False)
+					for i in range(tam_prey):
+						self.evolutionayAlgorithm(self.pollPreys)
 
 				# predators
-				predator_max = self.numPreys*self.max_pop_predators
-				predator_breed = self.breeding_inc*self.numPredators
-				tam_predator = int(math.ceil(min(predator_max, predator_breed)/2))
-				if breve.length(self.pollPredators) < tam_predator*2:
-					new_preds = tam_predator - breve.length(self.pollPredators)
-					breve.createInstances( breve.Predator, new_preds).dropDead(False)
-				for i in range(tam_predator):
-					self.evolutionayAlgorithm(self.pollPredators)
+				if not self.evaluatePrey:
+					predator_max = self.numPreys*self.max_pop_predators
+					predator_breed = self.breeding_inc*self.numPredators
+					tam_predator = int(math.ceil(min(predator_max, predator_breed)/2))
+					if breve.length(self.pollPredators) < tam_predator*2:
+						new_preds = tam_predator - breve.length(self.pollPredators)
+						breve.createInstances( breve.Predator, new_preds).dropDead(False)
+					for i in range(tam_predator):
+						self.evolutionayAlgorithm(self.pollPredators)
 					
 			# immigrants
 			else:
-				if self.numPreys < 0.2*self.initialNumPreys:
-					self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
-					self.createPreys(math.floor(0.05*self.initialNumPreys))
-				if self.numPredators < 0.2*self.initialNumPredators:
-					self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
-					self.createPredators(math.floor(0.05*self.initialNumPredators))
+				if not self.evaluatePredator:
+					if self.numPreys < 0.2*self.initialNumPreys:
+						self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
+						self.createPreys(math.floor(0.05*self.initialNumPreys))
+				if not self.evaluatePrey:
+					if self.numPredators < 0.2*self.initialNumPredators:
+						self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
+						self.createPredators(math.floor(0.05*self.initialNumPredators))
 			
 			# checkpoint
 			if self.isToSave and self.current_iteraction % (self.breeding_season*self.save_generation) == 0:
@@ -642,10 +808,18 @@ class Swarm( breve.Control ):
 			# print str(self.numBirdsBirth)
 			breve.Control.iterate( self )
 
-		elif self.isToRecord and self.movie:
-			self.movie.close()
-			breve.deleteInstances( self.movie )
-			self.movie = None
+		else:
+			if not self.endSimulation:
+				self.endSimulation = True
+
+				if self.isToEvaluate:
+					# save preys and predators
+					self.save_metrics()
+
+				if self.isToRecord and self.movie:
+					self.movie.close()
+					breve.deleteInstances( self.movie )
+					self.movie = None
 
 
 breve.Swarm = Swarm
@@ -913,21 +1087,25 @@ class Prey( breve.Mobile ):
 		return [x, y]
 
 	def addEnergy(self, num):
-		self.energy += num
-		if self.energy < 0:
-			self.energy = 0
+		if not self.controller.evaluatePredator:
+			self.energy += num
+			if self.energy < 0:
+				self.energy = 0
 
 	def getEnergy(self):
 		return self.energy
 
 	def eat( self, feeder ):
-		if feeder.energy > 0:
-			if self.energy <= 0.90:
-				self.addEnergy(0.1)
-				feeder.addEnergy(-0.1)
-			else:
-				feeder.addEnergy(self.energy-1)
-				self.energy = 1.0
+		if not self.controller.evaluatePredator:
+			if feeder.energy > 0:
+				if self.energy <= 0.90:
+					self.addEnergy(0.1)
+					feeder.addEnergy(-0.1)
+				else:
+					feeder.addEnergy(self.energy-1)
+					self.energy = 1.0
+		else:
+			feeder.addEnergy(-0.1)
 	
 	def dropDead(self, corpse=True):
 		if corpse:
@@ -1254,8 +1432,9 @@ class Prey( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 		
-		self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
-		self.adjustSize()
+		if not self.controller.evaluatePredator:
+			self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
+			self.adjustSize()
 		self.age += 1
 
 	def cross( self, v1, v2 ):
@@ -1425,21 +1604,25 @@ class Predator( breve.Mobile ):
 		return [x, y]
 
 	def addEnergy(self, num):
-		self.energy += num
-		if self.energy < 0:
-			self.energy = 0
+		if not self.controller.evaluatePrey:
+			self.energy += num
+			if self.energy < 0:
+				self.energy = 0
 
 	def getEnergy(self):
 		return self.energy
 
 	def eat( self, prey ):
-		if prey.energy > 0:
-			if self.energy <= 0.90:
-				self.addEnergy(0.1)
-				prey.addEnergy(-0.1)
-			else:
-				prey.addEnergy(self.energy-1)
-				self.energy = 1.0
+		if not self.controller.evaluatePrey:
+			if prey.energy > 0:
+				if self.energy <= 0.90:
+					self.addEnergy(0.1)
+					prey.addEnergy(-0.1)
+				else:
+					prey.addEnergy(self.energy-1)
+					self.energy = 1.0
+		else:
+			prey.addEnergy(-0.1)
 
 	def dropDead(self, corpse=True):
 		if corpse:
@@ -1720,8 +1903,9 @@ class Predator( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 
-		self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
-		self.adjustSize()
+		if not self.controller.evaluatePrey:
+			self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
+			self.adjustSize()
 		self.age += 1
 
 	def cross( self, v1, v2 ):
