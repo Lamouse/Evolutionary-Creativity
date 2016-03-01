@@ -499,7 +499,7 @@ class Swarm( breve.Control ):
 		return candidate
 
 	def fitness(self, bird):
-		return bird.energy * (1/(1+math.exp(- ((bird.age-100)/12) )))
+		return bird.energy * (1/float(1+math.exp(- ((bird.age-100)/12.0) )))
 
 	def crossover(self, newBird1, newBird2, parent1, parent2):
 		if self.controller.repr == 0:
@@ -740,13 +740,17 @@ class Swarm( breve.Control ):
 				self.movie.record( 'BOID_'+suffix+'.mpeg' )
 
 			# remove dead agents
-			if not self.evaluatePredator:
-				for prey in breve.allInstances( "Prey" ):
-					if prey.isAlive and prey.energy <= 0:
+			for prey in breve.allInstances( "Prey" ):
+				if prey.isAlive and prey.energy <= 0:
+					if self.controller.evaluatePredator:
+						prey.initializeRandomly2()
+					else:
 						prey.dropDead(self.controller.showCorpse)
-			if not self.evaluatePrey:
-				for predator in breve.allInstances( "Predator" ):
-					if predator.isAlive and predator.energy <= 0:
+			for predator in breve.allInstances( "Predator" ):
+				if predator.isAlive and predator.energy <= 0:
+					if self.controller.evaluatePrey:
+						predator.initializeRandomly2()
+					else:
 						predator.dropDead(self.controller.showCorpse)
 
 			# update neighborhoods
@@ -864,28 +868,30 @@ class Swarm( breve.Control ):
 
 
 				if self.evaluatePrey:
+					suffix = self.controller.reprType[self.controller.repr]
 					date = time.strftime("%Y%m%d")
 
-					f =  open('metrics/results/'+date+'_prey_mean_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
-					for item in listPrey_MeanFitness:
+					f =  open('metrics/results/'+date+'_prey_mean_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					for item in self.listPrey_MeanFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_prey_best_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
-					for item in listPrey_BestFitness:
+					f =  open('metrics/results/'+date+'_prey_best_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					for item in self.listPrey_BestFitness:
   						f.write("%s\n" % item)
 					f.close()
 
 				if self.evaluatePredator:
+					suffix = self.controller.reprType[self.controller.repr]
 					date = time.strftime("%Y%m%d")
 
-					f =  open('metrics/results/'+date+'_predator_mean_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
-					for item in listPredator_MeanFitness:
+					f =  open('metrics/results/'+date+'_predator_mean_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					for item in self.listPredator_MeanFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_predator_best_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
-					for item in listPredator_BestFitness:
+					f =  open('metrics/results/'+date+'_predator_best_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					for item in self.listPredator_BestFitness:
   						f.write("%s\n" % item)
 					f.close()
 
@@ -1091,6 +1097,19 @@ class Prey( breve.Mobile ):
 		elif self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
+	def initializeRandomly2(self):
+		x = random.uniform(self.controller.minX, self.controller.maxX)
+		y = random.uniform(self.controller.minY, self.controller.maxY)
+		self.changePos(x,y)
+
+		vel_x = random.uniform(-self.maxVel, self.maxVel)
+		vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(vel_x,vel_y)
+
+		self.changeAccel(0,0)
+		self.age = 0
+		self.energy = 0.5
+
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
@@ -1161,25 +1180,21 @@ class Prey( breve.Mobile ):
 		return [x, y]
 
 	def addEnergy(self, num):
-		if not self.controller.evaluatePredator:
-			self.energy += num
-			if self.energy < 0:
-				self.energy = 0
+		self.energy += num
+		if self.energy < 0:
+			self.energy = 0
 
 	def getEnergy(self):
 		return self.energy
 
 	def eat( self, feeder ):
-		if not self.controller.evaluatePredator:
-			if feeder.energy > 0:
-				if self.energy <= 0.90:
-					self.addEnergy(0.1)
-					feeder.addEnergy(-0.1)
-				else:
-					feeder.addEnergy(self.energy-1)
-					self.energy = 1.0
-		else:
-			feeder.addEnergy(-0.1)
+		if feeder.energy > 0:
+			if self.energy <= 0.90:
+				self.addEnergy(0.1)
+				feeder.addEnergy(-0.1)
+			else:
+				feeder.addEnergy(self.energy-1)
+				self.energy = 1.0
 	
 	def dropDead(self, corpse=True):
 		if corpse:
@@ -1506,9 +1521,8 @@ class Prey( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 		
-		if not self.controller.evaluatePredator:
-			self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
-			self.adjustSize()
+		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
+		self.adjustSize()
 		self.age += 1
 
 	def cross( self, v1, v2 ):
@@ -1608,6 +1622,19 @@ class Predator( breve.Mobile ):
 		elif self.controller.reprType == 2:
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
+	def initializeRandomly2(self):
+		x = random.uniform(self.controller.minX, self.controller.maxX)
+		y = random.uniform(self.controller.minY, self.controller.maxY)
+		self.changePos(x,y)
+
+		vel_x = random.uniform(-self.maxVel, self.maxVel)
+		vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(vel_x,vel_y)
+
+		self.changeAccel(0,0)
+		self.age = 0
+		self.energy = 0.5
+
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
@@ -1678,25 +1705,21 @@ class Predator( breve.Mobile ):
 		return [x, y]
 
 	def addEnergy(self, num):
-		if not self.controller.evaluatePrey:
-			self.energy += num
-			if self.energy < 0:
-				self.energy = 0
+		self.energy += num
+		if self.energy < 0:
+			self.energy = 0
 
 	def getEnergy(self):
 		return self.energy
 
 	def eat( self, prey ):
-		if not self.controller.evaluatePrey:
-			if prey.energy > 0:
-				if self.energy <= 0.90:
-					self.addEnergy(0.1)
-					prey.addEnergy(-0.1)
-				else:
-					prey.addEnergy(self.energy-1)
-					self.energy = 1.0
-		else:
-			prey.addEnergy(-0.1)
+		if prey.energy > 0:
+			if self.energy <= 0.90:
+				self.addEnergy(0.1)
+				prey.addEnergy(-0.1)
+			else:
+				prey.addEnergy(self.energy-1)
+				self.energy = 1.0
 
 	def dropDead(self, corpse=True):
 		if corpse:
@@ -1977,9 +2000,8 @@ class Predator( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 
-		if not self.controller.evaluatePrey:
-			self.addEnergy(-0.01 -0.01*(1/(1+math.exp(-((self.age-100)/12) ) ) ) )
-			self.adjustSize()
+		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
+		self.adjustSize()
 		self.age += 1
 
 	def cross( self, v1, v2 ):
