@@ -25,8 +25,8 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = True
-		self.evaluatePredator = False
+		self.evaluatePrey = False
+		self.evaluatePredator = True
 
 		self.listPrey_BestFitness = []
 		self.listPrey_MeanFitness = []
@@ -38,7 +38,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_Mean = 0
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -501,6 +501,33 @@ class Swarm( breve.Control ):
 	def fitness(self, bird):
 		return bird.energy * (1/float(1+math.exp(- ((bird.age-100)/12.0) )))
 
+	def duplicateGenes(self, newBird1, newBird2, parent1, parent2):
+		if self.controller.repr == 0:
+			newBird1.geno = list(parent1.geno)
+			newBird2.geno = list(parent2.geno)
+
+		elif self.controller.repr == 1:
+			newBird1.geno = self.tree_copy(parent1.geno)
+			newBird2.geno = self.tree_copy(parent2.geno)
+			self.fill_parents(newBird1.geno)
+			self.fill_parents(newBird2.geno)
+
+		elif self.controller.repr == 2:
+			newBird1.pushInterpreter.clearStacks()
+			newBird2.pushInterpreter.clearStacks()
+
+			c1 = breve.createInstances( breve.PushProgram, 1 )
+			c2 = breve.createInstances( breve.PushProgram, 1 )
+
+			parent1.pushInterpreter.copyCodeStackTop( c1 )
+			parent2.pushInterpreter.copyCodeStackTop( c2 )
+
+			newBird1.pushInterpreter.pushCode( c1 )
+			newBird2.pushInterpreter.pushCode( c2 )
+
+			breve.deleteInstances( c1 )
+			breve.deleteInstances( c2 )
+
 	def crossover(self, newBird1, newBird2, parent1, parent2):
 		if self.controller.repr == 0:
 			# one point crossover
@@ -517,10 +544,6 @@ class Swarm( breve.Control ):
 
 	def crossover_push(self, newBird, parent1, parent2):
 		newBird.pushInterpreter.clearStacks()
-
-		c3 = None
-		c2 = None
-		c1 = None
 
 		c1 = breve.createInstances( breve.PushProgram, 1 )
 		c2 = breve.createInstances( breve.PushProgram, 1 )
@@ -582,15 +605,20 @@ class Swarm( breve.Control ):
 
 		newBird1 = array[0]
 		newBird2 = array[1]
+		kind = newBird1.getType()
 
 		# classic evolutionay algorithm
-		parent1 = self.selectParent(newBird1.getType())
+		parent1 = self.selectParent(kind)
 		if parent1 is not None:
-			parent2 = self.selectNearParent(parent1, newBird1.getType())
+			parent2 = self.selectNearParent(parent1, kind)
 			if parent2 is not None:
-				self.crossover(newBird1, newBird2, parent1, parent2)
-				self.mutate(newBird1)
-				self.mutate(newBird2)
+				if (kind == 'Predator' and self.evaluatePrey) or (kind == 'Prey' and self.evaluatePredator):
+					self.duplicateGenes(newBird1, newBird2, parent1, parent2)
+				else:
+					self.crossover(newBird1, newBird2, parent1, parent2)
+					self.mutate(newBird1)
+					self.mutate(newBird2)
+
 				self.createNewBird(newBird1, parent2, parent1)
 				self.createNewBird(newBird2, parent1, parent2)
 				
@@ -742,16 +770,10 @@ class Swarm( breve.Control ):
 			# remove dead agents
 			for prey in breve.allInstances( "Prey" ):
 				if prey.isAlive and prey.energy <= 0:
-					if self.controller.evaluatePredator:
-						prey.initializeRandomly2()
-					else:
-						prey.dropDead(self.controller.showCorpse)
+					prey.dropDead(self.controller.showCorpse)
 			for predator in breve.allInstances( "Predator" ):
 				if predator.isAlive and predator.energy <= 0:
-					if self.controller.evaluatePrey:
-						predator.initializeRandomly2()
-					else:
-						predator.dropDead(self.controller.showCorpse)
+					predator.dropDead(self.controller.showCorpse)
 
 			# update neighborhoods
 			self.updateNeighbors()
@@ -811,35 +833,31 @@ class Swarm( breve.Control ):
 					self.tempPredator_Best = 0
 
 				# preys
-				if not self.evaluatePredator:
-					tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
-					if breve.length(self.pollPreys) < tam_prey*2:
-						new_prey = tam_prey - breve.length(self.pollPreys)
-						breve.createInstances( breve.Prey, new_prey).dropDead(False)
-					for i in range(tam_prey):
-						self.evolutionayAlgorithm(self.pollPreys)
+				tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
+				if breve.length(self.pollPreys) < tam_prey*2:
+					new_prey = tam_prey - breve.length(self.pollPreys)
+					breve.createInstances( breve.Prey, new_prey).dropDead(False)
+				for i in range(tam_prey):
+					self.evolutionayAlgorithm(self.pollPreys)
 
 				# predators
-				if not self.evaluatePrey:
-					predator_max = self.numPreys*self.max_pop_predators
-					predator_breed = self.breeding_inc*self.numPredators
-					tam_predator = int(math.ceil(min(predator_max, predator_breed)/2))
-					if breve.length(self.pollPredators) < tam_predator*2:
-						new_preds = tam_predator - breve.length(self.pollPredators)
-						breve.createInstances( breve.Predator, new_preds).dropDead(False)
-					for i in range(tam_predator):
-						self.evolutionayAlgorithm(self.pollPredators)
+				predator_max = self.numPreys*self.max_pop_predators
+				predator_breed = self.breeding_inc*self.numPredators
+				tam_predator = int(math.ceil(min(predator_max, predator_breed)/2))
+				if breve.length(self.pollPredators) < tam_predator*2:
+					new_preds = tam_predator - breve.length(self.pollPredators)
+					breve.createInstances( breve.Predator, new_preds).dropDead(False)
+				for i in range(tam_predator):
+					self.evolutionayAlgorithm(self.pollPredators)
 					
 			# immigrants
 			else:
-				if not self.evaluatePredator:
-					if self.numPreys < 0.2*self.initialNumPreys:
-						self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
-						self.createPreys(math.floor(0.05*self.initialNumPreys))
-				if not self.evaluatePrey:
-					if self.numPredators < 0.2*self.initialNumPredators:
-						self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
-						self.createPredators(math.floor(0.05*self.initialNumPredators))
+				if self.numPreys < 0.2*self.initialNumPreys:
+					self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
+					self.createPreys(math.floor(0.05*self.initialNumPreys))
+				if self.numPredators < 0.2*self.initialNumPredators:
+					self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
+					self.createPredators(math.floor(0.05*self.initialNumPredators))
 			
 			# checkpoint
 			if self.isToSave and self.current_iteraction % (self.breeding_season*self.save_generation) == 0:
@@ -1096,19 +1114,6 @@ class Prey( breve.Mobile ):
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Prey")
 		elif self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
-
-	def initializeRandomly2(self):
-		x = random.uniform(self.controller.minX, self.controller.maxX)
-		y = random.uniform(self.controller.minY, self.controller.maxY)
-		self.changePos(x,y)
-
-		vel_x = random.uniform(-self.maxVel, self.maxVel)
-		vel_y = random.uniform(-self.maxVel, self.maxVel)
-		self.changeVel(vel_x,vel_y)
-
-		self.changeAccel(0,0)
-		self.age = 0
-		self.energy = 0.5
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.changePos(pos_x, pos_y)
@@ -1621,19 +1626,6 @@ class Predator( breve.Mobile ):
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Predator")
 		elif self.controller.reprType == 2:
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
-
-	def initializeRandomly2(self):
-		x = random.uniform(self.controller.minX, self.controller.maxX)
-		y = random.uniform(self.controller.minY, self.controller.maxY)
-		self.changePos(x,y)
-
-		vel_x = random.uniform(-self.maxVel, self.maxVel)
-		vel_y = random.uniform(-self.maxVel, self.maxVel)
-		self.changeVel(vel_x,vel_y)
-
-		self.changeAccel(0,0)
-		self.age = 0
-		self.energy = 0.5
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, gener, geno, lastScale):
 		self.changePos(pos_x, pos_y)

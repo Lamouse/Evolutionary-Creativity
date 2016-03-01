@@ -22,5 +22,3 @@ if __name__ == '__main__':
 	    	plt.title(name)
     		plt.savefig(os.path.join('graphics', name)+'.png', bbox_inches='tight')
     		plt.close()
-    		#plt.show()
-
