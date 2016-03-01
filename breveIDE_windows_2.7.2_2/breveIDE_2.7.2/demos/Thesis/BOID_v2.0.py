@@ -3,6 +3,7 @@ import random
 import math
 import copy
 import cPickle
+import time
 
 __author__ = 'Paulo Pereira'
 
@@ -24,8 +25,17 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = False
-		self.evaluatePredator = False		
+		self.evaluatePrey = True
+		self.evaluatePredator = False
+
+		self.listPrey_BestFitness = []
+		self.listPrey_MeanFitness = []
+		self.tempPrey_Best = 0
+		self.tempPrey_Mean = 0
+		self.listPredator_BestFitness = []
+		self.listPredator_MeanFitness = []
+		self.tempPredator_Best = 0
+		self.tempPredator_Mean = 0
 
 		# Representation
 		self.repr = 0
@@ -447,7 +457,6 @@ class Swarm( breve.Control ):
 			else:
 				temp_predator.geno = geno
 
-
 	def addTotalFoodSupply(self, num):
 		self.totalFoodSupply += num;
 
@@ -702,6 +711,25 @@ class Swarm( breve.Control ):
 
 	    return tree_child1, tree_child2
 
+	def meanFitness(self, specie):
+		temp_list = breve.allInstances( specie )
+		mean = 0
+		tam = 0
+		for item in temp_list:
+			if item.isAlive:
+				mean += self.fitness(item)
+				tam += 1
+		return mean/(tam*1.0)
+
+	def bestFitness(self, specie):
+		temp_list = breve.allInstances( specie )
+		best = -1
+		for item in temp_list:
+			if item.isAlive:
+				temp_best = self.fitness(item)
+				if temp_best > best:
+					best = temp_best
+		return best
 
 	def iterate( self ):
 		if self.current_iteraction < self.maxIteraction:
@@ -756,10 +784,28 @@ class Swarm( breve.Control ):
 					breve.deleteInstances( corpse.shape )
 					breve.deleteInstances( corpse )
 
+			if self.evaluatePrey:
+				self.tempPrey_Mean += self.meanFitness('Prey')
+				self.tempPrey_Best += self.bestFitness('Prey')
+			if self.evaluatePredator:
+				self.tempPredator_Mean += self.meanFitness('Predator')
+				self.tempPredator_Best += self.bestFitness('Predator')
 
 			self.current_iteraction += 1
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
+				if self.evaluatePrey:
+					self.listPrey_MeanFitness.append(self.tempPrey_Mean/(self.breeding_season*1.0))
+					self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
+					self.tempPrey_Mean = 0
+					self.tempPrey_Best = 0
+
+				if self.evaluatePredator:
+					self.listPredator_MeanFitness.append(self.tempPredator_Mean/(self.breeding_season*1.0))
+					self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
+					self.tempPredator_Mean = 0
+					self.tempPredator_Best = 0
+
 				# preys
 				if not self.evaluatePredator:
 					tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
@@ -815,6 +861,34 @@ class Swarm( breve.Control ):
 				if self.isToEvaluate:
 					# save preys and predators
 					self.save_metrics()
+
+
+				if self.evaluatePrey:
+					date = time.strftime("%Y%m%d")
+
+					f =  open('metrics/results/'+date+'_prey_mean_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
+					for item in listPrey_MeanFitness:
+  						f.write("%s\n" % item)
+					f.close()
+
+					f =  open('metrics/results/'+date+'_prey_best_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
+					for item in listPrey_BestFitness:
+  						f.write("%s\n" % item)
+					f.close()
+
+				if self.evaluatePredator:
+					date = time.strftime("%Y%m%d")
+
+					f =  open('metrics/results/'+date+'_predator_mean_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
+					for item in listPredator_MeanFitness:
+  						f.write("%s\n" % item)
+					f.close()
+
+					f =  open('metrics/results/'+date+'_predator_best_'+self.maxIteraction+'_'+suffix+'.txt', 'w')
+					for item in listPredator_BestFitness:
+  						f.write("%s\n" % item)
+					f.close()
+
 
 				if self.isToRecord and self.movie:
 					self.movie.close()
