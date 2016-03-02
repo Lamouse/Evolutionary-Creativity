@@ -26,7 +26,7 @@ class Swarm( breve.Control ):
 		# Evaluation
 		self.isToEvaluate = False
 		self.evaluatePrey = False
-		self.evaluatePredator = True
+		self.evaluatePredator = False
 
 		self.listPrey_BestFitness = []
 		self.listPrey_MeanFitness = []
@@ -38,7 +38,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_Mean = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -544,6 +544,7 @@ class Swarm( breve.Control ):
 
 	def crossover_push(self, newBird, parent1, parent2):
 		newBird.pushInterpreter.clearStacks()
+		error = False
 
 		c1 = breve.createInstances( breve.PushProgram, 1 )
 		c2 = breve.createInstances( breve.PushProgram, 1 )
@@ -555,8 +556,20 @@ class Swarm( breve.Control ):
 				c3.crossover( c1, c2, newBird.pushInterpreter )
 				newBird.pushInterpreter.pushCode( c3 )
 
+				if len(c3.getList()) > 0:
+					a = newBird.pushCode
+					newBird.pushCode = c3
+					c3 = a
+				else:
+					error = True
 			else:
-				newBird.pushInterpreter.pushCode( c1 )
+				error = True
+
+		if error:
+			newBird.pushInterpreter.pushCode( c1 )
+			a = newBird.pushCode
+			newBird.pushCode = c1
+			c1 = a
 
 		breve.deleteInstances( c1 )
 		breve.deleteInstances( c2 )
@@ -578,15 +591,19 @@ class Swarm( breve.Control ):
 		elif self.controller.repr == 2:
 			prob = random.random()
 			if prob <= self.prob_mutation:
-				size = random.randint(1, 31)
-				if ( size > 0 ):
-					c = breve.createInstances( breve.PushProgram, 1 )
-					newBird.pushInterpreter.copyCodeStackTop( c )
-					c.mutate( newBird.pushInterpreter )
-					newBird.pushInterpreter.popIntegerStack()
-					newBird.pushInterpreter.popCodeStack()
+
+				c = breve.createInstances( breve.PushProgram, 1 )
+				newBird.pushInterpreter.copyCodeStackTop( c )
+				c.mutate( newBird.pushInterpreter )
+				newBird.pushInterpreter.clearStacks()
+
+				if len(c.getList()) > 0:
 					newBird.pushInterpreter.pushCode( c )
-					breve.deleteInstances( c )
+					b = newBird.pushCode
+					newBird.pushCode = c
+					breve.deleteInstances( b )
+				else:
+					newBird.pushInterpreter.pushCode( newBird.pushCode )
 
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
@@ -853,11 +870,17 @@ class Swarm( breve.Control ):
 			# immigrants
 			else:
 				if self.numPreys < 0.2*self.initialNumPreys:
-					self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
-					self.createPreys(math.floor(0.05*self.initialNumPreys))
+					if self.evaluatePredator:
+						self.revive(self.pollPreys, math.floor(0.2*self.initialNumPreys))
+					else:
+						self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
+						self.createPreys(math.floor(0.05*self.initialNumPreys))
 				if self.numPredators < 0.2*self.initialNumPredators:
-					self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
-					self.createPredators(math.floor(0.05*self.initialNumPredators))
+					if self.evaluatePrey:
+						self.revive(self.pollPredators, math.floor(0.2*self.initialNumPredators))
+					else:
+						self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
+						self.createPredators(math.floor(0.05*self.initialNumPredators))
 			
 			# checkpoint
 			if self.isToSave and self.current_iteraction % (self.breeding_season*self.save_generation) == 0:
@@ -1509,10 +1532,19 @@ class Prey( breve.Mobile ):
 			if self.controller.repr == 1:
 				accel_x, accel_y = self.controller.run_code(self, self.geno)
 			elif self.controller.repr == 2:
+
+				# clean the stacks
+				self.pushInterpreter.clearStacks()
+				self.currentVelocity()
+
+				# run the code
 				self.pushInterpreter.run( self.pushCode )
+				
+				# get result vector
 				accel = self.pushInterpreter.getVectorStackTop()
 				if ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ):
 					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
+
 				accel_x = accel.x
 				accel_y = accel.y
 
@@ -1975,10 +2007,19 @@ class Predator( breve.Mobile ):
 			if self.controller.repr == 1:
 				accel_x, accel_y = self.controller.run_code(self, self.geno)
 			elif self.controller.repr == 2:
+
+				# clean the stacks
+				self.pushInterpreter.clearStacks()
+				self.currentVelocity()
+
+				# run the code
 				self.pushInterpreter.run( self.pushCode )
+				
+				# get result vector
 				accel = self.pushInterpreter.getVectorStackTop()
 				if ( ( ( breve.breveInternalFunctionFinder.isinf( self, accel.x ) or breve.breveInternalFunctionFinder.isnan( self, accel.x ) ) or breve.breveInternalFunctionFinder.isinf( self, accel.y ) ) or breve.breveInternalFunctionFinder.isnan( self, accel.y ) ):
 					accel = breve.vector( 0.000000, 0.000000, 0.000000 )
+					
 				accel_x = accel.x
 				accel_y = accel.y
 
