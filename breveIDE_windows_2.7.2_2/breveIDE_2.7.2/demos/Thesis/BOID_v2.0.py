@@ -20,13 +20,18 @@ class Swarm( breve.Control ):
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
-		self.isToRecord = True
+		self.isToRecord = False
 		self.movie = None
 
 		# Evaluation
 		self.isToEvaluate = False
 		self.evaluatePrey = False
 		self.evaluatePredator = False
+
+		self.phase_portrait = True
+		self.tempPrey_pp = 0
+		self.tempPredator_pp = 0
+		self.list_phase_portrait = []
 
 		self.listPrey_BestFitness = []
 		self.listPrey_MeanFitness = []
@@ -833,6 +838,9 @@ class Swarm( breve.Control ):
 			if self.evaluatePredator:
 				self.tempPredator_Mean += self.meanFitness('Predator')
 				self.tempPredator_Best += self.bestFitness('Predator')
+			if self.phase_portrait:
+				self.tempPrey_pp += self.numPreys
+				self.tempPredator_pp += self.numPredators
 
 			self.current_iteraction += 1
 			# breeding
@@ -848,6 +856,11 @@ class Swarm( breve.Control ):
 					self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
 					self.tempPredator_Mean = 0
 					self.tempPredator_Best = 0
+
+				if self.phase_portrait:
+					self.list_phase_portrait.append([self.tempPrey_pp/(self.breeding_season*1.0), self.tempPredator_pp/(self.breeding_season*1.0)])
+					self.tempPrey_pp = 0
+					self.tempPredator_pp = 0
 
 				# preys
 				tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
@@ -912,12 +925,12 @@ class Swarm( breve.Control ):
 					suffix = self.controller.reprType[self.controller.repr]
 					date = time.strftime("%Y%m%d")
 
-					f =  open('metrics/results/'+date+'_prey_mean_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					f =  open('metrics/results/'+date+'_'+suffix+'_prey_mean_'+str(self.maxIteraction)+'.txt', 'w')
 					for item in self.listPrey_MeanFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_prey_best_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					f =  open('metrics/results/'+date+'_'+suffix+'_prey_best_'+str(self.maxIteraction)+'.txt', 'w')
 					for item in self.listPrey_BestFitness:
   						f.write("%s\n" % item)
 					f.close()
@@ -926,14 +939,23 @@ class Swarm( breve.Control ):
 					suffix = self.controller.reprType[self.controller.repr]
 					date = time.strftime("%Y%m%d")
 
-					f =  open('metrics/results/'+date+'_predator_mean_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					f =  open('metrics/results/'+date+'_'+suffix+'_predator_mean_'+str(self.maxIteraction)+'.txt', 'w')
 					for item in self.listPredator_MeanFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_predator_best_'+str(self.maxIteraction)+'_'+suffix+'.txt', 'w')
+					f =  open('metrics/results/'+date+'_'+suffix+'_predator_best_'+str(self.maxIteraction)+'.txt', 'w')
 					for item in self.listPredator_BestFitness:
   						f.write("%s\n" % item)
+					f.close()
+
+				if self.phase_portrait:
+					suffix = self.controller.reprType[self.controller.repr]
+					date = time.strftime("%Y%m%d")
+
+					f =  open('metrics/phase_portrait/results/'+date+'_'+suffix+'_'+str(self.maxIteraction)+'.txt', 'w')
+					for (item1, item2) in self.list_phase_portrait:
+  						f.write("%s %s\n" % (item1, item2))
 					f.close()
 
 
