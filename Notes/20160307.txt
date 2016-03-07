@@ -30,3 +30,4 @@ Problemas encontrados!!!
 
 
 Fazer programa que mostra as diferenças de tamanho entre as vizinhanças
+ver inicialização (numeros corretos)

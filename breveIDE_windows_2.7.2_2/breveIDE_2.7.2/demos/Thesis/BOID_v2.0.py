@@ -766,6 +766,9 @@ class Swarm( breve.Control ):
 			if item.isAlive:
 				mean += self.fitness(item)
 				tam += 1
+		
+		if tam == 0:
+			return 0
 		return mean/(tam*1.0)
 
 	def bestFitness(self, specie):
