@@ -20,18 +20,14 @@ class Swarm( breve.Control ):
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
-		self.isToRecord = False
+		self.isToRecord = True
 		self.movie = None
 
 		# Evaluation
 		self.isToEvaluate = False
 		self.evaluatePrey = False
 		self.evaluatePredator = False
-
-		self.phase_portrait = True
-		self.tempPrey_pp = 0
-		self.tempPredator_pp = 0
-		self.list_phase_portrait = []
+		self.phase_portrait = False
 
 		self.listPrey_BestFitness = []
 		self.listPrey_MeanFitness = []
@@ -41,16 +37,17 @@ class Swarm( breve.Control ):
 		self.listPredator_MeanFitness = []
 		self.tempPredator_Best = 0
 		self.tempPredator_Mean = 0
+		self.list_phase_portrait = []
+		self.tempPrey_pp = 0
+		self.tempPredator_pp = 0
 
 		# Representation
 		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
-		self.initialNumPreys = 150
-		self.initialNumPredators = 25
-		self.numPreys = 150
-		self.numPredators = 25
+		self.initialNumPreys = self.numPreys = 90
+		self.initialNumPredators = self.numPredators = 30
 		self.numDeadPreys = 0
 		self.numDeadPredators = 0
 

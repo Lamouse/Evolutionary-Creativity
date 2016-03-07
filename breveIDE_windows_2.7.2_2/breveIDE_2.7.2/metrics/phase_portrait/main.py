@@ -20,7 +20,7 @@ if __name__ == '__main__':
 	    		y.append(float(array[1]))
 	    	f.close()
 
-	    	plt.plot(x, y)
+	    	plt.plot(x, y, 'ro')
 	    	plt.ylabel('number of predators')
 	    	plt.xlabel('number of preys')
 	    	plt.title(name)
