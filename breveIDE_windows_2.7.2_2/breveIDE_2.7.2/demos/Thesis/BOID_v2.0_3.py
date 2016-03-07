@@ -117,14 +117,19 @@ class Swarm( breve.Control ):
 		if num < 1:
 			return
 
-		size = (int) (math.floor(num**0.5))
+		size = (int) (math.ceil(num**0.5))
 		num_segments_x = (self.maxX-self.minX)/size
 		num_segments_y = (self.maxY-self.minY)/size
+		created = 0
 
 		for i in range(size):
 			for j in range(size):
+				if created == num:
+					return
+
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
+
 				if breve.length(self.pollPreys) < 1:
 					temp_prey = breve.createInstances( breve.Prey, 1)
 					temp_prey.initializeRandomly(x,y,'m')
@@ -136,22 +141,25 @@ class Swarm( breve.Control ):
 					
 					if self.controller.repr == 2:
 						temp_prey.createPush()
-						#temp_prey.pushInterpreter.clearStacks()
-						#temp_prey.pushCode.makeRandomCode( temp_prey.pushInterpreter, 30 )
 
 				temp_prey.energy = 0.5
+				created += 1
 
 	def createPredators(self, num):
 		# latin hypercubes
 		if num < 1:
 			return
 
-		size = (int) (math.floor(num**0.5))
+		size = (int) (math.ceil(num**0.5))
 		num_segments_x = (self.maxX-self.minX)/size
 		num_segments_y = (self.maxY-self.minY)/size
+		created = 0
 
 		for i in range(size):
 			for j in range(size):
+				if created == num:
+					return
+
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
 				if breve.length(self.pollPredators) < 1:
@@ -165,22 +173,25 @@ class Swarm( breve.Control ):
 
 					if self.controller.repr == 2:
 						temp_predator.createPush()
-						#temp_predator.pushInterpreter.clearStacks()
-						#temp_predator.pushCode.makeRandomCode( temp_predator.pushInterpreter, 30 )
 						
 				temp_predator.energy = 0.5
+				created += 1
 
 	def revive(self, array, num):
 		# immigrants
 		if num < 1:
 			return
 
-		size = (int) (math.floor(num**0.5))
+		size = (int) (math.ceil(num**0.5))
 		num_segments_x = (self.maxX-self.minX)/size
 		num_segments_y = (self.maxY-self.minY)/size
+		created = 0
 
 		for i in range(size):
 			for j in range(size):
+				if created == num:
+					return
+
 				x = random.uniform((float) (i*num_segments_x+self.minX), (float) ((i+1)*num_segments_x+self.minX))
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
 
@@ -197,6 +208,7 @@ class Swarm( breve.Control ):
 				newBird.energy = 0.5
 				newBird.isAlive = True
 				newBird.setNewColor()
+				created += 1
 				
 	def init( self ):
 		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
