@@ -48,7 +48,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -79,7 +79,7 @@ class Swarm( breve.Control ):
 		self.pollPredators = breve.objectList()
 
 		# Generation
-		self.maxIteraction = 500
+		self.maxIteraction = 5000
 		self.current_iteraction = 0
 		self.save_generation = 25
 		self.breeding_season = 50
@@ -834,7 +834,7 @@ class Swarm( breve.Control ):
 
 		if self.repr == 0:
 			for i in range(len(item1.geno)):
-				if math.abs(item1.geno[i]-item2.geno[i]) < 0.1:
+				if abs(item1.geno[i]-item2.geno[i]) > 0.1:
 					result += 1
 			result /= (len(item1.geno)*1.0)
 		elif self.repr == 1:
