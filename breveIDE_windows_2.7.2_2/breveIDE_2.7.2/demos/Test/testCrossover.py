@@ -53,7 +53,7 @@ class Test( breve.Control ):
 
 	def crossover_push(self, newBird, parent1, parent2):
 		newBird.pushInterpreter.clearStacks()
-		error = False
+		error = True
 
 		c1 = breve.createInstances( breve.PushProgram, 1 )
 		c2 = breve.createInstances( breve.PushProgram, 1 )
@@ -63,16 +63,17 @@ class Test( breve.Control ):
 			parent2.pushInterpreter.copyCodeStackTop( c2 )
 			if ( c2.getSize() > 0 ):
 				c3.crossover( c1, c2, newBird.pushInterpreter )
-				newBird.pushInterpreter.pushCode( c3 )
 
 				if len(c3.getList()) > 0:
+					print "diversity", parent1.pushCode.getTopLevelDifference(parent2.pushCode)
+					print "diversity", parent1.pushCode.getTopLevelDifference(c3)
+					print "diversity", parent2.pushCode.getTopLevelDifference(c3)
+
+					newBird.pushInterpreter.pushCode( c3 )
 					a = self.object3.pushCode
 					self.object3.pushCode = c3
 					c3 = a
-				else:
-					error = True
-			else:
-				error = True
+					error = False
 
 		if error:
 			newBird.pushInterpreter.pushCode( c1 )

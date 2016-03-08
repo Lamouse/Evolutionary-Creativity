@@ -45,6 +45,8 @@ class Test( breve.Control ):
 		self.object1.pushInterpreter.clearStacks()
 
 		if len(c.getList()) > 0:
+			print "diversity", temp_object.pushCode.getTopLevelDifference(c)
+
 			temp_object.pushInterpreter.pushCode( c )
 			b = temp_object.pushCode
 			temp_object.pushCode = c
