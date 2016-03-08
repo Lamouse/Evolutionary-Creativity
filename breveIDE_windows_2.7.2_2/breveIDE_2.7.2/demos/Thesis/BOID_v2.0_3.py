@@ -30,13 +30,17 @@ class Swarm( breve.Control ):
 		self.phase_portrait = False
 
 		self.listPrey_BestFitness = []
-		self.listPrey_MeanFitness = []
+		self.listPrey_AverageFitness = []
+		self.listPrey_Diversity = []
 		self.tempPrey_Best = 0
-		self.tempPrey_Mean = 0
+		self.tempPrey_Average= 0
+		self.tempPrey_Diversity= 0
 		self.listPredator_BestFitness = []
-		self.listPredator_MeanFitness = []
+		self.listPredator_AverageFitness = []
+		self.listPredator_Diversity = []
 		self.tempPredator_Best = 0
-		self.tempPredator_Mean = 0
+		self.tempPredator_Average = 0
+		self.tempPredator_Diversity = 0
 		self.list_phase_portrait = []
 		self.tempPrey_pp = 0
 		self.tempPredator_pp = 0
@@ -765,18 +769,19 @@ class Swarm( breve.Control ):
 
 	    return tree_child1, tree_child2
 
-	def meanFitness(self, specie):
+	# metric functions
+	def averageFitness(self, specie):
 		temp_list = breve.allInstances( specie )
-		mean = 0
+		average = 0
 		tam = 0
 		for item in temp_list:
 			if item.isAlive:
-				mean += self.fitness(item)
+				average += self.fitness(item)
 				tam += 1
 
 		if tam == 0:
 			return 0
-		return mean/(tam*1.0)
+		return average/(tam*1.0)
 
 	def bestFitness(self, specie):
 		temp_list = breve.allInstances( specie )
@@ -787,6 +792,38 @@ class Swarm( breve.Control ):
 				if temp_best > best:
 					best = temp_best
 		return best
+
+	def diversity_genotype(self, specie):
+		tam = 0
+		result = 0
+
+		boid_list = []
+		temp_list = breve.allInstances( specie )
+		for item in temp_list:
+			if item.isAlive:
+				boid_list.append(item)
+
+		for i in range(0, len(boid_list)):
+			for y in range(i+1, len(boid_list)):
+				result += self.compare_genotype(boid_list[i], boid_list[y])
+				tam += 1
+
+		return result / (tam*1.0)
+
+	def compare_genotype(self, item1, item2):
+		result = 0
+
+		if self.repr == 0:
+			for i in range(len(item1.geno)):
+				if math.abs(item1.geno[i]-item2.geno[i]) < 0.1:
+					result += 1
+			result /= (len(item1.geno)*1.0)
+		elif self.repr == 1:
+			pass
+		elif self.repr == 2:
+			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (math.min(item1.pushCode.getSize(), item2.pushCode.getSize())*1.0)
+		return result
+
 
 	def iterate( self ):
 		if self.current_iteraction < self.maxIteraction:
@@ -853,11 +890,13 @@ class Swarm( breve.Control ):
 					breve.deleteInstances( corpse )
 
 			if self.evaluatePrey:
-				self.tempPrey_Mean += self.meanFitness('Prey')
+				self.tempPrey_Average += self.averageFitness('Prey')
 				self.tempPrey_Best += self.bestFitness('Prey')
+				self.tempPrey_Diversity += self.diversity_genotype('Prey')
 			if self.evaluatePredator:
-				self.tempPredator_Mean += self.meanFitness('Predator')
+				self.tempPredator_Average += self.averageFitness('Predator')
 				self.tempPredator_Best += self.bestFitness('Predator')
+				self.tempPredator_Diversity += self.diversity_genotype('Predator')
 			if self.phase_portrait:
 				self.tempPrey_pp += self.numPreys
 				self.tempPredator_pp += self.numPredators
@@ -866,16 +905,20 @@ class Swarm( breve.Control ):
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
 				if self.evaluatePrey:
-					self.listPrey_MeanFitness.append(self.tempPrey_Mean/(self.breeding_season*1.0))
+					self.listPrey_AverageFitness.append(self.tempPrey_Average/(self.breeding_season*1.0))
 					self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
-					self.tempPrey_Mean = 0
+					self.listPrey_Diversity.append(self.tempPrey_Diversity/(self.breeding_season*1.0))
+					self.tempPrey_Average = 0
 					self.tempPrey_Best = 0
+					self.tempPrey_Diversity = 0
 
 				if self.evaluatePredator:
-					self.listPredator_MeanFitness.append(self.tempPredator_Mean/(self.breeding_season*1.0))
+					self.listPredator_AverageFitness.append(self.tempPredator_Average/(self.breeding_season*1.0))
 					self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
-					self.tempPredator_Mean = 0
+					self.listPredator_Diversity.append(self.tempPredator_Diversity/(self.breeding_season*1.0))
+					self.tempPredator_Average = 0
 					self.tempPredator_Best = 0
+					self.tempPredator_Diversity = 0
 
 				if self.phase_portrait:
 					self.list_phase_portrait.append([self.tempPrey_pp/(self.breeding_season*1.0), self.tempPredator_pp/(self.breeding_season*1.0)])
@@ -971,8 +1014,8 @@ class Swarm( breve.Control ):
 					suffix = self.controller.reprType[self.controller.repr]
 					date = time.strftime("%Y%m%d")
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_prey_mean_'+str(self.maxIteraction)+'.txt', 'w')
-					for item in self.listPrey_MeanFitness:
+					f =  open('metrics/results/'+date+'_'+suffix+'_prey_average_'+str(self.maxIteraction)+'.txt', 'w')
+					for item in self.listPrey_AverageFitness:
   						f.write("%s\n" % item)
 					f.close()
 
@@ -985,8 +1028,8 @@ class Swarm( breve.Control ):
 					suffix = self.controller.reprType[self.controller.repr]
 					date = time.strftime("%Y%m%d")
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_predator_mean_'+str(self.maxIteraction)+'.txt', 'w')
-					for item in self.listPredator_MeanFitness:
+					f =  open('metrics/results/'+date+'_'+suffix+'_predator_average_'+str(self.maxIteraction)+'.txt', 'w')
+					for item in self.listPredator_AverageFitness:
   						f.write("%s\n" % item)
 					f.close()
 
