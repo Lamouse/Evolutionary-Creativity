@@ -37,9 +37,9 @@ class Test( breve.Control ):
 		# crossover
 		self.crossover_push(self.object3, self.object1, self.object2)
 
-		print self.object1.pushCode.getList()
-		print self.object2.pushCode.getList()
-		print self.object3.pushCode.getList()
+		print self.object1.pushCode.getList(), self.object1.pushCode.getSize()
+		print self.object2.pushCode.getList(), self.object2.pushCode.getSize()
+		print self.object3.pushCode.getList(), self.object3.pushCode.getSize()
 
 		# second run
 		'''self.object1.pushInterpreter.clearStacks()

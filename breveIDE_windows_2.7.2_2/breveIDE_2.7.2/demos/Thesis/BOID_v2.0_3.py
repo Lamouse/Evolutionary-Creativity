@@ -894,8 +894,6 @@ class Swarm( breve.Control ):
 								preys_list.remove(temp_boid)
 								self.numPreys -= 1
 						tam_prey = int(math.ceil((self.initialNumPreys-self.numPreys)/2))
-
-						print self.numPreys, tam_prey
 					else:
 						tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
 
@@ -1186,7 +1184,7 @@ class Prey( breve.Mobile ):
 		self.pushInterpreter.setEvaluationLimit( 50 )
 		self.pushInterpreter.setListLimit( 50 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 30 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 
 
 	def initializeRandomly( self, x, y, gener):
@@ -1720,7 +1718,7 @@ class Predator( breve.Mobile ):
 		self.pushInterpreter.setEvaluationLimit( 50 )
 		self.pushInterpreter.setListLimit( 50 )
 		self.pushCode = breve.createInstances( breve.PushProgram, 1 )
-		self.pushCode.makeRandomCode( self.pushInterpreter, 30 )
+		self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 
 
 	def initializeRandomly( self, x, y, gener):
