@@ -4,9 +4,11 @@ import math
 import copy
 import cPickle
 import time
+import decimal
 
 __author__ = 'Paulo Pereira'
 
+decimal.getcontext().prec = 6
 
 class Swarm( breve.Control ):
 	def __init__( self ):
@@ -46,7 +48,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 2
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -77,7 +79,7 @@ class Swarm( breve.Control ):
 		self.pollPredators = breve.objectList()
 
 		# Generation
-		self.maxIteraction = 5000
+		self.maxIteraction = 500
 		self.current_iteraction = 0
 		self.save_generation = 25
 		self.breeding_season = 50
@@ -661,6 +663,7 @@ class Swarm( breve.Control ):
 		    return None
 		return Node(self.create_random_tree(depth-1, specie), self.create_random_tree(depth-1, specie), specie)
 
+
 	def fill_parents(self, tree):
 	    if tree.right is not None:
 	        # node
@@ -670,6 +673,22 @@ class Swarm( breve.Control ):
 	        self.fill_parents(tree.left)
 	        self.fill_parents(tree.right)
 
+
+	def compare_trees(self, tree1, tree2):
+		temp = 0
+		if tree1.data != tree2.data:
+			temp = 1
+
+		# Leaf
+		if tree1.right is None or tree2.right is None:
+			return temp, 1
+		
+		# Node
+		v1, t1 = self.compare_trees(tree1.left, tree2.left)
+		v2, t2 = self.compare_trees(tree1.right, tree2.right)
+		v3 = v1 + v2 + temp
+		t3 = t1 + t2 + 1
+		return v3, t3
 
 	def print_tree(self, tree):
 	    if tree.right is None:
@@ -819,9 +838,10 @@ class Swarm( breve.Control ):
 					result += 1
 			result /= (len(item1.geno)*1.0)
 		elif self.repr == 1:
-			pass
+			result, tam = self.compare_trees(item1.geno, item2.geno)
+			result /= (tam*1.0)
 		elif self.repr == 2:
-			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (math.min(item1.pushCode.getSize(), item2.pushCode.getSize())*1.0)
+			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (min(item1.pushCode.getSize(), item2.pushCode.getSize())*1.0)
 		return result
 
 
@@ -1022,6 +1042,11 @@ class Swarm( breve.Control ):
 					f =  open('metrics/results/'+date+'_'+suffix+'_prey_best_'+str(self.maxIteraction)+'.txt', 'w')
 					for item in self.listPrey_BestFitness:
   						f.write("%s\n" % item)
+  					f.close()
+
+  					f =  open('metrics/results/'+date+'_'+suffix+'_prey_diversity_'+str(self.maxIteraction)+'.txt', 'w')
+					for item in self.listPrey_Diversity:
+  						f.write("%s\n" % item)
 					f.close()
 
 				if self.evaluatePredator:
@@ -1035,6 +1060,11 @@ class Swarm( breve.Control ):
 
 					f =  open('metrics/results/'+date+'_'+suffix+'_predator_best_'+str(self.maxIteraction)+'.txt', 'w')
 					for item in self.listPredator_BestFitness:
+  						f.write("%s\n" % item)
+					f.close()
+
+					f =  open('metrics/results/'+date+'_'+suffix+'_predator_diversity_'+str(self.maxIteraction)+'.txt', 'w')
+					for item in self.listPredator_Diversity:
   						f.write("%s\n" % item)
 					f.close()
 
@@ -1309,14 +1339,14 @@ class Prey( breve.Mobile ):
 		self.move( breve.vector(x,y,0) )
 
 	def changeAccel(self, x, y):
-		norm = (x**2 + y**2)**0.5
+		norm = math.sqrt(x**2 + y**2)
 		if norm > self.maxAccel:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
 			
 	def changeVel(self, x, y):
-		norm = (x**2 + y**2)**0.5
+		norm = math.sqrt(x**2 + y**2)
 		if norm > self.maxVel:
 			x = x/norm * self.maxVel
 			y = y/norm * self.maxVel
@@ -1325,7 +1355,7 @@ class Prey( breve.Mobile ):
 		self.setVelocity( breve.vector(x,y,0) )
 
 	def normalizeVector(self, x, y):
-		norm = (x**2 + y**2)**0.5
+		norm = math.sqrt(x**2 + y**2)
 		if norm > 0:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
@@ -1843,14 +1873,14 @@ class Predator( breve.Mobile ):
 		self.move( breve.vector(x,y,0) )
 
 	def changeAccel(self, x, y):
-		norm = (x**2 + y**2)**0.5
+		norm = math.sqrt(x**2 + y**2)
 		if norm > self.maxAccel:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
 			
 	def changeVel(self, x, y):
-		norm = (x**2 + y**2)**0.5
+		norm = math.sqrt(x**2 + y**2)
 		if norm > self.maxVel:
 			x = x/norm * self.maxVel
 			y = y/norm * self.maxVel
@@ -1859,7 +1889,7 @@ class Predator( breve.Mobile ):
 		self.setVelocity( breve.vector(x,y,0) )
 
 	def normalizeVector(self, x, y):
-		norm = (x**2 + y**2)**0.5
+		norm = math.sqrt(x**2 + y**2)
 		if norm > 0:
 			x = x/norm * self.maxAccel
 			y = y/norm * self.maxAccel
