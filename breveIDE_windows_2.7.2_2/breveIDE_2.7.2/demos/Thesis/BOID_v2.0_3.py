@@ -30,8 +30,8 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = True
-		self.evaluatePredator = False
+		self.evaluatePrey = False
+		self.evaluatePredator = True
 		self.phase_portrait = False
 		
 		self.runs = 10
@@ -54,7 +54,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -836,6 +836,8 @@ class Swarm( breve.Control ):
 				result += self.compare_genotype(boid_list[i], boid_list[y])
 				tam += 1
 
+		if tam == 0:
+			return 0
 		return result / (tam*1.0)
 
 	def compare_genotype(self, item1, item2):
@@ -905,7 +907,6 @@ class Swarm( breve.Control ):
 			breve.deleteInstances( corpse )
 
 		# add new agents
-		print len(breve.allInstances( "Prey" )), len(breve.allInstances( "Predator" ))
 
 		self.add_new_agents()
 
@@ -1364,6 +1365,8 @@ class Prey( breve.Mobile ):
 		elif self.controller.repr == 1:
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Prey")
 		elif self.controller.repr == 2:
+			self.pushCode = breve.createInstances( breve.PushProgram, 1 )
+			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
 	def initializeRandomly2(self):
@@ -1444,8 +1447,8 @@ class Prey( breve.Mobile ):
 	def normalizeVector(self, x, y):
 		norm = math.sqrt(x**2 + y**2)
 		if norm > 0:
-			x = x/norm * self.maxAccel
-			y = y/norm * self.maxAccel
+			x = x/norm
+			y = y/norm
 		return [x, y]
 
 	def addEnergy(self, num):
@@ -1898,6 +1901,8 @@ class Predator( breve.Mobile ):
 		elif self.controller.repr == 1:
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Predator")
 		elif self.controller.reprType == 2:
+			self.pushCode = breve.createInstances( breve.PushProgram, 1 )
+			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
 	def initializeRandomly2(self):
@@ -1978,8 +1983,8 @@ class Predator( breve.Mobile ):
 	def normalizeVector(self, x, y):
 		norm = math.sqrt(x**2 + y**2)
 		if norm > 0:
-			x = x/norm * self.maxAccel
-			y = y/norm * self.maxAccel
+			x = x/norm
+			y = y/norm
 		return [x, y]
 
 	def addEnergy(self, num):
