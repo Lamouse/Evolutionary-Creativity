@@ -5,6 +5,7 @@ import copy
 import cPickle
 import time
 import decimal
+import os 
 
 __author__ = 'Paulo Pereira'
 
@@ -14,6 +15,8 @@ class Swarm( breve.Control ):
 	def __init__( self ):
 		breve.Control.__init__( self )
 
+		self.date = time.strftime("%Y%m%d%H%M")
+
 		# Random Number Generator
 		random.seed( 5 )
 		self.setRandomSeed( 5 )
@@ -22,14 +25,17 @@ class Swarm( breve.Control ):
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
-		self.isToRecord = True
+		self.isToRecord = False
 		self.movie = None
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = False
+		self.evaluatePrey = True
 		self.evaluatePredator = False
 		self.phase_portrait = False
+		
+		self.runs = 10
+		self.current_run = 0
 
 		self.listPrey_BestFitness = []
 		self.listPrey_AverageFitness = []
@@ -215,15 +221,8 @@ class Swarm( breve.Control ):
 				newBird.isAlive = True
 				newBird.setNewColor()
 				created += 1
-				
-	def init( self ):
-		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
-		self.setDisplayTextColor( breve.vector( 1, 1, 1 ) )
-		self.pointCamera( breve.vector( 0, 0, 0 ), breve.vector( 0, 0, 300 ) )
-		self.setIterationStep(1.0)
-		self.enableDrawEveryFrame()
-		self.enableSmoothDrawing()
-
+			
+	def add_new_agents( self ):
 		if not self.isToLoad:
 			self.addRandomFeederIfNecessary()
 
@@ -238,6 +237,16 @@ class Swarm( breve.Control ):
 			
 		else:
 			self.load_data()
+
+	def init( self ):
+		self.setBackgroundColor( breve.vector( 0, 0, 0 ) )
+		self.setDisplayTextColor( breve.vector( 1, 1, 1 ) )
+		self.pointCamera( breve.vector( 0, 0, 0 ), breve.vector( 0, 0, 300 ) )
+		self.setIterationStep(1.0)
+		self.enableDrawEveryFrame()
+		self.enableSmoothDrawing()
+
+		self.add_new_agents()
 
 	def save_data(self):
 		suffix = self.controller.reprType[self.controller.repr]
@@ -845,6 +854,62 @@ class Swarm( breve.Control ):
 		return result
 
 
+	def resetSimulation( self ):
+		# clean data
+
+		# Random Number Generator
+		random.seed( 5 )
+		self.setRandomSeed( 5 )
+
+		self.listPrey_BestFitness = []
+		self.listPrey_AverageFitness = []
+		self.listPrey_Diversity = []
+		self.tempPrey_Best = 0
+		self.tempPrey_Average= 0
+		self.tempPrey_Diversity= 0
+		self.listPredator_BestFitness = []
+		self.listPredator_AverageFitness = []
+		self.listPredator_Diversity = []
+		self.tempPredator_Best = 0
+		self.tempPredator_Average = 0
+		self.tempPredator_Diversity = 0
+		self.list_phase_portrait = []
+		self.tempPrey_pp = 0
+		self.tempPredator_pp = 0
+
+		# Simulation
+		self.initialNumPreys = self.numPreys = 90
+		self.initialNumPredators = self.numPredators = 30
+		self.numDeadPreys = 0
+		self.numDeadPredators = 0
+
+		# List
+		self.pollPreys = breve.objectList()
+		self.pollPredators = breve.objectList()
+
+		# Generation
+		self.current_iteraction = 0
+		self.endSimulation = False
+
+
+		# remove all agents
+
+		for prey in breve.allInstances( "Prey" ):
+			prey.dropDead(corpse=False)
+
+		for predator in breve.allInstances( "Predator" ):
+			predator.dropDead(corpse=False)
+
+		for corpse in breve.allInstances( "Corpse" ):
+			breve.deleteInstances( corpse.shape )
+			breve.deleteInstances( corpse )
+
+		# add new agents
+		print len(breve.allInstances( "Prey" )), len(breve.allInstances( "Predator" ))
+
+		self.add_new_agents()
+
+
 	def iterate( self ):
 		if self.current_iteraction < self.maxIteraction:
 			preys_list = []
@@ -899,6 +964,7 @@ class Swarm( breve.Control ):
 					self.totalFoodSupply += feeder.VirtualEnergy
 				self.totalFoodSupply += feeder.energy
 				if feeder.energy <= 0 and not feeder.rapid:
+					breve.deleteInstances( feeder.shape )
 					breve.deleteInstances( feeder )
 			self.addRandomFeederIfNecessary(rapid=True)
 
@@ -1029,59 +1095,80 @@ class Swarm( breve.Control ):
 					# save preys and predators
 					self.save_metrics()
 
-
 				if self.evaluatePrey:
 					suffix = self.controller.reprType[self.controller.repr]
-					date = time.strftime("%Y%m%d")
+					
+					# check folders
+					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_prey_'
+					directory_list = ['average', 'best', 'diversity']
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_prey_average_'+str(self.maxIteraction)+'.txt', 'w')
+					for directory in directory_list:
+						if not os.path.exists(directory_base+directory):
+							os.makedirs(directory_base+directory)
+
+	    			# save data
+					f =  open(directory_base+directory_list[0]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPrey_AverageFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_prey_best_'+str(self.maxIteraction)+'.txt', 'w')
+					f =  open(directory_base+directory_list[1]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPrey_BestFitness:
   						f.write("%s\n" % item)
   					f.close()
 
-  					f =  open('metrics/results/'+date+'_'+suffix+'_prey_diversity_'+str(self.maxIteraction)+'.txt', 'w')
+  					f =  open(directory_base+directory_list[2]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPrey_Diversity:
   						f.write("%s\n" % item)
 					f.close()
 
 				if self.evaluatePredator:
 					suffix = self.controller.reprType[self.controller.repr]
-					date = time.strftime("%Y%m%d")
+					
+					# check folders
+					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_predator_'
+					directory_list = ['average', 'best', 'diversity']
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_predator_average_'+str(self.maxIteraction)+'.txt', 'w')
+					for directory in directory_list:
+						if not os.path.exists(directory_base+directory):
+							os.makedirs(directory_base+directory)
+
+	    			# save data
+					f =  open(directory_base+directory_list[0]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_AverageFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_predator_best_'+str(self.maxIteraction)+'.txt', 'w')
+					f =  open(directory_base+directory_list[1]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_BestFitness:
   						f.write("%s\n" % item)
 					f.close()
 
-					f =  open('metrics/results/'+date+'_'+suffix+'_predator_diversity_'+str(self.maxIteraction)+'.txt', 'w')
+					f =  open(directory_base+directory_list[2]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_Diversity:
   						f.write("%s\n" % item)
 					f.close()
 
 				if self.phase_portrait:
 					suffix = self.controller.reprType[self.controller.repr]
-					date = time.strftime("%Y%m%d")
+					directory = 'metrics/phase_portrait/results/'+self.date+'_'+suffix
+					if not os.path.exists(directory):
+						os.makedirs(directory)
 
-					f =  open('metrics/phase_portrait/results/'+date+'_'+suffix+'_'+str(self.maxIteraction)+'.txt', 'w')
+					f =  open(diversity+'/'+str(self.current_run)+'.txt', 'w')
 					for (item1, item2) in self.list_phase_portrait:
   						f.write("%s %s\n" % (item1, item2))
 					f.close()
 
 
-				if self.isToRecord and self.movie:
-					self.movie.close()
-					breve.deleteInstances( self.movie )
-					self.movie = None
+				self.current_run += 1
+				if (self.evaluatePrey or self.evaluatePredator) and self.current_run < self.runs:
+					self.resetSimulation()
+				else:
+					if self.isToRecord and self.movie:
+						self.movie.close()
+						breve.deleteInstances( self.movie )
+						self.movie = None
 
 
 breve.Swarm = Swarm
