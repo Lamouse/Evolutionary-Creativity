@@ -54,7 +54,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 2
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -852,7 +852,8 @@ class Swarm( breve.Control ):
 			result, tam = self.compare_trees(item1.geno, item2.geno)
 			result /= (tam*1.0)
 		elif self.repr == 2:
-			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (min(item1.pushCode.getSize(), item2.pushCode.getSize())*1.0)
+			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (max(item1.pushCode.getTopLevelSize(), item2.pushCode.getTopLevelSize())*1.0)
+			
 		return result
 
 
@@ -1062,11 +1063,11 @@ class Swarm( breve.Control ):
 					
 			# immigrants
 			else:
-				if not self.evaluatePrey:
+				if not self.evaluatePredator:
 					if self.numPreys < 0.2*self.initialNumPreys:
 						self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
 						self.createPreys(math.floor(0.05*self.initialNumPreys))
-				if not self.evaluatePredator:
+				if not self.evaluatePrey:
 					if self.numPredators < 0.2*self.initialNumPredators:	
 						self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
 						self.createPredators(math.floor(0.05*self.initialNumPredators))

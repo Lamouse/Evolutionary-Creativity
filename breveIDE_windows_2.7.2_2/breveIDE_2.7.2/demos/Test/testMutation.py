@@ -23,7 +23,7 @@ class Test( breve.Control ):
 		self.object1.pushInterpreter.run( self.object1.pushCode )
 		print self.object1.pushInterpreter.getVectorStackTop()
 
-		self.mutate(self.object1)
+		'''self.mutate(self.object1)
 
 		self.object1.pushInterpreter.clearStacks()
 		self.object1.pushInterpreter.run( self.object1.pushCode )
@@ -33,7 +33,7 @@ class Test( breve.Control ):
 		self.object1.pushInterpreter.run( self.object1.pushCode )
 		print self.object1.pushInterpreter.getVectorStackTop()
 
-		print self.object1.pushInterpreter.getCodeStackSize()
+		print self.object1.pushInterpreter.getCodeStackSize()'''
 
 
 	def mutate(self, temp_object):
@@ -46,6 +46,7 @@ class Test( breve.Control ):
 
 		if len(c.getList()) > 0:
 			print "diversity", temp_object.pushCode.getTopLevelDifference(c)
+			print temp_object.pushCode.getTopLevelSize(), c.getTopLevelSize()
 
 			temp_object.pushInterpreter.pushCode( c )
 			b = temp_object.pushCode
@@ -55,6 +56,14 @@ class Test( breve.Control ):
 			temp_object.pushInterpreter.pushCode( temp_object.pushCode )
 
 		print temp_object.pushCode.getList()
+
+
+	def iterate( self ):
+		self.mutate(self.object1)
+
+		self.object1.pushInterpreter.clearStacks()
+		self.object1.pushInterpreter.run( self.object1.pushCode )
+		print self.object1.pushInterpreter.getVectorStackTop()
 
 
 breve.Test = Test
