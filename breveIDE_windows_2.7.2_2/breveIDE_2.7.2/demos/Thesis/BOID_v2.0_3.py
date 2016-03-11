@@ -31,11 +31,13 @@ class Swarm( breve.Control ):
 		# Evaluation
 		self.isToEvaluate = False
 		self.evaluatePrey = False
-		self.evaluatePredator = True
+		self.evaluatePredator = False
 		self.phase_portrait = False
 		
 		self.runs = 10
 		self.current_run = 0
+		self.preyID = 1
+		self.predatorID = 1
 
 		self.listPrey_BestFitness = []
 		self.listPrey_AverageFitness = []
@@ -54,7 +56,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 2
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -157,6 +159,10 @@ class Swarm( breve.Control ):
 				temp_prey.energy = 0.5
 				created += 1
 
+				temp_prey.ID = self.preyID
+				self.preyID += 1
+				self.save_log( 'new prey created with ID=' + str(temp_prey.ID) )
+
 	def createPredators(self, num):
 		# latin hypercubes
 		if num < 1:
@@ -188,6 +194,10 @@ class Swarm( breve.Control ):
 						
 				temp_predator.energy = 0.5
 				created += 1
+
+				temp_predator.ID = self.predatorID
+				self.predatorID += 1
+				self.save_log( 'new predator created with ID=' + str(temp_predator.ID) )
 
 	def revive(self, array, num):
 		# immigrants
@@ -221,8 +231,13 @@ class Swarm( breve.Control ):
 				newBird.isAlive = True
 				newBird.setNewColor()
 				created += 1
+
+				kind = newBird1.getType()
+				self.save_log( kind + newBird.ID + ' revived' )
 			
 	def add_new_agents( self ):
+		self.save_log( '--- Started run ' + str(self.current_run) + '---\n' )
+
 		if not self.isToLoad:
 			self.addRandomFeederIfNecessary()
 
@@ -326,6 +341,9 @@ class Swarm( breve.Control ):
 				
 				temp_prey = breve.createInstances( breve.Prey, 1)
 				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.gener, data_prey.geno, data_prey.lastScale)
+
+				temp_prey.ID = self.preyID
+				self.preyID += 1
 				if not temp_prey.isAlive:
 					temp_prey.dropDead(False)
 			except EOFError:
@@ -339,6 +357,9 @@ class Swarm( breve.Control ):
 				data_predator = cPickle.load(f)
 				temp_predator = breve.createInstances( breve.Predator, 1)
 				temp_predator.initializeFromData(data_predator.pos_x, data_predator.pos_y, data_predator.vel_x, data_predator.vel_y, data_predator.accel_x, data_predator.accel_y, data_predator.energy, data_predator.age, data_predator.isAlive, data_predator.maxVel, data_predator.maxAccel, data_predator.gener, data_predator.geno, data_predator.lastScale)
+
+				temp_predator.ID = self.predatorID
+				self.predatorID += 1
 				if not temp_predator.isAlive:
 					temp_predator.dropDead(False)
 			except EOFError:
@@ -666,6 +687,19 @@ class Swarm( breve.Control ):
 				array.remove(newBird1)
 				array.remove(newBird2)
 
+				# update IDs
+				if kind == 'Prey':
+					newBird1.ID = self.preyID
+					newBird2.ID = self.preyID+1
+					self.preyID += 2
+				else:
+					newBird1.ID = self.predatorID
+					newBird2.ID = self.predatorID+1
+					self.predatorID += 2
+
+				self.save_log( kind + str(parent1.ID) + ', ' + kind + str(parent2.ID) + '-->' + kind + str(newBird1.ID) + ', ' + kind + str(newBird2.ID))
+
+
 	# GP code
 	def create_random_tree(self, depth, specie):
 		if depth < 1:
@@ -856,6 +890,20 @@ class Swarm( breve.Control ):
 			
 		return result
 
+	def save_log( self, string ):
+		if self.evaluatePrey or self.evaluatePredator:
+			suffix = self.controller.reprType[self.controller.repr]
+
+			# check folders
+			directory = 'metrics/log'
+			if not os.path.exists(directory):
+				os.makedirs(directory)
+
+			# save data
+			f =  open( directory + '/' + self.date+'_'+suffix+'_prey_log.txt', 'a+' )
+			f.write( str(self.current_iteraction) + '\t' + string+'\n' )
+			f.close()
+
 
 	def resetSimulation( self ):
 		# clean data
@@ -893,6 +941,8 @@ class Swarm( breve.Control ):
 		# Generation
 		self.current_iteraction = 0
 		self.endSimulation = False
+		self.preyID = 1
+		self.predatorID = 1
 
 
 		# remove all agents
@@ -930,8 +980,10 @@ class Swarm( breve.Control ):
 						if self.evaluatePredator:
 							prey.initializeRandomly2()
 							preys_list.append(prey)
+							self.save_log( 'one prey died and started again randomly with ID=' + str(prey.ID) )
 						else:
 							prey.dropDead(self.controller.showCorpse)
+							self.save_log( 'one prey died with ID=' + str(prey.ID) )
 					else:
 						preys_list.append(prey)
 			for predator in breve.allInstances( "Predator" ):
@@ -940,8 +992,10 @@ class Swarm( breve.Control ):
 						if self.evaluatePrey:
 							predator.initializeRandomly2()
 							predators_list.append(predator)
+							self.save_log( 'one predator died and started again randomly with ID=' + str(predator.ID) )
 						else:
 							predator.dropDead(self.controller.showCorpse)
+							self.save_log( 'one predator died with ID=' + str(predator.ID) )
 					else:
 						predators_list.append(predator)
 
@@ -1024,6 +1078,7 @@ class Swarm( breve.Control ):
 								temp_boid.dropDead(False)
 								preys_list.remove(temp_boid)
 								self.numPreys -= 1
+								self.save_log( 'one prey died with ID=' + str(temp_boid.ID) )
 						tam_prey = int(math.ceil((self.initialNumPreys-self.numPreys)/2))
 					else:
 						tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
@@ -1047,6 +1102,7 @@ class Swarm( breve.Control ):
 								temp_boid.dropDead(False)
 								predators_list.remove(temp_boid)
 								self.numPredators -= 1
+								self.save_log( 'one predator died with ID=' + str(temp_boid.ID) )
 						tam_predator = int(math.ceil((self.initialNumPredators-self.numPredators)/2))
 					else:
 						predator_max = self.numPreys*self.max_pop_predators
@@ -1065,10 +1121,12 @@ class Swarm( breve.Control ):
 			else:
 				if not self.evaluatePredator:
 					if self.numPreys < 0.2*self.initialNumPreys:
+						self.save_log( 'immigrant preys added' )
 						self.revive(self.pollPreys, math.floor(0.15*self.initialNumPreys))
 						self.createPreys(math.floor(0.05*self.initialNumPreys))
 				if not self.evaluatePrey:
-					if self.numPredators < 0.2*self.initialNumPredators:	
+					if self.numPredators < 0.2*self.initialNumPredators:
+						self.save_log( 'immigrant predators added' )
 						self.revive(self.pollPredators, math.floor(0.15*self.initialNumPredators))
 						self.createPredators(math.floor(0.05*self.initialNumPredators))
 			
@@ -1162,7 +1220,7 @@ class Swarm( breve.Control ):
   						f.write("%s %s\n" % (item1, item2))
 					f.close()
 
-
+				self.save_log( '\n--- Ended run ' + str(self.current_run) + '---\n\n' )
 				self.current_run += 1
 				if (self.evaluatePrey or self.evaluatePredator) and self.current_run < self.runs:
 					self.resetSimulation()
@@ -1304,6 +1362,8 @@ class Prey( breve.Mobile ):
 	def __init__( self ):
 		breve.Mobile.__init__( self )
 		self.shape = None
+		self.ID = -1
+
 		# can be changed
 		self.pos_x = -9999
 		self.pos_y = -9999
@@ -1841,6 +1901,8 @@ class Predator( breve.Mobile ):
 	def __init__( self ):
 		breve.Mobile.__init__( self )
 		self.shape = None
+		self.ID = -1
+
 		# can be changed
 		self.pos_x = -9999
 		self.pos_y = -9999
