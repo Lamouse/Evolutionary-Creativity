@@ -30,7 +30,7 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = False
+		self.evaluatePrey = True
 		self.evaluatePredator = False
 		self.phase_portrait = False
 		
@@ -232,11 +232,11 @@ class Swarm( breve.Control ):
 				newBird.setNewColor()
 				created += 1
 
-				kind = newBird1.getType()
+				kind = newBird.getType()
 				self.save_log( kind + newBird.ID + ' revived' )
 			
 	def add_new_agents( self ):
-		self.save_log( '--- Started run ' + str(self.current_run) + '---\n' )
+		self.save_log( '--- Started run ' + str(self.current_run) + ' ---\n' )
 
 		if not self.isToLoad:
 			self.addRandomFeederIfNecessary()
@@ -260,6 +260,26 @@ class Swarm( breve.Control ):
 		self.setIterationStep(1.0)
 		self.enableDrawEveryFrame()
 		self.enableSmoothDrawing()
+
+		if self.evaluatePrey or self.evaluatePredator:
+			self.save_log( 'Representation: ' + self.controller.reprType[self.controller.repr], initiation=True )
+			self.save_log( 'Initial Preys: ' + str(self.initialNumPreys), initiation=True )
+			self.save_log( 'Initial Predators: ' + str(self.initialNumPredators), initiation=True )
+			self.save_log( 'WorldX: [' + str(self.minX) + ', ' + str(self.maxX) + ']', initiation=True )
+			self.save_log( 'WorldY: [' + str(self.minY) + ', ' + str(self.maxY) + ']', initiation=True )
+			self.save_log( 'Target Zone: ' + str(self.targetZone), initiation=True )
+			self.save_log( 'Social Zone: ' + str(self.socialZone), initiation=True )
+			self.save_log( 'Separation Zone: ' + str(self.separationZone), initiation=True )
+			self.save_log( 'Max Food Supplies: ' + str(self.maxFoodSupply), initiation=True )
+			self.save_log( 'Feeder Min Distance: ' + str(self.feederMinDistance), initiation=True )
+
+			self.save_log( 'Runs: ' + str(self.runs), initiation=True )
+			self.save_log( 'Max Iteraction: ' + str(self.maxIteraction), initiation=True )
+			self.save_log( 'Breeding Season: ' + str(self.breeding_season), initiation=True )
+			self.save_log( 'Breeding Inc: ' + str(self.breeding_inc), initiation=True )
+			self.save_log( 'Max Pop Predators: ' + str(self.max_pop_predators), initiation=True )
+			self.save_log( 'Mutation Prob: ' + str(self.prob_mutation), initiation=True )
+			self.save_log( 'Evaluation Survivor: ' + str(self.evaluation_survivor) + '\n\n\n', initiation=True )
 
 		self.add_new_agents()
 
@@ -890,7 +910,7 @@ class Swarm( breve.Control ):
 			
 		return result
 
-	def save_log( self, string ):
+	def save_log( self, string, initiation=False ):
 		if self.evaluatePrey or self.evaluatePredator:
 			suffix = self.controller.reprType[self.controller.repr]
 
@@ -899,18 +919,19 @@ class Swarm( breve.Control ):
 			if not os.path.exists(directory):
 				os.makedirs(directory)
 
+			string_final = ''
+			if not initiation:
+				string_final += str(self.current_iteraction) + '\t'
+			string_final += string + '\n'
+
 			# save data
 			f =  open( directory + '/' + self.date+'_'+suffix+'_prey_log.txt', 'a+' )
-			f.write( str(self.current_iteraction) + '\t' + string+'\n' )
+			f.write( string_final )
 			f.close()
 
 
 	def resetSimulation( self ):
 		# clean data
-
-		# Random Number Generator
-		random.seed( 5 )
-		self.setRandomSeed( 5 )
 
 		self.listPrey_BestFitness = []
 		self.listPrey_AverageFitness = []
@@ -1220,7 +1241,7 @@ class Swarm( breve.Control ):
   						f.write("%s %s\n" % (item1, item2))
 					f.close()
 
-				self.save_log( '\n--- Ended run ' + str(self.current_run) + '---\n\n' )
+				self.save_log( '\n--- Ended run ' + str(self.current_run) + ' ---\n\n' )
 				self.current_run += 1
 				if (self.evaluatePrey or self.evaluatePredator) and self.current_run < self.runs:
 					self.resetSimulation()
