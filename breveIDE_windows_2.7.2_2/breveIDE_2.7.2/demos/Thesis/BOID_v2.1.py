@@ -25,7 +25,7 @@ class Swarm( breve.Control ):
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
-		self.isToRecord = True
+		self.isToRecord = False
 		self.movie = None
 
 		# Evaluation
@@ -146,12 +146,12 @@ class Swarm( breve.Control ):
 
 				if breve.length(self.pollPreys) < 1:
 					temp_prey = breve.createInstances( breve.Prey, 1)
-					temp_prey.initializeRandomly(x,y,'m')
+					temp_prey.initializeRandomly(x,y)
 				else:
 					temp_prey = self.pollPreys[0]
 					temp_prey.isAlive = True
 					self.pollPreys.remove(temp_prey)
-					temp_prey.initializeRandomly(x,y,'m')
+					temp_prey.initializeRandomly(x,y)
 					
 					if self.controller.repr == 2:
 						temp_prey.createPush()
@@ -182,12 +182,12 @@ class Swarm( breve.Control ):
 				y = random.uniform((float)(j*num_segments_y+self.minY), (float)((j+1)*num_segments_y+self.minY))
 				if breve.length(self.pollPredators) < 1:
 					temp_predator = breve.createInstances( breve.Predator, 1)
-					temp_predator.initializeRandomly(x,y,'m')
+					temp_predator.initializeRandomly(x,y)
 				else:
 					temp_predator = self.pollPredators[0]
 					temp_predator.isAlive = True
 					self.pollPredators.remove(temp_predator)
-					temp_predator.initializeRandomly(x,y,'m')
+					temp_predator.initializeRandomly(x,y)
 
 					if self.controller.repr == 2:
 						temp_predator.createPush()
@@ -1510,25 +1510,28 @@ class Prey( breve.Mobile ):
 		self.move( breve.vector(x,y,0) )
 
 	def changeAccel(self, x, y):
-		n = norm([x, y])
+		n = self.norm([x, y])
 		if n > self.maxAccel:
 			x = x/n * self.maxAccel
 			y = y/n * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
 			
 	def changeVel(self, x, y):
-		# do something
-		a = math.degrees(angle([self.vel_x, self.vel_y], [x, y]))
+		n = self.norm([x, y])
+		
+		v1 = self.normalizeVector(self.vel_x, self.vel_y)
+		v2 = self.normalizeVector(x, y)
+		a = math.degrees(self.angle(v1, v2))
 		if a > self.maxSteering:
-			n = norm([x, y])
-			if crossproduct(v1, v2) < 0:
+			if self.crossproduct(v1, v2) < 0:
 				an = -self.maxSteering
 			else:
 				an = self.maxSteering
 
-				
-
-		n = norm([x, y])
+			x, y = self.rotateVector(v1, an)
+			x *= n
+			y *= n
+		
 		if n > self.maxVel:
 			x = x/n * self.maxVel
 			y = y/n * self.maxVel
@@ -1538,23 +1541,36 @@ class Prey( breve.Mobile ):
 		self.setVelocity( breve.vector(x,y,0) )
 
 	def normalizeVector(self, x, y):
-		n = norm([x, y])
+		n = self.norm([x, y])
 		if n > 0:
 			x = x/n
 			y = y/n
 		return [x, y]
 
-	def dotproduct(v1, v2):
-		return sum((a*b) for a, b in zip(v1, v2))
+	def rotateVector(self, v, alpha):
+	    alpha = -math.radians(alpha)
+	    return [v[0]*math.cos(alpha)+v[1]*math.sin(alpha), -v[0]*math.sin(alpha)+v[1]*math.cos(alpha)]
 
-	def crossproduct(v1, v2):
+	def dotproduct(self, v1, v2):
+		temp = 0
+		for a, b in zip(v1, v2):
+			temp += (a*b)
+		return temp
+
+	def crossproduct(self, v1, v2):
 		return (v1[0]*v2[1]) - (v1[1]*v2[0])
 
-	def norm(v):
-		return math.sqrt(dotproduct(v, v))
+	def norm(self, v):
+		return math.sqrt(self.dotproduct(v, v))
 
-	def angle(v1, v2):
-		return math.acos(dotproduct(v1, v2) / (norm(v1) * norm(v2)))
+	def angle(self, v1, v2):
+		sub = self.norm(v1) * self.norm(v2)
+		if sub == 0:
+			return 0
+		return math.acos(self.clean_cos(self.dotproduct(v1, v2) / sub))
+
+	def clean_cos(self, cos_angle):
+		return min(1,max(cos_angle,-1))
 
 	def addEnergy(self, num):
 		self.energy += num
@@ -2034,39 +2050,67 @@ class Predator( breve.Mobile ):
 		self.move( breve.vector(x,y,0) )
 
 	def changeAccel(self, x, y):
-		n = norm([x, y])
+		n = self.norm([x, y])
 		if n > self.maxAccel:
 			x = x/n * self.maxAccel
 			y = y/n * self.maxAccel
 		self.setAcceleration( breve.vector(x, y, 0) )
 			
 	def changeVel(self, x, y):
-		n = norm([x, y])
+		n = self.norm([x, y])
+		
+		v1 = self.normalizeVector(self.vel_x, self.vel_y)
+		v2 = self.normalizeVector(x, y)
+		a = math.degrees(self.angle(v1, v2))
+		if a > self.maxSteering:
+			if self.crossproduct(v1, v2) < 0:
+				an = -self.maxSteering
+			else:
+				an = self.maxSteering
+
+			x, y = self.rotateVector(v1, an)
+			x *= n
+			y *= n
+		
 		if n > self.maxVel:
 			x = x/n * self.maxVel
 			y = y/n * self.maxVel
+
 		self.vel_x = x
 		self.vel_y = y
 		self.setVelocity( breve.vector(x,y,0) )
 
 	def normalizeVector(self, x, y):
-		n = norm([x, y])
+		n = self.norm([x, y])
 		if n > 0:
 			x = x/n
 			y = y/n
 		return [x, y]
 
-	def dotproduct(v1, v2):
-		return sum((a*b) for a, b in zip(v1, v2))
+	def rotateVector(self, v, alpha):
+	    alpha = -math.radians(alpha)
+	    return [v[0]*math.cos(alpha)+v[1]*math.sin(alpha), -v[0]*math.sin(alpha)+v[1]*math.cos(alpha)]
 
-	def crossproduct(v1, v2):
+	def dotproduct(self, v1, v2):
+		temp = 0
+		for a, b in zip(v1, v2):
+			temp += (a*b)
+		return temp
+
+	def crossproduct(self, v1, v2):
 		return (v1[0]*v2[1]) - (v1[1]*v2[0])
 
-	def norm(v):
-		return math.sqrt(dotproduct(v, v))
+	def norm(self, v):
+		return math.sqrt(self.dotproduct(v, v))
 
-	def angle(v1, v2):
-		return math.acos(dotproduct(v1, v2) / (norm(v1) * norm(v2)))
+	def angle(self, v1, v2):
+		sub = self.norm(v1) * self.norm(v2)
+		if sub == 0:
+			return 0
+		return math.acos(self.clean_cos(self.dotproduct(v1, v2) / sub))
+
+	def clean_cos(self, cos_angle):
+		return min(1,max(cos_angle,-1))
 
 	def addEnergy(self, num):
 		self.energy += num
