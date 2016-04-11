@@ -1,0 +1,2337 @@
+Representation: gp
+Initial Preys: 90
+Initial Predators: 30
+WorldX: [-200, 200]
+WorldY: [-100, 100]
+Target Zone: 25
+Social Zone: 10
+Separation Zone: 2
+Max Food Supplies: 300
+Feeder Min Distance: 25
+Runs: 1
+Max Iteraction: 5000
+Breeding Season: 50
+Breeding Inc: 0.5
+Max Pop Predators: 0.6
+Mutation Prob: 0.1
+Evaluation Survivor: 0.9
+
+
+
+0	--- Started run 0 ---
+
+0	new prey created with ID=1
+0	new prey created with ID=2
+0	new prey created with ID=3
+0	new prey created with ID=4
+0	new prey created with ID=5
+0	new prey created with ID=6
+0	new prey created with ID=7
+0	new prey created with ID=8
+0	new prey created with ID=9
+0	new prey created with ID=10
+0	new prey created with ID=11
+0	new prey created with ID=12
+0	new prey created with ID=13
+0	new prey created with ID=14
+0	new prey created with ID=15
+0	new prey created with ID=16
+0	new prey created with ID=17
+0	new prey created with ID=18
+0	new prey created with ID=19
+0	new prey created with ID=20
+0	new prey created with ID=21
+0	new prey created with ID=22
+0	new prey created with ID=23
+0	new prey created with ID=24
+0	new prey created with ID=25
+0	new prey created with ID=26
+0	new prey created with ID=27
+0	new prey created with ID=28
+0	new prey created with ID=29
+0	new prey created with ID=30
+0	new prey created with ID=31
+0	new prey created with ID=32
+0	new prey created with ID=33
+0	new prey created with ID=34
+0	new prey created with ID=35
+0	new prey created with ID=36
+0	new prey created with ID=37
+0	new prey created with ID=38
+0	new prey created with ID=39
+0	new prey created with ID=40
+0	new prey created with ID=41
+0	new prey created with ID=42
+0	new prey created with ID=43
+0	new prey created with ID=44
+0	new prey created with ID=45
+0	new prey created with ID=46
+0	new prey created with ID=47
+0	new prey created with ID=48
+0	new prey created with ID=49
+0	new prey created with ID=50
+0	new prey created with ID=51
+0	new prey created with ID=52
+0	new prey created with ID=53
+0	new prey created with ID=54
+0	new prey created with ID=55
+0	new prey created with ID=56
+0	new prey created with ID=57
+0	new prey created with ID=58
+0	new prey created with ID=59
+0	new prey created with ID=60
+0	new prey created with ID=61
+0	new prey created with ID=62
+0	new prey created with ID=63
+0	new prey created with ID=64
+0	new prey created with ID=65
+0	new prey created with ID=66
+0	new prey created with ID=67
+0	new prey created with ID=68
+0	new prey created with ID=69
+0	new prey created with ID=70
+0	new prey created with ID=71
+0	new prey created with ID=72
+0	new prey created with ID=73
+0	new prey created with ID=74
+0	new prey created with ID=75
+0	new prey created with ID=76
+0	new prey created with ID=77
+0	new prey created with ID=78
+0	new prey created with ID=79
+0	new prey created with ID=80
+0	new prey created with ID=81
+0	new prey created with ID=82
+0	new prey created with ID=83
+0	new prey created with ID=84
+0	new prey created with ID=85
+0	new prey created with ID=86
+0	new prey created with ID=87
+0	new prey created with ID=88
+0	new prey created with ID=89
+0	new prey created with ID=90
+0	new predator created with ID=1
+0	new predator created with ID=2
+0	new predator created with ID=3
+0	new predator created with ID=4
+0	new predator created with ID=5
+0	new predator created with ID=6
+0	new predator created with ID=7
+0	new predator created with ID=8
+0	new predator created with ID=9
+0	new predator created with ID=10
+0	new predator created with ID=11
+0	new predator created with ID=12
+0	new predator created with ID=13
+0	new predator created with ID=14
+0	new predator created with ID=15
+0	new predator created with ID=16
+0	new predator created with ID=17
+0	new predator created with ID=18
+0	new predator created with ID=19
+0	new predator created with ID=20
+0	new predator created with ID=21
+0	new predator created with ID=22
+0	new predator created with ID=23
+0	new predator created with ID=24
+0	new predator created with ID=25
+0	new predator created with ID=26
+0	new predator created with ID=27
+0	new predator created with ID=28
+0	new predator created with ID=29
+0	new predator created with ID=30
+9	one prey died with ID=18
+10	one prey died with ID=6
+10	one prey died with ID=20
+10	one prey died with ID=51
+10	one prey died with ID=54
+10	one prey died with ID=69
+11	one prey died with ID=78
+12	one prey died with ID=35
+12	one prey died with ID=53
+12	one prey died with ID=73
+13	one prey died with ID=40
+14	one prey died with ID=5
+14	one prey died with ID=37
+14	one prey died with ID=59
+17	one prey died with ID=81
+18	one prey died with ID=2
+18	one prey died with ID=38
+19	one prey died with ID=32
+21	one prey died with ID=7
+21	one prey died with ID=19
+21	one prey died with ID=70
+21	one prey died with ID=80
+23	one prey died with ID=1
+23	one prey died with ID=8
+23	one prey died with ID=15
+25	one prey died with ID=55
+26	one prey died with ID=13
+26	one prey died with ID=17
+27	one prey died with ID=47
+27	one prey died with ID=64
+29	one prey died with ID=4
+29	one prey died with ID=50
+29	one prey died with ID=67
+30	one prey died with ID=31
+30	one prey died with ID=36
+30	one prey died with ID=42
+32	one prey died with ID=89
+33	one prey died with ID=60
+34	one prey died with ID=33
+34	one prey died with ID=72
+36	one prey died with ID=90
+37	one prey died with ID=25
+37	one prey died with ID=45
+37	one prey died with ID=48
+38	one prey died with ID=9
+40	one prey died with ID=3
+40	one prey died with ID=49
+40	one prey died with ID=52
+41	one prey died with ID=66
+42	one prey died with ID=27
+47	one prey died with ID=22
+50	Prey63, Prey24-->Prey91, Prey92
+50	Prey91, Prey92-->Prey93, Prey94
+50	Prey94, Prey12-->Prey95, Prey96
+50	Prey24, Prey65-->Prey97, Prey98
+50	Prey68, Prey71-->Prey99, Prey100
+50	Prey94, Prey39-->Prey101, Prey102
+50	Prey94, Prey65-->Prey103, Prey104
+50	Prey68, Prey39-->Prey105, Prey106
+50	Prey102, Prey93-->Prey107, Prey108
+50	Prey100, Prey106-->Prey109, Prey110
+50	Prey29, Prey110-->Prey111, Prey112
+50	Prey71, Prey65-->Prey113, Prey114
+50	Prey110, Prey62-->Prey115, Prey116
+50	Prey99, Prey103-->Prey117, Prey118
+50	Prey68, Prey68-->Prey119, Prey120
+50	Prey98, Prey99-->Prey121, Prey122
+50	Prey91, Prey62-->Prey123, Prey124
+50	Prey120, Prey113-->Prey125, Prey126
+50	Prey100, Prey99-->Prey127, Prey128
+50	Prey39, Prey68-->Prey129, Prey130
+50	Prey123, Prey117-->Prey131, Prey132
+50	Prey68, Prey62-->Prey133, Prey134
+50	Prey114, Prey112-->Prey135, Prey136
+50	Prey104, Prey130-->Prey137, Prey138
+50	Prey102, Prey39-->Prey139, Prey140
+50	one prey died with ID=10
+50	one prey died with ID=11
+50	one prey died with ID=12
+50	one prey died with ID=14
+50	one prey died with ID=16
+50	one prey died with ID=21
+50	one prey died with ID=23
+50	one prey died with ID=24
+50	one prey died with ID=26
+50	one prey died with ID=28
+50	one prey died with ID=29
+50	one prey died with ID=30
+50	one prey died with ID=34
+50	one prey died with ID=41
+50	one prey died with ID=43
+50	one prey died with ID=44
+50	one prey died with ID=46
+50	one prey died with ID=56
+50	one prey died with ID=57
+50	one prey died with ID=58
+50	one prey died with ID=61
+50	one prey died with ID=74
+50	one prey died with ID=75
+50	one prey died with ID=76
+50	one prey died with ID=77
+50	one prey died with ID=79
+50	one prey died with ID=82
+50	one prey died with ID=83
+50	one prey died with ID=84
+50	one prey died with ID=85
+50	one prey died with ID=86
+50	one prey died with ID=88
+50	one predator died and started again randomly with ID=8
+50	one predator died and started again randomly with ID=10
+50	one predator died and started again randomly with ID=28
+58	one prey died with ID=96
+60	one prey died with ID=87
+61	one prey died with ID=128
+62	one prey died with ID=111
+64	one prey died with ID=112
+66	one prey died with ID=115
+66	one prey died with ID=130
+66	one prey died with ID=105
+70	one prey died with ID=121
+70	one predator died and started again randomly with ID=7
+70	one predator died and started again randomly with ID=17
+72	one prey died with ID=122
+76	one prey died with ID=123
+80	one prey died with ID=127
+82	one prey died with ID=139
+83	one prey died with ID=92
+87	one prey died with ID=63
+87	one predator died and started again randomly with ID=1
+90	one prey died with ID=110
+90	one prey died with ID=99
+91	one prey died with ID=103
+92	one prey died with ID=133
+93	one prey died with ID=95
+95	one prey died with ID=71
+95	one predator died and started again randomly with ID=9
+100	Prey109, Prey97-->Prey141, Prey142
+100	Prey124, Prey104-->Prey143, Prey144
+100	Prey141, Prey39-->Prey145, Prey146
+100	Prey104, Prey62-->Prey147, Prey148
+100	Prey39, Prey98-->Prey149, Prey150
+100	Prey144, Prey131-->Prey151, Prey152
+100	Prey39, Prey62-->Prey153, Prey154
+100	Prey39, Prey151-->Prey155, Prey156
+100	Prey155, Prey65-->Prey157, Prey158
+100	Prey129, Prey98-->Prey159, Prey160
+100	Prey148, Prey152-->Prey161, Prey162
+100	Prey153, Prey143-->Prey163, Prey164
+100	Prey154, Prey39-->Prey165, Prey166
+100	Prey154, Prey65-->Prey167, Prey168
+100	Prey98, Prey98-->Prey169, Prey170
+100	Prey163, Prey148-->Prey171, Prey172
+100	Prey172, Prey143-->Prey173, Prey174
+100	Prey169, Prey166-->Prey175, Prey176
+100	Prey39, Prey129-->Prey177, Prey178
+100	Prey160, Prey175-->Prey179, Prey180
+100	Prey154, Prey178-->Prey181, Prey182
+100	Prey39, Prey149-->Prey183, Prey184
+100	Prey173, Prey150-->Prey185, Prey186
+100	Prey154, Prey151-->Prey187, Prey188
+100	Prey104, Prey147-->Prey189, Prey190
+100	Prey145, Prey39-->Prey191, Prey192
+100	Prey65, Prey65-->Prey193, Prey194
+100	one prey died with ID=113
+100	one prey died with ID=106
+100	one prey died with ID=136
+100	one prey died with ID=109
+100	one prey died with ID=114
+100	one prey died with ID=135
+100	one prey died with ID=117
+100	one prey died with ID=118
+100	one prey died with ID=91
+100	one prey died with ID=93
+100	one prey died with ID=132
+100	one prey died with ID=140
+100	one prey died with ID=108
+100	one prey died with ID=125
+100	one prey died with ID=107
+100	one prey died with ID=101
+100	one prey died with ID=126
+100	one prey died with ID=119
+100	one prey died with ID=134
+100	one prey died with ID=137
+100	one prey died with ID=94
+100	one prey died with ID=138
+100	one prey died with ID=116
+100	one prey died with ID=120
+100	one prey died with ID=100
+100	one prey died with ID=97
+100	one predator died and started again randomly with ID=10
+100	one predator died and started again randomly with ID=28
+101	one prey died with ID=68
+102	one predator died and started again randomly with ID=13
+105	one prey died with ID=163
+108	one predator died and started again randomly with ID=2
+108	one predator died and started again randomly with ID=3
+108	one predator died and started again randomly with ID=4
+108	one predator died and started again randomly with ID=30
+109	one prey died with ID=131
+110	one prey died with ID=141
+111	one prey died with ID=159
+114	one prey died with ID=184
+120	one predator died and started again randomly with ID=7
+120	one predator died and started again randomly with ID=17
+121	one prey died with ID=150
+122	one prey died with ID=157
+128	one prey died with ID=172
+129	one prey died with ID=102
+130	one predator died and started again randomly with ID=14
+132	one prey died with ID=186
+137	one prey died with ID=189
+137	one predator died and started again randomly with ID=1
+140	one prey died with ID=167
+141	one predator died and started again randomly with ID=15
+142	one prey died with ID=147
+143	one prey died with ID=162
+144	one prey died with ID=151
+145	one prey died with ID=168
+145	one prey died with ID=171
+145	one predator died and started again randomly with ID=9
+147	one prey died with ID=65
+149	one prey died with ID=148
+149	one prey died with ID=166
+150	Prey188, Prey164-->Prey195, Prey196
+150	Prey181, Prey180-->Prey197, Prey198
+150	Prey180, Prey39-->Prey199, Prey200
+150	Prey175, Prey164-->Prey201, Prey202
+150	Prey98, Prey185-->Prey203, Prey204
+150	Prey176, Prey160-->Prey205, Prey206
+150	Prey188, Prey177-->Prey207, Prey208
+150	Prey188, Prey165-->Prey209, Prey210
+150	Prey129, Prey185-->Prey211, Prey212
+150	Prey185, Prey205-->Prey213, Prey214
+150	Prey188, Prey160-->Prey215, Prey216
+150	Prey176, Prey185-->Prey217, Prey218
+150	Prey191, Prey175-->Prey219, Prey220
+150	Prey183, Prey156-->Prey221, Prey222
+150	Prey169, Prey216-->Prey223, Prey224
+150	Prey177, Prey212-->Prey225, Prey226
+150	Prey169, Prey169-->Prey227, Prey228
+150	Prey225, Prey177-->Prey229, Prey230
+150	Prey191, Prey226-->Prey231, Prey232
+150	Prey215, Prey177-->Prey233, Prey234
+150	Prey142, Prey142-->Prey235, Prey236
+150	Prey225, Prey175-->Prey237, Prey238
+150	Prey165, Prey160-->Prey239, Prey240
+150	one prey died with ID=182
+150	one prey died with ID=187
+150	one prey died with ID=145
+150	one prey died with ID=179
+150	one prey died with ID=146
+150	one prey died with ID=149
+150	one prey died with ID=152
+150	one prey died with ID=153
+150	one prey died with ID=154
+150	one prey died with ID=155
+150	one prey died with ID=192
+150	one prey died with ID=158
+150	one prey died with ID=190
+150	one prey died with ID=178
+150	one prey died with ID=170
+150	one predator died and started again randomly with ID=25
+152	one predator died and started again randomly with ID=13
+154	one prey died with ID=143
+155	one prey died with ID=161
+157	one prey died with ID=193
+157	one prey died with ID=104
+158	one predator died and started again randomly with ID=2
+158	one predator died and started again randomly with ID=3
+158	one predator died and started again randomly with ID=4
+160	one prey died with ID=191
+162	one prey died with ID=62
+163	one prey died with ID=198
+164	one prey died with ID=221
+168	one prey died with ID=174
+170	one predator died and started again randomly with ID=7
+170	one predator died and started again randomly with ID=17
+171	one prey died with ID=183
+173	one prey died with ID=194
+175	one prey died with ID=124
+175	one prey died with ID=165
+179	one prey died with ID=181
+180	one prey died with ID=200
+180	one prey died with ID=210
+182	one prey died with ID=144
+186	one prey died with ID=199
+187	one prey died with ID=217
+187	one predator died and started again randomly with ID=1
+190	one prey died with ID=219
+192	one prey died with ID=212
+195	one prey died with ID=214
+195	one predator died and started again randomly with ID=9
+200	Prey207, Prey236-->Prey241, Prey242
+200	Prey237, Prey204-->Prey243, Prey244
+200	Prey202, Prey203-->Prey245, Prey246
+200	Prey216, Prey160-->Prey247, Prey248
+200	Prey202, Prey195-->Prey249, Prey250
+200	Prey207, Prey244-->Prey251, Prey252
+200	Prey195, Prey243-->Prey253, Prey254
+200	Prey204, Prey208-->Prey255, Prey256
+200	Prey215, Prey237-->Prey257, Prey258
+200	Prey234, Prey196-->Prey259, Prey260
+200	Prey233, Prey237-->Prey261, Prey262
+200	Prey203, Prey216-->Prey263, Prey264
+200	Prey235, Prey204-->Prey265, Prey266
+200	Prey261, Prey236-->Prey267, Prey268
+200	Prey236, Prey240-->Prey269, Prey270
+200	Prey235, Prey240-->Prey271, Prey272
+200	Prey222, Prey195-->Prey273, Prey274
+200	Prey235, Prey235-->Prey275, Prey276
+200	Prey227, Prey175-->Prey277, Prey278
+200	one prey died with ID=232
+200	one prey died with ID=206
+200	one prey died with ID=225
+200	one prey died with ID=218
+200	one prey died with ID=231
+200	one prey died with ID=226
+200	one prey died with ID=220
+200	one prey died with ID=238
+200	one prey died with ID=229
+201	one prey died with ID=129
+201	one predator died and started again randomly with ID=26
+202	one predator died and started again randomly with ID=13
+202	one predator died and started again randomly with ID=23
+204	one prey died with ID=205
+205	one prey died with ID=224
+206	one prey died with ID=39
+208	one predator died and started again randomly with ID=2
+208	one predator died and started again randomly with ID=3
+209	one predator died and started again randomly with ID=14
+212	one predator died and started again randomly with ID=20
+215	one predator died and started again randomly with ID=6
+216	one predator died and started again randomly with ID=30
+220	one prey died with ID=213
+220	one prey died with ID=276
+220	one predator died and started again randomly with ID=7
+220	one predator died and started again randomly with ID=17
+222	one prey died with ID=275
+223	one prey died with ID=263
+223	one prey died with ID=266
+226	one prey died with ID=235
+227	one prey died with ID=253
+227	one prey died with ID=270
+231	one predator died and started again randomly with ID=27
+234	one prey died with ID=257
+235	one prey died with ID=236
+236	one prey died with ID=230
+236	one prey died with ID=254
+236	one prey died with ID=173
+236	one predator died and started again randomly with ID=10
+237	one prey died with ID=209
+237	one predator died and started again randomly with ID=1
+238	one prey died with ID=188
+238	one prey died with ID=185
+239	one prey died with ID=251
+240	one prey died with ID=215
+243	one prey died with ID=248
+243	one prey died with ID=272
+244	one prey died with ID=242
+244	one predator died and started again randomly with ID=12
+245	one predator died and started again randomly with ID=5
+248	one prey died with ID=160
+249	one prey died with ID=98
+249	one prey died with ID=223
+250	Prey201, Prey244-->Prey279, Prey280
+250	Prey267, Prey222-->Prey281, Prey282
+250	Prey271, Prey249-->Prey283, Prey284
+250	Prey240, Prey267-->Prey285, Prey286
+250	Prey208, Prey202-->Prey287, Prey288
+250	Prey282, Prey268-->Prey289, Prey290
+250	Prey249, Prey262-->Prey291, Prey292
+250	Prey246, Prey271-->Prey293, Prey294
+250	Prey271, Prey261-->Prey295, Prey296
+250	Prey233, Prey267-->Prey297, Prey298
+250	Prey249, Prey271-->Prey299, Prey300
+250	Prey262, Prey233-->Prey301, Prey302
+250	Prey197, Prey268-->Prey303, Prey304
+250	Prey233, Prey281-->Prey305, Prey306
+250	Prey283, Prey177-->Prey307, Prey308
+250	Prey261, Prey267-->Prey309, Prey310
+250	Prey307, Prey284-->Prey311, Prey312
+250	Prey311, Prey312-->Prey313, Prey314
+250	one prey died with ID=243
+250	one prey died with ID=274
+250	one prey died with ID=245
+250	one prey died with ID=277
+250	one prey died with ID=278
+250	one prey died with ID=259
+250	one prey died with ID=260
+250	one prey died with ID=264
+250	one prey died with ID=265
+250	one prey died with ID=269
+250	one prey died with ID=256
+252	one prey died with ID=203
+252	one predator died and started again randomly with ID=13
+252	one predator died and started again randomly with ID=23
+253	one prey died with ID=142
+253	one prey died with ID=180
+253	one prey died with ID=169
+253	one prey died with ID=175
+254	one prey died with ID=164
+254	one predator died and started again randomly with ID=16
+255	one predator died and started again randomly with ID=15
+256	one prey died with ID=211
+256	one prey died with ID=281
+258	one prey died with ID=252
+258	one predator died and started again randomly with ID=2
+260	one prey died with ID=273
+261	one prey died with ID=196
+262	one predator died and started again randomly with ID=20
+264	one prey died with ID=234
+264	one prey died with ID=228
+265	one prey died with ID=202
+265	one predator died and started again randomly with ID=6
+266	one prey died with ID=201
+266	one prey died with ID=292
+266	one predator died and started again randomly with ID=30
+268	one prey died with ID=216
+270	one prey died with ID=247
+270	one prey died with ID=250
+273	one prey died with ID=239
+274	one prey died with ID=195
+274	one prey died with ID=227
+275	one prey died with ID=176
+276	one prey died with ID=237
+277	one prey died with ID=279
+280	one predator died and started again randomly with ID=21
+281	one prey died with ID=156
+281	one predator died and started again randomly with ID=27
+283	one prey died with ID=267
+283	one prey died with ID=222
+284	one predator died and started again randomly with ID=24
+285	one prey died with ID=241
+286	one predator died and started again randomly with ID=10
+287	one prey died with ID=246
+287	one prey died with ID=249
+287	one predator died and started again randomly with ID=1
+289	one prey died with ID=306
+290	one predator died and started again randomly with ID=29
+291	one prey died with ID=289
+292	one predator died and started again randomly with ID=22
+294	one prey died with ID=287
+294	one predator died and started again randomly with ID=18
+295	one prey died with ID=207
+295	one prey died with ID=208
+295	one predator died and started again randomly with ID=5
+298	one predator died and started again randomly with ID=28
+300	Prey255, Prey305-->Prey315, Prey316
+300	Prey240, Prey296-->Prey317, Prey318
+300	Prey244, Prey204-->Prey319, Prey320
+300	Prey310, Prey310-->Prey321, Prey322
+300	Prey255, Prey310-->Prey323, Prey324
+300	Prey258, Prey271-->Prey325, Prey326
+300	Prey244, Prey244-->Prey327, Prey328
+300	Prey295, Prey319-->Prey329, Prey330
+300	Prey244, Prey271-->Prey331, Prey332
+300	Prey312, Prey280-->Prey333, Prey334
+300	Prey312, Prey244-->Prey335, Prey336
+300	Prey303, Prey300-->Prey337, Prey338
+300	Prey244, Prey280-->Prey339, Prey340
+300	Prey305, Prey322-->Prey341, Prey342
+300	Prey317, Prey340-->Prey343, Prey344
+300	Prey297, Prey280-->Prey345, Prey346
+300	Prey346, Prey303-->Prey347, Prey348
+300	Prey305, Prey325-->Prey349, Prey350
+300	Prey325, Prey244-->Prey351, Prey352
+300	Prey258, Prey197-->Prey353, Prey354
+300	Prey310, Prey255-->Prey355, Prey356
+300	Prey305, Prey197-->Prey357, Prey358
+300	Prey350, Prey324-->Prey359, Prey360
+300	Prey329, Prey331-->Prey361, Prey362
+300	one prey died with ID=302
+300	one prey died with ID=290
+300	one prey died with ID=301
+300	one prey died with ID=288
+300	one prey died with ID=314
+300	one prey died with ID=291
+300	one prey died with ID=311
+300	one prey died with ID=308
+300	one prey died with ID=298
+300	one prey died with ID=309
+300	one prey died with ID=294
+300	one prey died with ID=313
+300	one prey died with ID=262
+300	one prey died with ID=282
+300	one prey died with ID=284
+300	one prey died with ID=293
+300	one prey died with ID=299
+300	one prey died with ID=286
+300	one prey died with ID=304
+300	one prey died with ID=307
+302	one predator died and started again randomly with ID=23
+310	one prey died with ID=283
+314	one predator died and started again randomly with ID=9
+315	one prey died with ID=177
+315	one prey died with ID=285
+315	one predator died and started again randomly with ID=6
+315	one predator died and started again randomly with ID=7
+315	one predator died and started again randomly with ID=26
+316	one prey died with ID=296
+316	one prey died with ID=233
+317	one prey died with ID=240
+317	one prey died with ID=268
+317	one prey died with ID=305
+318	one prey died with ID=271
+321	one prey died with ID=334
+325	one prey died with ID=318
+325	one prey died with ID=358
+325	one prey died with ID=315
+328	one predator died and started again randomly with ID=2
+329	one prey died with ID=335
+330	one prey died with ID=350
+330	one predator died and started again randomly with ID=21
+331	one predator died and started again randomly with ID=27
+332	one prey died with ID=300
+333	one prey died with ID=312
+333	one prey died with ID=357
+333	one prey died with ID=261
+334	one prey died with ID=310
+334	one predator died and started again randomly with ID=24
+335	one prey died with ID=316
+336	one prey died with ID=297
+336	one predator died and started again randomly with ID=3
+336	one predator died and started again randomly with ID=10
+337	one predator died and started again randomly with ID=1
+338	one prey died with ID=321
+339	one prey died with ID=322
+340	one prey died with ID=342
+340	one prey died with ID=330
+340	one predator died and started again randomly with ID=29
+341	one prey died with ID=351
+342	one prey died with ID=362
+342	one predator died and started again randomly with ID=22
+343	one prey died with ID=349
+344	one predator died and started again randomly with ID=18
+345	one prey died with ID=352
+345	one predator died and started again randomly with ID=5
+346	one prey died with ID=317
+346	one prey died with ID=329
+346	one predator died and started again randomly with ID=4
+347	one prey died with ID=244
+347	one prey died with ID=345
+348	one predator died and started again randomly with ID=28
+349	one prey died with ID=280
+349	one prey died with ID=258
+349	one prey died with ID=255
+350	Prey331, Prey339-->Prey363, Prey364
+350	Prey204, Prey337-->Prey365, Prey366
+350	Prey204, Prey336-->Prey367, Prey368
+350	Prey348, Prey365-->Prey369, Prey370
+350	Prey336, Prey340-->Prey371, Prey372
+350	Prey355, Prey336-->Prey373, Prey374
+350	Prey340, Prey355-->Prey375, Prey376
+350	Prey355, Prey204-->Prey377, Prey378
+350	Prey347, Prey340-->Prey379, Prey380
+350	Prey204, Prey364-->Prey381, Prey382
+350	Prey355, Prey376-->Prey383, Prey384
+350	Prey377, Prey336-->Prey385, Prey386
+350	Prey379, Prey303-->Prey387, Prey388
+350	Prey340, Prey383-->Prey389, Prey390
+350	Prey364, Prey204-->Prey391, Prey392
+350	Prey388, Prey371-->Prey393, Prey394
+350	Prey355, Prey328-->Prey395, Prey396
+350	Prey339, Prey383-->Prey397, Prey398
+350	Prey303, Prey355-->Prey399, Prey400
+350	Prey353, Prey347-->Prey401, Prey402
+350	Prey397, Prey376-->Prey403, Prey404
+350	Prey336, Prey303-->Prey405, Prey406
+350	Prey303, Prey398-->Prey407, Prey408
+350	Prey406, Prey197-->Prey409, Prey410
+350	Prey336, Prey340-->Prey411, Prey412
+350	Prey408, Prey404-->Prey413, Prey414
+350	Prey355, Prey410-->Prey415, Prey416
+350	Prey197, Prey383-->Prey417, Prey418
+350	one prey died with ID=337
+350	one prey died with ID=341
+350	one prey died with ID=356
+350	one prey died with ID=338
+350	one prey died with ID=344
+350	one prey died with ID=359
+350	one prey died with ID=348
+350	one prey died with ID=361
+350	one prey died with ID=333
+350	one prey died with ID=319
+350	one prey died with ID=343
+350	one prey died with ID=346
+350	one prey died with ID=323
+350	one prey died with ID=324
+350	one prey died with ID=332
+350	one prey died with ID=325
+350	one prey died with ID=326
+350	one prey died with ID=360
+350	one prey died with ID=331
+352	one predator died and started again randomly with ID=23
+355	one prey died with ID=295
+355	one predator died and started again randomly with ID=19
+359	one prey died with ID=363
+360	one prey died with ID=399
+360	one prey died with ID=370
+364	one prey died with ID=354
+364	one predator died and started again randomly with ID=9
+365	one prey died with ID=327
+365	one predator died and started again randomly with ID=7
+365	one predator died and started again randomly with ID=26
+367	one prey died with ID=407
+368	one prey died with ID=365
+369	one prey died with ID=303
+373	one prey died with ID=408
+375	one predator died and started again randomly with ID=25
+381	one prey died with ID=402
+381	one predator died and started again randomly with ID=27
+382	one prey died with ID=366
+382	one predator died and started again randomly with ID=16
+384	one predator died and started again randomly with ID=24
+385	one prey died with ID=369
+386	one predator died and started again randomly with ID=3
+386	one predator died and started again randomly with ID=10
+386	one predator died and started again randomly with ID=14
+387	one predator died and started again randomly with ID=1
+388	one predator died and started again randomly with ID=2
+389	one prey died with ID=401
+390	one prey died with ID=388
+390	one prey died with ID=397
+390	one predator died and started again randomly with ID=29
+392	one predator died and started again randomly with ID=17
+392	one predator died and started again randomly with ID=20
+394	one predator died and started again randomly with ID=8
+394	one predator died and started again randomly with ID=18
+395	one predator died and started again randomly with ID=5
+396	one predator died and started again randomly with ID=4
+397	one prey died with ID=197
+400	Prey387, Prey396-->Prey419, Prey420
+400	Prey396, Prey353-->Prey421, Prey422
+400	Prey415, Prey379-->Prey423, Prey424
+400	Prey398, Prey391-->Prey425, Prey426
+400	Prey416, Prey416-->Prey427, Prey428
+400	Prey415, Prey412-->Prey429, Prey430
+400	Prey417, Prey385-->Prey431, Prey432
+400	Prey415, Prey387-->Prey433, Prey434
+400	Prey374, Prey411-->Prey435, Prey436
+400	Prey418, Prey412-->Prey437, Prey438
+400	Prey391, Prey380-->Prey439, Prey440
+400	Prey391, Prey391-->Prey441, Prey442
+400	Prey391, Prey380-->Prey443, Prey444
+400	Prey412, Prey415-->Prey445, Prey446
+400	Prey415, Prey418-->Prey447, Prey448
+400	Prey411, Prey340-->Prey449, Prey450
+400	Prey411, Prey432-->Prey451, Prey452
+400	Prey378, Prey372-->Prey453, Prey454
+400	one prey died with ID=403
+400	one prey died with ID=413
+400	one prey died with ID=364
+400	one prey died with ID=400
+400	one prey died with ID=389
+400	one prey died with ID=392
+400	one prey died with ID=404
+400	one prey died with ID=394
+400	one prey died with ID=376
+400	one prey died with ID=384
+400	one prey died with ID=414
+400	one prey died with ID=381
+401	one prey died with ID=367
+407	one prey died with ID=336
+408	one prey died with ID=385
+412	one prey died with ID=386
+413	one prey died with ID=204
+414	one prey died with ID=405
+414	one prey died with ID=383
+414	one predator died and started again randomly with ID=9
+415	one predator died and started again randomly with ID=7
+415	one predator died and started again randomly with ID=19
+415	one predator died and started again randomly with ID=26
+416	one prey died with ID=431
+417	one prey died with ID=355
+420	one prey died with ID=406
+420	one prey died with ID=382
+421	one prey died with ID=409
+423	one predator died and started again randomly with ID=6
+424	one prey died with ID=452
+425	one predator died and started again randomly with ID=25
+426	one prey died with ID=339
+427	one prey died with ID=429
+427	one prey died with ID=445
+427	one prey died with ID=432
+429	one prey died with ID=377
+430	one prey died with ID=416
+431	one predator died and started again randomly with ID=27
+432	one prey died with ID=374
+432	one predator died and started again randomly with ID=16
+433	one prey died with ID=347
+433	one prey died with ID=353
+434	one prey died with ID=373
+434	one prey died with ID=380
+435	one prey died with ID=441
+435	one predator died and started again randomly with ID=13
+436	one prey died with ID=395
+436	one predator died and started again randomly with ID=10
+437	one prey died with ID=450
+437	one prey died with ID=390
+437	one prey died with ID=375
+437	one predator died and started again randomly with ID=1
+438	one prey died with ID=453
+438	one prey died with ID=417
+438	one prey died with ID=433
+438	one prey died with ID=438
+440	one predator died and started again randomly with ID=29
+441	one prey died with ID=410
+442	one prey died with ID=446
+442	one predator died and started again randomly with ID=17
+442	one predator died and started again randomly with ID=20
+444	one prey died with ID=430
+444	one predator died and started again randomly with ID=8
+444	one predator died and started again randomly with ID=18
+444	one predator died and started again randomly with ID=21
+445	one predator died and started again randomly with ID=5
+446	one prey died with ID=423
+446	one predator died and started again randomly with ID=4
+447	one prey died with ID=415
+447	one prey died with ID=434
+447	one prey died with ID=436
+450	Prey411, Prey418-->Prey455, Prey456
+450	Prey372, Prey372-->Prey457, Prey458
+450	Prey328, Prey371-->Prey459, Prey460
+450	Prey328, Prey419-->Prey461, Prey462
+450	Prey457, Prey457-->Prey463, Prey464
+450	Prey412, Prey461-->Prey465, Prey466
+450	Prey393, Prey418-->Prey467, Prey468
+450	Prey435, Prey418-->Prey469, Prey470
+450	Prey419, Prey372-->Prey471, Prey472
+450	Prey372, Prey456-->Prey473, Prey474
+450	Prey454, Prey393-->Prey475, Prey476
+450	Prey419, Prey455-->Prey477, Prey478
+450	Prey328, Prey393-->Prey479, Prey480
+450	Prey467, Prey372-->Prey481, Prey482
+450	Prey465, Prey411-->Prey483, Prey484
+450	Prey463, Prey418-->Prey485, Prey486
+450	Prey393, Prey372-->Prey487, Prey488
+450	Prey486, Prey393-->Prey489, Prey490
+450	Prey477, Prey372-->Prey491, Prey492
+450	Prey393, Prey393-->Prey493, Prey494
+450	Prey372, Prey463-->Prey495, Prey496
+450	Prey393, Prey393-->Prey497, Prey498
+450	Prey475, Prey412-->Prey499, Prey500
+450	Prey340, Prey454-->Prey501, Prey502
+450	Prey435, Prey419-->Prey503, Prey504
+450	Prey504, Prey486-->Prey505, Prey506
+450	one prey died with ID=420
+450	one prey died with ID=440
+450	one prey died with ID=439
+450	one prey died with ID=421
+450	one prey died with ID=422
+450	one prey died with ID=444
+450	one prey died with ID=424
+450	one prey died with ID=425
+450	one prey died with ID=426
+450	one prey died with ID=427
+450	one prey died with ID=451
+450	one prey died with ID=442
+450	one prey died with ID=428
+450	one prey died with ID=447
+450	one prey died with ID=443
+450	one prey died with ID=448
+450	one prey died with ID=437
+452	one prey died with ID=378
+453	one prey died with ID=391
+453	one prey died with ID=398
+453	one prey died with ID=368
+453	one prey died with ID=396
+454	one prey died with ID=387
+454	one prey died with ID=379
+457	one prey died with ID=503
+458	one prey died with ID=486
+462	one prey died with ID=483
+464	one prey died with ID=472
+465	one predator died and started again randomly with ID=7
+465	one predator died and started again randomly with ID=19
+465	one predator died and started again randomly with ID=26
+467	one predator died and started again randomly with ID=22
+468	one prey died with ID=471
+470	one prey died with ID=476
+473	one prey died with ID=480
+473	one predator died and started again randomly with ID=6
+474	one predator died and started again randomly with ID=15
+475	one prey died with ID=488
+481	one prey died with ID=449
+481	one predator died and started again randomly with ID=27
+482	one predator died and started again randomly with ID=16
+484	one predator died and started again randomly with ID=30
+485	one prey died with ID=371
+485	one prey died with ID=462
+486	one predator died and started again randomly with ID=10
+487	one prey died with ID=499
+487	one predator died and started again randomly with ID=1
+488	one prey died with ID=496
+488	one predator died and started again randomly with ID=14
+490	one predator died and started again randomly with ID=29
+492	one prey died with ID=459
+492	one predator died and started again randomly with ID=20
+494	one predator died and started again randomly with ID=8
+494	one predator died and started again randomly with ID=18
+494	one predator died and started again randomly with ID=21
+495	one predator died and started again randomly with ID=5
+496	one prey died with ID=500
+496	one predator died and started again randomly with ID=4
+500	Prey467, Prey461-->Prey507, Prey508
+500	Prey492, Prey484-->Prey509, Prey510
+500	Prey460, Prey328-->Prey511, Prey512
+500	Prey460, Prey477-->Prey513, Prey514
+500	Prey477, Prey418-->Prey515, Prey516
+500	Prey468, Prey464-->Prey517, Prey518
+500	Prey484, Prey464-->Prey519, Prey520
+500	Prey461, Prey461-->Prey521, Prey522
+500	Prey493, Prey456-->Prey523, Prey524
+500	Prey393, Prey521-->Prey525, Prey526
+500	Prey468, Prey493-->Prey527, Prey528
+500	Prey465, Prey494-->Prey529, Prey530
+500	Prey514, Prey493-->Prey531, Prey532
+500	Prey464, Prey494-->Prey533, Prey534
+500	Prey482, Prey464-->Prey535, Prey536
+500	Prey393, Prey497-->Prey537, Prey538
+500	Prey461, Prey494-->Prey539, Prey540
+500	Prey493, Prey461-->Prey541, Prey542
+500	Prey461, Prey456-->Prey543, Prey544
+500	Prey512, Prey524-->Prey545, Prey546
+500	one prey died with ID=455
+500	one prey died with ID=469
+500	one prey died with ID=505
+500	one prey died with ID=479
+500	one prey died with ID=504
+500	one prey died with ID=481
+500	one prey died with ID=490
+500	one prey died with ID=487
+500	one prey died with ID=463
+500	one prey died with ID=475
+500	one prey died with ID=474
+500	one prey died with ID=466
+500	one prey died with ID=506
+500	one prey died with ID=454
+506	one prey died with ID=478
+508	one prey died with ID=543
+509	one predator died and started again randomly with ID=11
+510	one prey died with ID=495
+515	one prey died with ID=320
+515	one predator died and started again randomly with ID=19
+516	one prey died with ID=501
+516	one prey died with ID=435
+517	one predator died and started again randomly with ID=22
+520	one prey died with ID=498
+520	one prey died with ID=502
+520	one prey died with ID=518
+523	one predator died and started again randomly with ID=6
+524	one predator died and started again randomly with ID=15
+525	one prey died with ID=524
+525	one predator died and started again randomly with ID=23
+531	one predator died and started again randomly with ID=27
+533	one prey died with ID=508
+533	one prey died with ID=517
+534	one predator died and started again randomly with ID=30
+536	one predator died and started again randomly with ID=10
+537	one prey died with ID=485
+538	one predator died and started again randomly with ID=14
+540	one prey died with ID=532
+541	one prey died with ID=530
+542	one predator died and started again randomly with ID=20
+544	one predator died and started again randomly with ID=8
+544	one predator died and started again randomly with ID=18
+544	one predator died and started again randomly with ID=21
+545	one predator died and started again randomly with ID=5
+546	one prey died with ID=514
+548	one prey died with ID=511
+550	Prey520, Prey340-->Prey547, Prey548
+550	Prey460, Prey521-->Prey549, Prey550
+550	Prey538, Prey492-->Prey551, Prey552
+550	Prey468, Prey473-->Prey553, Prey554
+550	Prey457, Prey328-->Prey555, Prey556
+550	Prey458, Prey538-->Prey557, Prey558
+550	Prey411, Prey519-->Prey559, Prey560
+550	Prey491, Prey411-->Prey561, Prey562
+550	Prey457, Prey535-->Prey563, Prey564
+550	Prey411, Prey558-->Prey565, Prey566
+550	Prey461, Prey457-->Prey567, Prey568
+550	Prey491, Prey467-->Prey569, Prey570
+550	Prey467, Prey535-->Prey571, Prey572
+550	Prey520, Prey515-->Prey573, Prey574
+550	Prey491, Prey569-->Prey575, Prey576
+550	one prey died with ID=539
+550	one prey died with ID=513
+550	one prey died with ID=516
+550	one prey died with ID=545
+550	one prey died with ID=533
+550	one prey died with ID=529
+550	one prey died with ID=534
+550	one prey died with ID=536
+550	one prey died with ID=525
+550	one prey died with ID=507
+550	one prey died with ID=546
+551	one prey died with ID=540
+553	one prey died with ID=484
+554	one predator died and started again randomly with ID=9
+556	one prey died with ID=465
+558	one prey died with ID=492
+558	one prey died with ID=418
+559	one prey died with ID=494
+559	one predator died and started again randomly with ID=11
+560	one prey died with ID=547
+560	one prey died with ID=512
+560	one prey died with ID=531
+563	one prey died with ID=549
+564	one prey died with ID=489
+567	one prey died with ID=461
+567	one predator died and started again randomly with ID=22
+568	one prey died with ID=544
+570	one prey died with ID=509
+571	one prey died with ID=550
+571	one prey died with ID=564
+572	one prey died with ID=510
+574	one prey died with ID=567
+575	one prey died with ID=521
+575	one prey died with ID=470
+577	one prey died with ID=555
+579	one prey died with ID=497
+579	one prey died with ID=482
+580	one prey died with ID=568
+580	one prey died with ID=519
+580	one prey died with ID=556
+581	one predator died and started again randomly with ID=27
+582	one prey died with ID=456
+582	one prey died with ID=562
+582	one prey died with ID=419
+584	one prey died with ID=491
+588	one predator died and started again randomly with ID=14
+590	one prey died with ID=541
+590	one prey died with ID=542
+593	one prey died with ID=537
+594	one prey died with ID=457
+595	one prey died with ID=526
+595	one prey died with ID=523
+595	one predator died and started again randomly with ID=5
+596	one prey died with ID=464
+596	one predator died and started again randomly with ID=3
+597	one prey died with ID=473
+599	one prey died with ID=535
+600	Prey572, Prey553-->Prey577, Prey578
+600	Prey520, Prey565-->Prey579, Prey580
+600	Prey563, Prey563-->Prey581, Prey582
+600	Prey565, Prey553-->Prey583, Prey584
+600	Prey552, Prey565-->Prey585, Prey586
+600	Prey493, Prey477-->Prey587, Prey588
+600	Prey571, Prey563-->Prey589, Prey590
+600	Prey571, Prey578-->Prey591, Prey592
+600	Prey527, Prey515-->Prey593, Prey594
+600	Prey515, Prey527-->Prey595, Prey596
+600	Prey477, Prey565-->Prey597, Prey598
+600	Prey553, Prey527-->Prey599, Prey600
+600	Prey460, Prey468-->Prey601, Prey602
+600	Prey528, Prey572-->Prey603, Prey604
+600	Prey477, Prey565-->Prey605, Prey606
+600	Prey552, Prey372-->Prey607, Prey608
+600	Prey538, Prey468-->Prey609, Prey610
+600	Prey515, Prey572-->Prey611, Prey612
+600	Prey493, Prey412-->Prey613, Prey614
+600	Prey571, Prey565-->Prey615, Prey616
+600	Prey563, Prey572-->Prey617, Prey618
+600	Prey477, Prey599-->Prey619, Prey620
+600	Prey565, Prey553-->Prey621, Prey622
+600	Prey553, Prey619-->Prey623, Prey624
+600	Prey527, Prey493-->Prey625, Prey626
+600	one prey died with ID=328
+600	one prey died with ID=551
+600	one prey died with ID=576
+600	one prey died with ID=569
+600	one prey died with ID=574
+600	one prey died with ID=554
+600	one prey died with ID=557
+600	one prey died with ID=573
+600	one prey died with ID=559
+600	one prey died with ID=566
+600	one prey died with ID=560
+600	one prey died with ID=561
+602	one prey died with ID=458
+602	one prey died with ID=522
+603	one predator died and started again randomly with ID=13
+604	one predator died and started again randomly with ID=9
+612	one predator died and started again randomly with ID=28
+613	one predator died and started again randomly with ID=17
+618	one prey died with ID=602
+618	one prey died with ID=594
+619	one predator died and started again randomly with ID=25
+621	one predator died and started again randomly with ID=12
+622	one prey died with ID=605
+623	one prey died with ID=608
+624	one prey died with ID=520
+626	one prey died with ID=597
+627	one predator died and started again randomly with ID=22
+630	one prey died with ID=623
+632	one prey died with ID=393
+632	one predator died and started again randomly with ID=19
+633	one prey died with ID=598
+634	one predator died and started again randomly with ID=2
+635	one prey died with ID=515
+636	one predator died and started again randomly with ID=24
+640	one prey died with ID=595
+641	one prey died with ID=581
+642	one prey died with ID=412
+643	one prey died with ID=603
+643	one prey died with ID=610
+647	one prey died with ID=548
+648	one predator died and started again randomly with ID=14
+649	one prey died with ID=572
+650	Prey493, Prey585-->Prey627, Prey628
+650	Prey563, Prey577-->Prey629, Prey630
+650	Prey577, Prey626-->Prey631, Prey632
+650	Prey626, Prey601-->Prey633, Prey634
+650	Prey625, Prey609-->Prey635, Prey636
+650	Prey527, Prey570-->Prey637, Prey638
+650	Prey625, Prey493-->Prey639, Prey640
+650	Prey477, Prey577-->Prey641, Prey642
+650	Prey585, Prey527-->Prey643, Prey644
+650	Prey577, Prey596-->Prey645, Prey646
+650	Prey590, Prey615-->Prey647, Prey648
+650	Prey631, Prey648-->Prey649, Prey650
+650	Prey644, Prey626-->Prey651, Prey652
+650	Prey644, Prey585-->Prey653, Prey654
+650	Prey642, Prey467-->Prey655, Prey656
+650	Prey577, Prey590-->Prey657, Prey658
+650	one prey died with ID=592
+650	one prey died with ID=579
+650	one prey died with ID=580
+650	one prey died with ID=606
+650	one prey died with ID=612
+650	one prey died with ID=589
+650	one prey died with ID=613
+650	one prey died with ID=611
+650	one prey died with ID=604
+650	one prey died with ID=607
+650	one prey died with ID=620
+650	one prey died with ID=614
+650	one prey died with ID=616
+650	one prey died with ID=586
+650	one prey died with ID=587
+650	one prey died with ID=588
+652	one prey died with ID=565
+652	one prey died with ID=411
+652	one prey died with ID=570
+653	one prey died with ID=558
+661	one predator died and started again randomly with ID=6
+664	one prey died with ID=618
+669	one prey died with ID=460
+669	one predator died and started again randomly with ID=25
+670	one prey died with ID=622
+670	one prey died with ID=621
+673	one prey died with ID=563
+675	one prey died with ID=617
+677	one predator died and started again randomly with ID=22
+679	one prey died with ID=578
+679	one prey died with ID=582
+683	one predator died and started again randomly with ID=17
+684	one predator died and started again randomly with ID=2
+684	one predator died and started again randomly with ID=4
+686	one predator died and started again randomly with ID=7
+692	one predator died and started again randomly with ID=19
+695	one prey died with ID=619
+696	one predator died and started again randomly with ID=1
+696	one predator died and started again randomly with ID=29
+697	one predator died and started again randomly with ID=15
+698	one predator died and started again randomly with ID=14
+700	Prey645, Prey599-->Prey659, Prey660
+700	Prey650, Prey650-->Prey661, Prey662
+700	Prey643, Prey636-->Prey663, Prey664
+700	Prey625, Prey552-->Prey665, Prey666
+700	Prey641, Prey552-->Prey667, Prey668
+700	Prey637, Prey552-->Prey669, Prey670
+700	Prey538, Prey372-->Prey671, Prey672
+700	Prey609, Prey641-->Prey673, Prey674
+700	Prey649, Prey624-->Prey675, Prey676
+700	Prey657, Prey372-->Prey677, Prey678
+700	Prey372, Prey633-->Prey679, Prey680
+700	Prey609, Prey649-->Prey681, Prey682
+700	Prey640, Prey637-->Prey683, Prey684
+700	Prey654, Prey609-->Prey685, Prey686
+700	one prey died with ID=627
+700	one prey died with ID=656
+700	one prey died with ID=630
+700	one prey died with ID=651
+700	one prey died with ID=646
+700	one prey died with ID=635
+707	one predator died and started again randomly with ID=16
+710	one prey died with ID=638
+721	one predator died and started again randomly with ID=6
+727	one predator died and started again randomly with ID=22
+729	one prey died with ID=664
+731	one prey died with ID=590
+733	one prey died with ID=668
+739	one prey died with ID=575
+740	one prey died with ID=631
+744	one prey died with ID=596
+750	Prey639, Prey625-->Prey687, Prey688
+750	Prey628, Prey637-->Prey689, Prey690
+750	Prey644, Prey672-->Prey691, Prey692
+750	Prey644, Prey667-->Prey693, Prey694
+750	Prey527, Prey625-->Prey695, Prey696
+750	Prey493, Prey628-->Prey697, Prey698
+750	Prey672, Prey654-->Prey699, Prey700
+750	one prey died with ID=681
+750	one prey died with ID=663
+750	one prey died with ID=680
+750	one prey died with ID=686
+750	one prey died with ID=671
+750	one prey died with ID=682
+750	one prey died with ID=684
+750	one prey died with ID=673
+750	one prey died with ID=679
+750	one prey died with ID=674
+752	one prey died with ID=528
+758	one prey died with ID=642
+760	one prey died with ID=670
+763	one prey died with ID=585
+770	one prey died with ID=661
+770	one prey died with ID=658
+770	one prey died with ID=477
+772	one prey died with ID=340
+778	one prey died with ID=657
+778	one prey died with ID=643
+785	one prey died with ID=655
+785	one predator died and started again randomly with ID=27
+789	one prey died with ID=636
+790	one prey died with ID=577
+791	one prey died with ID=584
+800	Prey683, Prey634-->Prey701, Prey702
+800	Prey688, Prey688-->Prey703, Prey704
+800	Prey695, Prey667-->Prey705, Prey706
+800	Prey699, Prey593-->Prey707, Prey708
+800	Prey647, Prey695-->Prey709, Prey710
+800	Prey637, Prey666-->Prey711, Prey712
+800	Prey694, Prey688-->Prey713, Prey714
+800	Prey653, Prey624-->Prey715, Prey716
+800	Prey553, Prey493-->Prey717, Prey718
+800	Prey683, Prey669-->Prey719, Prey720
+800	Prey669, Prey698-->Prey721, Prey722
+800	Prey593, Prey665-->Prey723, Prey724
+800	one prey died with ID=689
+800	one prey died with ID=687
+801	one prey died with ID=468
+813	one predator died and started again randomly with ID=5
+813	one predator died and started again randomly with ID=18
+815	one prey died with ID=677
+819	one prey died with ID=660
+822	one prey died with ID=640
+827	one prey died with ID=675
+829	one prey died with ID=625
+832	one prey died with ID=712
+834	one predator died and started again randomly with ID=4
+834	one predator died and started again randomly with ID=10
+836	one prey died with ID=713
+844	one prey died with ID=649
+850	Prey641, Prey641-->Prey725, Prey726
+850	Prey715, Prey719-->Prey727, Prey728
+850	Prey647, Prey698-->Prey729, Prey730
+850	Prey609, Prey711-->Prey731, Prey732
+850	Prey641, Prey724-->Prey733, Prey734
+850	one prey died with ID=723
+850	one prey died with ID=721
+850	one prey died with ID=705
+850	one prey died with ID=706
+850	one prey died with ID=707
+850	one prey died with ID=708
+850	one prey died with ID=709
+852	one prey died with ID=694
+853	one prey died with ID=601
+854	one prey died with ID=688
+855	one prey died with ID=716
+856	one prey died with ID=702
+858	one prey died with ID=665
+860	one prey died with ID=650
+860	one prey died with ID=676
+861	one prey died with ID=593
+861	one prey died with ID=634
+861	one prey died with ID=637
+863	one prey died with ID=669
+863	one prey died with ID=591
+868	one prey died with ID=652
+869	one prey died with ID=632
+869	one prey died with ID=624
+871	one prey died with ID=626
+871	one predator died and started again randomly with ID=3
+872	one prey died with ID=678
+873	one predator died and started again randomly with ID=19
+874	one prey died with ID=552
+875	one prey died with ID=615
+875	one prey died with ID=648
+876	one prey died with ID=645
+878	one prey died with ID=693
+878	one predator died and started again randomly with ID=28
+879	one prey died with ID=662
+879	one prey died with ID=647
+884	one predator died and started again randomly with ID=4
+886	one prey died with ID=372
+887	one prey died with ID=692
+887	one prey died with ID=717
+889	one prey died with ID=553
+891	one prey died with ID=730
+891	one predator died and started again randomly with ID=8
+892	one prey died with ID=600
+893	one prey died with ID=685
+893	one prey died with ID=720
+893	one predator died and started again randomly with ID=25
+894	one prey died with ID=571
+895	one prey died with ID=691
+900	Prey734, Prey703-->Prey735, Prey736
+900	Prey733, Prey696-->Prey737, Prey738
+900	Prey733, Prey715-->Prey739, Prey740
+900	Prey704, Prey731-->Prey741, Prey742
+900	Prey729, Prey683-->Prey743, Prey744
+900	Prey727, Prey734-->Prey745, Prey746
+900	Prey733, Prey731-->Prey747, Prey748
+900	Prey719, Prey704-->Prey749, Prey750
+900	Prey711, Prey641-->Prey751, Prey752
+900	Prey701, Prey727-->Prey753, Prey754
+900	Prey734, Prey719-->Prey755, Prey756
+900	Prey719, Prey703-->Prey757, Prey758
+900	Prey644, Prey733-->Prey759, Prey760
+900	Prey719, Prey734-->Prey761, Prey762
+900	Prey727, Prey734-->Prey763, Prey764
+900	Prey695, Prey714-->Prey765, Prey766
+900	Prey731, Prey696-->Prey767, Prey768
+900	Prey734, Prey690-->Prey769, Prey770
+900	Prey729, Prey639-->Prey771, Prey772
+900	Prey715, Prey733-->Prey773, Prey774
+900	Prey654, Prey722-->Prey775, Prey776
+900	one prey died with ID=700
+900	one prey died with ID=732
+910	one predator died and started again randomly with ID=7
+915	one predator died and started again randomly with ID=9
+919	one prey died with ID=736
+920	one prey died with ID=735
+924	one predator died and started again randomly with ID=29
+925	one prey died with ID=654
+928	one predator died and started again randomly with ID=23
+929	one prey died with ID=538
+933	one prey died with ID=703
+933	one prey died with ID=768
+934	one prey died with ID=776
+934	one prey died with ID=718
+936	one prey died with ID=740
+938	one prey died with ID=659
+938	one predator died and started again randomly with ID=6
+938	one predator died and started again randomly with ID=22
+940	one prey died with ID=628
+940	one prey died with ID=629
+940	one prey died with ID=757
+941	one prey died with ID=747
+942	one predator died and started again randomly with ID=14
+942	one predator died and started again randomly with ID=30
+943	one prey died with ID=770
+943	one predator died and started again randomly with ID=1
+943	one predator died and started again randomly with ID=16
+943	one predator died and started again randomly with ID=25
+945	one predator died and started again randomly with ID=24
+946	one prey died with ID=633
+950	Prey731, Prey751-->Prey777, Prey778
+950	Prey739, Prey599-->Prey779, Prey780
+950	Prey731, Prey733-->Prey781, Prey782
+950	Prey599, Prey761-->Prey783, Prey784
+950	Prey710, Prey737-->Prey785, Prey786
+950	Prey751, Prey729-->Prey787, Prey788
+950	Prey609, Prey710-->Prey789, Prey790
+950	Prey710, Prey731-->Prey791, Prey792
+950	Prey761, Prey672-->Prey793, Prey794
+950	one prey died with ID=769
+950	one prey died with ID=773
+950	one prey died with ID=752
+950	one prey died with ID=760
+950	one prey died with ID=758
+950	one prey died with ID=467
+951	one prey died with ID=728
+951	one predator died and started again randomly with ID=27
+952	one predator died and started again randomly with ID=13
+959	one prey died with ID=783
+959	one prey died with ID=738
+959	one prey died with ID=755
+960	one prey died with ID=763
+960	one prey died with ID=583
+960	one predator died and started again randomly with ID=7
+967	one prey died with ID=698
+972	one prey died with ID=774
+982	one predator died and started again randomly with ID=21
+987	one prey died with ID=729
+987	one prey died with ID=724
+988	one prey died with ID=727
+988	one prey died with ID=767
+989	one prey died with ID=699
+990	one prey died with ID=782
+992	one prey died with ID=791
+993	one predator died and started again randomly with ID=25
+994	one prey died with ID=784
+995	one prey died with ID=749
+996	one prey died with ID=772
+996	one prey died with ID=711
+997	one prey died with ID=704
+997	one prey died with ID=667
+998	one prey died with ID=701
+998	one prey died with ID=719
+998	one prey died with ID=672
+999	one prey died with ID=750
+1000	Prey786, Prey748-->Prey795, Prey796
+1000	Prey759, Prey742-->Prey797, Prey798
+1000	Prey787, Prey734-->Prey799, Prey800
+1000	Prey644, Prey751-->Prey801, Prey802
+1000	Prey742, Prey787-->Prey803, Prey804
+1000	Prey793, Prey793-->Prey805, Prey806
+1000	Prey748, Prey751-->Prey807, Prey808
+1000	Prey788, Prey794-->Prey809, Prey810
+1000	Prey806, Prey751-->Prey811, Prey812
+1000	Prey759, Prey734-->Prey813, Prey814
+1000	Prey793, Prey810-->Prey815, Prey816
+1000	Prey786, Prey793-->Prey817, Prey818
+1000	Prey797, Prey493-->Prey819, Prey820
+1000	Prey493, Prey683-->Prey821, Prey822
+1000	Prey756, Prey788-->Prey823, Prey824
+1000	Prey743, Prey725-->Prey825, Prey826
+1000	one prey died with ID=781
+1000	one prey died with ID=779
+1001	one predator died and started again randomly with ID=27
+1002	one predator died and started again randomly with ID=13
+1004	one prey died with ID=739
+1008	one prey died with ID=762
+1010	one prey died with ID=780
+1010	one prey died with ID=761
+1011	one prey died with ID=695
+1011	one prey died with ID=696
+1011	one prey died with ID=599
+1012	one prey died with ID=778
+1012	one prey died with ID=737
+1014	one prey died with ID=715
+1014	one prey died with ID=653
+1014	one prey died with ID=792
+1015	one prey died with ID=746
+1015	one prey died with ID=753
+1017	one prey died with ID=765
+1020	one predator died and started again randomly with ID=7
+1022	one prey died with ID=754
+1023	one prey died with ID=766
+1023	one predator died and started again randomly with ID=2
+1026	one prey died with ID=809
+1028	one prey died with ID=764
+1029	one prey died with ID=824
+1030	one prey died with ID=775
+1032	one prey died with ID=756
+1032	one predator died and started again randomly with ID=20
+1032	one predator died and started again randomly with ID=21
+1037	one prey died with ID=741
+1038	one prey died with ID=714
+1041	one prey died with ID=777
+1045	one predator died and started again randomly with ID=26
+1045	one predator died and started again randomly with ID=28
+1048	one prey died with ID=731
+1048	one predator died and started again randomly with ID=18
+1049	one prey died with ID=810
+1050	Prey796, Prey803-->Prey827, Prey828
+1050	Prey804, Prey697-->Prey829, Prey830
+1050	Prey771, Prey815-->Prey831, Prey832
+1050	Prey823, Prey823-->Prey833, Prey834
+1050	Prey814, Prey826-->Prey835, Prey836
+1050	Prey794, Prey744-->Prey837, Prey838
+1050	Prey806, Prey823-->Prey839, Prey840
+1050	Prey722, Prey787-->Prey841, Prey842
+1050	Prey639, Prey814-->Prey843, Prey844
+1050	Prey733, Prey771-->Prey845, Prey846
+1050	Prey787, Prey609-->Prey847, Prey848
+1050	Prey722, Prey839-->Prey849, Prey850
+1050	Prey805, Prey804-->Prey851, Prey852
+1050	Prey771, Prey843-->Prey853, Prey854
+1050	one prey died with ID=819
+1050	one prey died with ID=821
+1052	one prey died with ID=789
+1052	one predator died and started again randomly with ID=13
+1058	one prey died with ID=527
+1059	one prey died with ID=683
+1065	one predator died and started again randomly with ID=5
+1067	one prey died with ID=745
+1070	one predator died and started again randomly with ID=7
+1071	one prey died with ID=726
+1072	one prey died with ID=733
+1073	one predator died and started again randomly with ID=2
+1076	one prey died with ID=786
+1076	one prey died with ID=800
+1078	one prey died with ID=641
+1079	one predator died and started again randomly with ID=9
+1080	one predator died and started again randomly with ID=14
+1082	one predator died and started again randomly with ID=17
+1082	one predator died and started again randomly with ID=20
+1086	one prey died with ID=827
+1090	one prey died with ID=843
+1090	one predator died and started again randomly with ID=24
+1092	one prey died with ID=829
+1093	one prey died with ID=818
+1095	one prey died with ID=798
+1095	one prey died with ID=808
+1095	one predator died and started again randomly with ID=26
+1098	one predator died and started again randomly with ID=18
+1100	Prey822, Prey854-->Prey855, Prey856
+1100	Prey639, Prey825-->Prey857, Prey858
+1100	Prey788, Prey854-->Prey859, Prey860
+1100	Prey853, Prey834-->Prey861, Prey862
+1100	Prey832, Prey834-->Prey863, Prey864
+1100	Prey748, Prey785-->Prey865, Prey866
+1100	Prey796, Prey852-->Prey867, Prey868
+1100	Prey796, Prey493-->Prey869, Prey870
+1100	Prey771, Prey493-->Prey871, Prey872
+1100	one prey died with ID=848
+1100	one prey died with ID=831
+1100	one prey died with ID=844
+1100	one prey died with ID=847
+1101	one prey died with ID=804
+1102	one predator died and started again randomly with ID=13
+1107	one prey died with ID=759
+1107	one prey died with ID=734
+1107	one prey died with ID=802
+1107	one predator died and started again randomly with ID=11
+1108	one prey died with ID=743
+1110	one prey died with ID=801
+1111	one prey died with ID=812
+1111	one predator died and started again randomly with ID=21
+1112	one prey died with ID=851
+1113	one prey died with ID=793
+1113	one prey died with ID=852
+1115	one predator died and started again randomly with ID=5
+1116	one prey died with ID=785
+1117	one prey died with ID=742
+1118	one prey died with ID=644
+1118	one prey died with ID=725
+1118	one prey died with ID=839
+1118	one prey died with ID=817
+1118	one prey died with ID=788
+1119	one prey died with ID=787
+1119	one prey died with ID=794
+1120	one prey died with ID=867
+1120	one prey died with ID=841
+1120	one prey died with ID=835
+1121	one prey died with ID=814
+1123	one predator died and started again randomly with ID=2
+1124	one prey died with ID=860
+1124	one prey died with ID=815
+1124	one prey died with ID=797
+1126	one prey died with ID=799
+1128	one prey died with ID=826
+1128	one prey died with ID=813
+1130	one prey died with ID=870
+1130	one prey died with ID=840
+1132	one predator died and started again randomly with ID=20
+1133	one prey died with ID=816
+1133	one prey died with ID=805
+1134	one prey died with ID=806
+1138	one prey died with ID=834
+1140	one prey died with ID=833
+1140	one predator died and started again randomly with ID=24
+1142	one prey died with ID=863
+1144	one prey died with ID=858
+1146	one prey died with ID=820
+1149	one prey died with ID=836
+1150	Prey849, Prey864-->Prey873, Prey874
+1150	Prey744, Prey807-->Prey875, Prey876
+1150	Prey862, Prey871-->Prey877, Prey878
+1150	Prey854, Prey865-->Prey879, Prey880
+1150	Prey832, Prey856-->Prey881, Prey882
+1150	Prey862, Prey861-->Prey883, Prey884
+1150	Prey859, Prey871-->Prey885, Prey886
+1150	Prey864, Prey666-->Prey887, Prey888
+1150	Prey864, Prey868-->Prey889, Prey890
+1150	Prey807, Prey859-->Prey891, Prey892
+1150	Prey859, Prey861-->Prey893, Prey894
+1150	Prey850, Prey864-->Prey895, Prey896
+1150	Prey744, Prey868-->Prey897, Prey898
+1150	Prey868, Prey862-->Prey899, Prey900
+1150	Prey862, Prey865-->Prey901, Prey902
+1150	Prey861, Prey864-->Prey903, Prey904
+1150	Prey862, Prey862-->Prey905, Prey906
+1150	Prey871, Prey849-->Prey907, Prey908
+1150	Prey856, Prey842-->Prey909, Prey910
+1150	Prey910, Prey866-->Prey911, Prey912
+1150	Prey823, Prey790-->Prey913, Prey914
+1150	Prey803, Prey849-->Prey915, Prey916
+1150	one prey died with ID=855
+1150	one prey died with ID=869
+1155	one prey died with ID=795
+1158	one predator died and started again randomly with ID=18
+1159	one prey died with ID=857
+1160	one prey died with ID=902
+1161	one prey died with ID=915
+1161	one predator died and started again randomly with ID=21
+1163	one prey died with ID=912
+1164	one prey died with ID=748
+1169	one predator died and started again randomly with ID=29
+1170	one prey died with ID=911
+1172	one predator died and started again randomly with ID=13
+1174	one predator died and started again randomly with ID=26
+1175	one prey died with ID=910
+1175	one prey died with ID=796
+1176	one prey died with ID=889
+1177	one prey died with ID=811
+1179	one prey died with ID=871
+1179	one predator died and started again randomly with ID=19
+1181	one prey died with ID=878
+1181	one predator died and started again randomly with ID=23
+1182	one predator died and started again randomly with ID=20
+1184	one prey died with ID=890
+1185	one prey died with ID=690
+1185	one prey died with ID=828
+1185	one prey died with ID=879
+1187	one prey died with ID=908
+1189	one predator died and started again randomly with ID=4
+1189	one predator died and started again randomly with ID=16
+1190	one prey died with ID=876
+1190	one predator died and started again randomly with ID=17
+1190	one predator died and started again randomly with ID=24
+1195	one prey died with ID=906
+1196	one prey died with ID=872
+1197	one prey died with ID=862
+1200	Prey897, Prey904-->Prey917, Prey918
+1200	Prey899, Prey899-->Prey919, Prey920
+1200	Prey913, Prey907-->Prey921, Prey922
+1200	Prey883, Prey883-->Prey923, Prey924
+1200	Prey884, Prey887-->Prey925, Prey926
+1200	Prey916, Prey899-->Prey927, Prey928
+1200	Prey916, Prey916-->Prey929, Prey930
+1200	Prey907, Prey883-->Prey931, Prey932
+1200	Prey898, Prey903-->Prey933, Prey934
+1200	Prey899, Prey803-->Prey935, Prey936
+1200	Prey838, Prey883-->Prey937, Prey938
+1200	Prey899, Prey897-->Prey939, Prey940
+1200	one prey died with ID=914
+1200	one prey died with ID=900
+1200	one prey died with ID=886
+1200	one prey died with ID=875
+1200	one prey died with ID=905
+1200	one predator died and started again randomly with ID=6
+1201	one predator died and started again randomly with ID=15
+1202	one prey died with ID=822
+1202	one prey died with ID=493
+1204	one prey died with ID=853
+1205	one predator died and started again randomly with ID=7
+1206	one prey died with ID=609
+1208	one predator died and started again randomly with ID=18
+1210	one prey died with ID=885
+1210	one prey died with ID=901
+1210	one prey died with ID=893
+1210	one prey died with ID=881
+1211	one prey died with ID=790
+1211	one prey died with ID=939
+1211	one prey died with ID=888
+1213	one prey died with ID=873
+1215	one prey died with ID=832
+1217	one prey died with ID=722
+1218	one prey died with ID=666
+1219	one predator died and started again randomly with ID=29
+1220	one prey died with ID=846
+1220	one prey died with ID=697
+1220	one prey died with ID=744
+1222	one prey died with ID=830
+1222	one prey died with ID=837
+1223	one predator died and started again randomly with ID=22
+1231	one predator died and started again randomly with ID=23
+1232	one predator died and started again randomly with ID=13
+1232	one predator died and started again randomly with ID=20
+1234	one predator died and started again randomly with ID=10
+1237	one prey died with ID=639
+1239	one predator died and started again randomly with ID=4
+1240	one predator died and started again randomly with ID=24
+1241	one prey died with ID=929
+1243	one prey died with ID=887
+1245	one predator died and started again randomly with ID=2
+1246	one prey died with ID=925
+1247	one prey died with ID=899
+1247	one prey died with ID=898
+1248	one prey died with ID=895
+1249	one prey died with ID=845
+1249	one predator died and started again randomly with ID=30
+1250	Prey923, Prey940-->Prey941, Prey942
+1250	Prey922, Prey854-->Prey943, Prey944
+1250	Prey923, Prey932-->Prey945, Prey946
+1250	Prey926, Prey918-->Prey947, Prey948
+1250	Prey880, Prey917-->Prey949, Prey950
+1250	Prey930, Prey807-->Prey951, Prey952
+1250	Prey917, Prey934-->Prey953, Prey954
+1250	Prey933, Prey897-->Prey955, Prey956
+1250	Prey917, Prey866-->Prey957, Prey958
+1250	Prey854, Prey932-->Prey959, Prey960
+1250	Prey883, Prey917-->Prey961, Prey962
+1250	Prey926, Prey913-->Prey963, Prey964
+1250	Prey913, Prey921-->Prey965, Prey966
+1250	Prey866, Prey903-->Prey967, Prey968
+1250	Prey924, Prey883-->Prey969, Prey970
+1250	Prey864, Prey923-->Prey971, Prey972
+1251	one predator died and started again randomly with ID=9
+1251	one predator died and started again randomly with ID=15
+1253	one prey died with ID=751
+1253	one prey died with ID=825
+1254	one prey died with ID=803
+1256	one prey died with ID=868
+1258	one predator died and started again randomly with ID=18
+1259	one prey died with ID=938
+1260	one predator died and started again randomly with ID=3
+1261	one predator died and started again randomly with ID=1
+1262	one predator died and started again randomly with ID=5
+1266	one prey died with ID=936
+1268	one prey died with ID=874
+1268	one prey died with ID=967
+1269	one prey died with ID=907
+1271	one prey died with ID=957
+1272	one prey died with ID=964
+1275	one prey died with ID=823
+1282	one predator died and started again randomly with ID=13
+1285	one prey died with ID=771
+1286	one prey died with ID=941
+1286	one prey died with ID=866
+1287	one prey died with ID=920
+1287	one prey died with ID=927
+1287	one prey died with ID=807
+1291	one predator died and started again randomly with ID=12
+1292	one predator died and started again randomly with ID=25
+1294	one prey died with ID=904
+1294	one predator died and started again randomly with ID=10
+1296	one prey died with ID=942
+1296	one prey died with ID=842
+1298	one prey died with ID=892
+1298	one prey died with ID=865
+1298	one prey died with ID=880
+1299	one predator died and started again randomly with ID=21
+1300	Prey951, Prey930-->Prey973, Prey974
+1300	Prey919, Prey932-->Prey975, Prey976
+1300	Prey856, Prey891-->Prey977, Prey978
+1300	Prey935, Prey928-->Prey979, Prey980
+1300	Prey951, Prey928-->Prey981, Prey982
+1300	Prey856, Prey896-->Prey983, Prey984
+1300	Prey919, Prey909-->Prey985, Prey986
+1300	Prey965, Prey951-->Prey987, Prey988
+1300	Prey966, Prey710-->Prey989, Prey990
+1300	Prey959, Prey961-->Prey991, Prey992
+1300	Prey963, Prey877-->Prey993, Prey994
+1300	Prey928, Prey940-->Prey995, Prey996
+1300	one prey died with ID=946
+1300	one prey died with ID=968
+1300	one prey died with ID=955
+1300	one prey died with ID=956
+1301	one predator died and started again randomly with ID=15
+1305	one predator died and started again randomly with ID=26
+1309	one prey died with ID=854
+1310	one prey died with ID=972
+1311	one prey died with ID=883
+1311	one prey died with ID=903
+1311	one prey died with ID=884
+1311	one prey died with ID=966
+1312	one prey died with ID=894
+1313	one prey died with ID=969
+1318	one predator died and started again randomly with ID=23
+1319	one predator died and started again randomly with ID=24
+1321	one prey died with ID=850
+1321	one prey died with ID=849
+1322	one prey died with ID=913
+1322	one prey died with ID=982
+1325	one prey died with ID=859
+1325	one prey died with ID=861
+1329	one prey died with ID=924
+1329	one prey died with ID=918
+1330	one prey died with ID=926
+1330	one prey died with ID=917
+1330	one prey died with ID=990
+1334	one prey died with ID=953
+1335	one predator died and started again randomly with ID=8
+1337	one predator died and started again randomly with ID=27
+1338	one prey died with ID=934
+1341	one prey died with ID=975
+1342	one predator died and started again randomly with ID=13
+1345	one prey died with ID=960
+1345	one prey died with ID=944
+1346	one prey died with ID=947
+1348	one prey died with ID=958
+1350	Prey995, Prey935-->Prey997, Prey998
+1350	Prey952, Prey996-->Prey999, Prey1000
+1350	Prey978, Prey979-->Prey1001, Prey1002
+1350	Prey983, Prey981-->Prey1003, Prey1004
+1350	Prey963, Prey882-->Prey1005, Prey1006
+1350	Prey945, Prey978-->Prey1007, Prey1008
+1350	Prey979, Prey974-->Prey1009, Prey1010
+1350	Prey923, Prey919-->Prey1011, Prey1012
+1350	Prey978, Prey963-->Prey1013, Prey1014
+1350	Prey996, Prey963-->Prey1015, Prey1016
+1350	Prey838, Prey923-->Prey1017, Prey1018
+1350	Prey981, Prey950-->Prey1019, Prey1020
+1350	Prey923, Prey995-->Prey1021, Prey1022
+1350	Prey943, Prey978-->Prey1023, Prey1024
+1350	Prey980, Prey945-->Prey1025, Prey1026
+1350	one prey died with ID=973
+1350	one prey died with ID=991
+1350	one prey died with ID=962
+1350	one prey died with ID=986
+1350	one prey died with ID=971
+1350	one prey died with ID=988
+1350	one prey died with ID=994
+1351	one prey died with ID=961
+1351	one prey died with ID=954
+1351	one predator died and started again randomly with ID=15
+1355	one prey died with ID=951
+1384	one prey died with ID=981
+1385	one prey died with ID=882
+1389	one prey died with ID=952
+1394	one prey died with ID=1004
+1400	Prey1019, Prey995-->Prey1027, Prey1028
+1400	Prey983, Prey963-->Prey1029, Prey1030
+1400	Prey1018, Prey1014-->Prey1031, Prey1032
+1400	Prey999, Prey1019-->Prey1033, Prey1034
+1400	Prey1025, Prey943-->Prey1035, Prey1036
+1400	Prey1017, Prey930-->Prey1037, Prey1038
+1400	Prey1022, Prey1019-->Prey1039, Prey1040
+1400	one prey died with ID=1020
+1400	one prey died with ID=998
+1400	one prey died with ID=919
+1400	one prey died with ID=935
+1400	one prey died with ID=1005
+1400	one prey died with ID=1006
+1410	one prey died with ID=1035
+1410	one prey died with ID=970
+1411	one prey died with ID=977
+1412	one prey died with ID=856
+1412	one prey died with ID=923
+1414	one predator died and started again randomly with ID=10
+1416	one prey died with ID=949
+1417	one prey died with ID=1015
+1419	one prey died with ID=864
+1421	one prey died with ID=943
+1424	one predator died and started again randomly with ID=22
+1431	one prey died with ID=978
+1434	one prey died with ID=989
+1435	one prey died with ID=974
+1436	one prey died with ID=1036
+1449	one prey died with ID=1040
+1450	Prey1019, Prey996-->Prey1041, Prey1042
+1450	Prey1023, Prey1030-->Prey1043, Prey1044
+1450	Prey1032, Prey996-->Prey1045, Prey1046
+1450	Prey950, Prey1038-->Prey1047, Prey1048
+1450	Prey984, Prey1011-->Prey1049, Prey1050
+1450	Prey945, Prey1033-->Prey1051, Prey1052
+1450	Prey1007, Prey999-->Prey1053, Prey1054
+1450	Prey948, Prey1028-->Prey1055, Prey1056
+1450	Prey1011, Prey976-->Prey1057, Prey1058
+1450	Prey1028, Prey1026-->Prey1059, Prey1060
+1451	one prey died with ID=1009
+1452	one prey died with ID=1008
+1454	one prey died with ID=1010
+1455	one prey died with ID=1013
+1456	one prey died with ID=922
+1456	one prey died with ID=963
+1459	one prey died with ID=1057
+1464	one predator died and started again randomly with ID=10
+1467	one prey died with ID=1016
+1472	one predator died and started again randomly with ID=13
+1475	one prey died with ID=1039
+1479	one prey died with ID=1058
+1480	one prey died with ID=983
+1482	one prey died with ID=909
+1484	one prey died with ID=1002
+1491	one prey died with ID=1018
+1491	one prey died with ID=940
+1499	one prey died with ID=897
+1500	Prey921, Prey1033-->Prey1061, Prey1062
+1500	Prey1024, Prey1043-->Prey1063, Prey1064
+1500	Prey996, Prey1014-->Prey1065, Prey1066
+1500	Prey1059, Prey1060-->Prey1067, Prey1068
+1500	Prey1024, Prey877-->Prey1069, Prey1070
+1500	Prey1028, Prey1046-->Prey1071, Prey1072
+1500	Prey1027, Prey1038-->Prey1073, Prey1074
+1500	Prey1024, Prey1043-->Prey1075, Prey1076
+1500	one prey died with ID=1045
+1502	one prey died with ID=959
+1505	one prey died with ID=1073
+1508	one prey died with ID=838
+1509	one prey died with ID=710
+1510	one prey died with ID=1003
+1511	one prey died with ID=916
+1513	one prey died with ID=1012
+1517	one prey died with ID=950
+1521	one prey died with ID=984
+1522	one prey died with ID=1025
+1524	one prey died with ID=1047
+1527	one prey died with ID=931
+1529	one prey died with ID=1026
+1530	one prey died with ID=995
+1532	one prey died with ID=1053
+1533	one prey died with ID=993
+1536	one prey died with ID=1014
+1537	one prey died with ID=1007
+1538	one prey died with ID=1042
+1541	one predator died and started again randomly with ID=8
+1542	one prey died with ID=1011
+1545	one predator died and started again randomly with ID=30
+1547	one prey died with ID=1074
+1548	one predator died and started again randomly with ID=29
+1549	one predator died and started again randomly with ID=1
+1550	Prey1068, Prey1055-->Prey1077, Prey1078
+1550	Prey1054, Prey1059-->Prey1079, Prey1080
+1550	Prey1041, Prey979-->Prey1081, Prey1082
+1550	Prey1049, Prey1046-->Prey1083, Prey1084
+1550	Prey1066, Prey1038-->Prey1085, Prey1086
+1550	Prey1059, Prey1041-->Prey1087, Prey1088
+1550	Prey1054, Prey1065-->Prey1089, Prey1090
+1550	Prey1056, Prey976-->Prey1091, Prey1092
+1550	Prey1041, Prey1068-->Prey1093, Prey1094
+1550	Prey979, Prey1001-->Prey1095, Prey1096
+1550	Prey1055, Prey1017-->Prey1097, Prey1098
+1550	one prey died with ID=1060
+1550	one prey died with ID=1070
+1551	one predator died and started again randomly with ID=6
+1551	one predator died and started again randomly with ID=7
+1553	one prey died with ID=985
+1553	one prey died with ID=937
+1555	one prey died with ID=965
+1557	one prey died with ID=1062
+1557	one prey died with ID=1032
+1558	one prey died with ID=1082
+1563	one prey died with ID=1024
+1563	one prey died with ID=1034
+1564	one prey died with ID=1028
+1565	one prey died with ID=1050
+1572	one prey died with ID=1075
+1574	one prey died with ID=1084
+1575	one prey died with ID=932
+1576	one prey died with ID=1069
+1577	one prey died with ID=891
+1579	one prey died with ID=877
+1579	one predator died and started again randomly with ID=5
+1583	one prey died with ID=1023
+1584	one prey died with ID=1063
+1584	one predator died and started again randomly with ID=3
+1586	one prey died with ID=933
+1587	one predator died and started again randomly with ID=26
+1588	one prey died with ID=1049
+1592	one prey died with ID=1097
+1592	one prey died with ID=1080
+1594	one prey died with ID=1044
+1596	one prey died with ID=1051
+1600	Prey997, Prey1066-->Prey1099, Prey1100
+1600	Prey1089, Prey1079-->Prey1101, Prey1102
+1600	Prey1087, Prey1086-->Prey1103, Prey1104
+1600	Prey1027, Prey1078-->Prey1105, Prey1106
+1600	Prey1052, Prey1092-->Prey1107, Prey1108
+1600	Prey1098, Prey1046-->Prey1109, Prey1110
+1600	Prey976, Prey1067-->Prey1111, Prey1112
+1600	Prey992, Prey1087-->Prey1113, Prey1114
+1600	Prey1019, Prey1029-->Prey1115, Prey1116
+1600	Prey1089, Prey980-->Prey1117, Prey1118
+1600	Prey1033, Prey1079-->Prey1119, Prey1120
+1600	Prey1078, Prey1059-->Prey1121, Prey1122
+1600	Prey1059, Prey1094-->Prey1123, Prey1124
+1604	one prey died with ID=1017
+1607	one predator died and started again randomly with ID=10
+1617	one prey died with ID=1076
+1617	one prey died with ID=1001
+1618	one predator died and started again randomly with ID=25
+1621	one prey died with ID=1109
+1621	one prey died with ID=945
+1622	one prey died with ID=1119
+1623	one prey died with ID=999
+1625	one prey died with ID=1120
+1625	one prey died with ID=1022
+1628	one prey died with ID=1027
+1632	one prey died with ID=1041
+1635	one prey died with ID=1038
+1644	one prey died with ID=1048
+1644	one prey died with ID=948
+1644	one prey died with ID=1116
+1645	one prey died with ID=1085
+1646	one prey died with ID=1098
+1650	Prey1106, Prey1087-->Prey1125, Prey1126
+1650	Prey1122, Prey1106-->Prey1127, Prey1128
+1650	Prey1092, Prey1092-->Prey1129, Prey1130
+1650	Prey1105, Prey1124-->Prey1131, Prey1132
+1650	Prey1078, Prey1108-->Prey1133, Prey1134
+1650	Prey1068, Prey1122-->Prey1135, Prey1136
+1650	Prey1043, Prey997-->Prey1137, Prey1138
+1650	Prey1061, Prey1121-->Prey1139, Prey1140
+1650	Prey1106, Prey1112-->Prey1141, Prey1142
+1650	one prey died with ID=1114
+1650	one prey died with ID=1117
+1655	one prey died with ID=1029
+1655	one prey died with ID=1079
+1661	one prey died with ID=1052
+1662	one prey died with ID=896
+1665	one prey died with ID=1083
+1665	one prey died with ID=1107
+1668	one prey died with ID=1031
+1669	one prey died with ID=992
+1671	one prey died with ID=1019
+1673	one prey died with ID=980
+1675	one prey died with ID=1096
+1676	one prey died with ID=1129
+1679	one prey died with ID=1081
+1682	one prey died with ID=979
+1688	one prey died with ID=1092
+1690	one prey died with ID=1071
+1691	one prey died with ID=1100
+1692	one predator died and started again randomly with ID=4
+1694	one prey died with ID=928
+1695	one prey died with ID=1056
+1699	one prey died with ID=1000
+1700	Prey1132, Prey1136-->Prey1143, Prey1144
+1700	Prey1104, Prey1072-->Prey1145, Prey1146
+1700	Prey997, Prey1090-->Prey1147, Prey1148
+1700	Prey1136, Prey1046-->Prey1149, Prey1150
+1700	Prey1104, Prey1106-->Prey1151, Prey1152
+1700	Prey1088, Prey1141-->Prey1153, Prey1154
+1700	Prey1121, Prey1138-->Prey1155, Prey1156
+1700	Prey1103, Prey1110-->Prey1157, Prey1158
+1700	Prey1142, Prey1021-->Prey1159, Prey1160
+1700	Prey1131, Prey1112-->Prey1161, Prey1162
+1700	Prey1128, Prey1105-->Prey1163, Prey1164
+1700	one prey died with ID=1127
+1700	one prey died with ID=1137
+1700	one prey died with ID=1111
+1703	one predator died and started again randomly with ID=3
+1711	one predator died and started again randomly with ID=17
+1713	one prey died with ID=1115
+1714	one prey died with ID=1089
+1718	one predator died and started again randomly with ID=27
+1721	one predator died and started again randomly with ID=16
+1721	one predator died and started again randomly with ID=18
+1724	one predator died and started again randomly with ID=9
+1729	one prey died with ID=1149
+1735	one prey died with ID=1102
+1735	one prey died with ID=1163
+1736	one prey died with ID=1155
+1737	one prey died with ID=1066
+1738	one prey died with ID=1065
+1740	one predator died and started again randomly with ID=26
+1744	one predator died and started again randomly with ID=30
+1745	one prey died with ID=1101
+1750	Prey1110, Prey1061-->Prey1165, Prey1166
+1750	Prey1143, Prey1121-->Prey1167, Prey1168
+1750	Prey1121, Prey1072-->Prey1169, Prey1170
+1750	Prey1093, Prey1151-->Prey1171, Prey1172
+1750	Prey1147, Prey1088-->Prey1173, Prey1174
+1750	Prey1104, Prey1113-->Prey1175, Prey1176
+1750	one prey died with ID=1150
+1750	one predator died and started again randomly with ID=10
+1752	one prey died with ID=1077
+1756	one prey died with ID=1125
+1766	one prey died with ID=1175
+1771	one prey died with ID=1113
+1774	one predator died and started again randomly with ID=9
+1775	one prey died with ID=1099
+1777	one prey died with ID=1106
+1778	one prey died with ID=1091
+1781	one prey died with ID=1130
+1783	one prey died with ID=1131
+1784	one prey died with ID=1118
+1784	one predator died and started again randomly with ID=29
+1786	one prey died with ID=1108
+1788	one predator died and started again randomly with ID=27
+1790	one prey died with ID=1169
+1795	one prey died with ID=1112
+1796	one prey died with ID=1166
+1797	one prey died with ID=1110
+1799	one prey died with ID=1148
+1799	one prey died with ID=1121
+1800	Prey1146, Prey1151-->Prey1177, Prey1178
+1800	Prey1157, Prey1145-->Prey1179, Prey1180
+1800	Prey1167, Prey1105-->Prey1181, Prey1182
+1800	Prey1146, Prey1174-->Prey1183, Prey1184
+1800	Prey1061, Prey1157-->Prey1185, Prey1186
+1800	Prey1156, Prey1138-->Prey1187, Prey1188
+1800	Prey1030, Prey1171-->Prey1189, Prey1190
+1800	Prey1103, Prey1156-->Prey1191, Prey1192
+1800	Prey1167, Prey1156-->Prey1193, Prey1194
+1800	one prey died with ID=1168
+1801	one prey died with ID=1090
+1802	one prey died with ID=1152
+1803	one prey died with ID=1095
+1803	one prey died with ID=1021
+1805	one prey died with ID=1054
+1805	one predator died and started again randomly with ID=28
+1808	one prey died with ID=1134
+1811	one prey died with ID=1185
+1816	one prey died with ID=1061
+1817	one predator died and started again randomly with ID=14
+1819	one prey died with ID=1122
+1819	one prey died with ID=1067
+1820	one prey died with ID=1158
+1820	one prey died with ID=1136
+1821	one prey died with ID=1164
+1822	one prey died with ID=1161
+1824	one prey died with ID=1037
+1824	one prey died with ID=1177
+1825	one prey died with ID=1162
+1825	one prey died with ID=1184
+1827	one prey died with ID=1086
+1827	one prey died with ID=1123
+1831	one prey died with ID=1141
+1831	one prey died with ID=1159
+1832	one prey died with ID=1183
+1833	one prey died with ID=1103
+1834	one prey died with ID=1186
+1835	one prey died with ID=1143
+1835	one prey died with ID=1146
+1837	one prey died with ID=1165
+1840	one prey died with ID=1179
+1842	one prey died with ID=1154
+1843	one prey died with ID=1181
+1843	one prey died with ID=1104
+1844	one prey died with ID=1140
+1844	one predator died and started again randomly with ID=29
+1845	one prey died with ID=1174
+1845	one prey died with ID=1046
+1847	one prey died with ID=1151
+1848	one prey died with ID=1132
+1849	one prey died with ID=1191
+1850	Prey1172, Prey1142-->Prey1195, Prey1196
+1850	Prey1124, Prey1139-->Prey1197, Prey1198
+1850	Prey1192, Prey1094-->Prey1199, Prey1200
+1850	Prey1043, Prey1192-->Prey1201, Prey1202
+1850	Prey1068, Prey1187-->Prey1203, Prey1204
+1850	Prey1190, Prey1064-->Prey1205, Prey1206
+1850	Prey1194, Prey1188-->Prey1207, Prey1208
+1850	Prey1059, Prey1171-->Prey1209, Prey1210
+1850	Prey1187, Prey1189-->Prey1211, Prey1212
+1850	Prey1190, Prey1189-->Prey1213, Prey1214
+1850	Prey1189, Prey1189-->Prey1215, Prey1216
+1850	Prey1172, Prey921-->Prey1217, Prey1218
+1850	Prey1160, Prey1068-->Prey1219, Prey1220
+1850	Prey1172, Prey1153-->Prey1221, Prey1222
+1850	Prey1188, Prey1167-->Prey1223, Prey1224
+1850	Prey1187, Prey1139-->Prey1225, Prey1226
+1850	Prey1176, Prey1189-->Prey1227, Prey1228
+1850	Prey930, Prey1087-->Prey1229, Prey1230
+1850	Prey1124, Prey1171-->Prey1231, Prey1232
+1850	one prey died with ID=1178
+1850	one prey died with ID=1105
+1852	one prey died with ID=1133
+1852	one prey died with ID=1126
+1853	one prey died with ID=1072
+1855	one prey died with ID=1145
+1856	one prey died with ID=1157
+1858	one prey died with ID=1147
+1858	one prey died with ID=1180
+1858	one predator died and started again randomly with ID=10
+1858	one predator died and started again randomly with ID=23
+1861	one prey died with ID=1170
+1867	one predator died and started again randomly with ID=14
+1868	one prey died with ID=1227
+1871	one prey died with ID=1230
+1872	one predator died and started again randomly with ID=20
+1875	one prey died with ID=1087
+1876	one prey died with ID=996
+1878	one prey died with ID=1219
+1879	one prey died with ID=1193
+1879	one prey died with ID=1228
+1880	one prey died with ID=1093
+1882	one prey died with ID=1215
+1883	one prey died with ID=1224
+1884	one prey died with ID=1167
+1885	one predator died and started again randomly with ID=22
+1888	one prey died with ID=1138
+1888	one prey died with ID=1197
+1892	one prey died with ID=976
+1893	one prey died with ID=1218
+1894	one prey died with ID=921
+1894	one predator died and started again randomly with ID=29
+1895	one prey died with ID=1196
+1895	one prey died with ID=1059
+1896	one prey died with ID=1055
+1896	one prey died with ID=1135
+1897	one prey died with ID=1172
+1897	one prey died with ID=1124
+1897	one prey died with ID=1033
+1897	one prey died with ID=1203
+1898	one prey died with ID=1198
+1898	one prey died with ID=1223
+1900	Prey1229, Prey1194-->Prey1233, Prey1234
+1900	Prey1160, Prey1182-->Prey1235, Prey1236
+1900	Prey1128, Prey987-->Prey1237, Prey1238
+1900	Prey1160, Prey1128-->Prey1239, Prey1240
+1900	Prey1189, Prey1204-->Prey1241, Prey1242
+1900	Prey1094, Prey1156-->Prey1243, Prey1244
+1900	Prey1139, Prey1160-->Prey1245, Prey1246
+1900	Prey1139, Prey1233-->Prey1247, Prey1248
+1900	Prey930, Prey1156-->Prey1249, Prey1250
+1900	Prey1064, Prey1194-->Prey1251, Prey1252
+1900	Prey1194, Prey997-->Prey1253, Prey1254
+1900	Prey1237, Prey1160-->Prey1255, Prey1256
+1900	Prey1255, Prey1160-->Prey1257, Prey1258
+1900	Prey1064, Prey1252-->Prey1259, Prey1260
+1900	Prey1064, Prey1245-->Prey1261, Prey1262
+1900	Prey1205, Prey987-->Prey1263, Prey1264
+1900	Prey997, Prey1254-->Prey1265, Prey1266
+1900	Prey1257, Prey1265-->Prey1267, Prey1268
+1900	one prey died with ID=1212
+1900	one prey died with ID=1225
+1900	one prey died with ID=1220
+1900	one prey died with ID=1200
+1900	one prey died with ID=1206
+1900	one prey died with ID=1221
+1900	one prey died with ID=1214
+1900	one prey died with ID=1217
+1900	one prey died with ID=1207
+1900	one prey died with ID=1195
+1900	one prey died with ID=1201
+1900	one prey died with ID=1208
+1900	one prey died with ID=1202
+1900	one prey died with ID=1199
+1900	one prey died with ID=1211
+1900	one prey died with ID=1213
+1901	one prey died with ID=1043
+1901	one prey died with ID=1173
+1903	one predator died and started again randomly with ID=8
+1904	one prey died with ID=1153
+1905	one prey died with ID=1068
+1905	one prey died with ID=1210
+1905	one prey died with ID=1088
+1905	one prey died with ID=1144
+1906	one prey died with ID=1171
+1907	one predator died and started again randomly with ID=18
+1909	one prey died with ID=1252
+1910	one prey died with ID=1209
+1910	one prey died with ID=1235
+1910	one predator died and started again randomly with ID=11
+1915	one prey died with ID=1258
+1918	one prey died with ID=1262
+1920	one prey died with ID=1232
+1920	one prey died with ID=1231
+1923	one prey died with ID=1188
+1923	one prey died with ID=1243
+1925	one prey died with ID=1189
+1928	one prey died with ID=1241
+1929	one prey died with ID=1216
+1931	one prey died with ID=1160
+1932	one prey died with ID=1260
+1933	one prey died with ID=1142
+1934	one predator died and started again randomly with ID=17
+1937	one predator died and started again randomly with ID=13
+1938	one prey died with ID=1254
+1940	one predator died and started again randomly with ID=30
+1941	one predator died and started again randomly with ID=21
+1942	one predator died and started again randomly with ID=20
+1946	one prey died with ID=1078
+1946	one predator died and started again randomly with ID=3
+1946	one predator died and started again randomly with ID=4
+1947	one prey died with ID=1242
+1948	one prey died with ID=1267
+1948	one prey died with ID=1247
+1950	Prey1238, Prey1263-->Prey1269, Prey1270
+1950	Prey1205, Prey1251-->Prey1271, Prey1272
+1950	Prey1259, Prey1064-->Prey1273, Prey1274
+1950	Prey1248, Prey1238-->Prey1275, Prey1276
+1950	Prey1239, Prey1244-->Prey1277, Prey1278
+1950	Prey1187, Prey1248-->Prey1279, Prey1280
+1950	Prey1259, Prey1156-->Prey1281, Prey1282
+1950	Prey1204, Prey1238-->Prey1283, Prey1284
+1950	Prey1204, Prey1238-->Prey1285, Prey1286
+1950	Prey1249, Prey930-->Prey1287, Prey1288
+1950	Prey930, Prey1263-->Prey1289, Prey1290
+1950	Prey1264, Prey1264-->Prey1291, Prey1292
+1950	Prey1238, Prey1249-->Prey1293, Prey1294
+1950	Prey1244, Prey1264-->Prey1295, Prey1296
+1950	Prey1187, Prey1249-->Prey1297, Prey1298
+1950	Prey1249, Prey1251-->Prey1299, Prey1300
+1950	Prey1248, Prey1249-->Prey1301, Prey1302
+1950	Prey1245, Prey1255-->Prey1303, Prey1304
+1950	Prey1259, Prey1245-->Prey1305, Prey1306
+1950	Prey1030, Prey1238-->Prey1307, Prey1308
+1950	Prey1128, Prey1282-->Prey1309, Prey1310
+1950	Prey1300, Prey1277-->Prey1311, Prey1312
+1950	one prey died with ID=1253
+1950	one prey died with ID=1236
+1950	one prey died with ID=1250
+1950	one prey died with ID=1234
+1950	one prey died with ID=1233
+1950	one prey died with ID=1261
+1950	one prey died with ID=1237
+1951	one prey died with ID=1182
+1952	one prey died with ID=1192
+1953	one predator died and started again randomly with ID=8
+1957	one predator died and started again randomly with ID=25
+1959	one predator died and started again randomly with ID=5
+1962	one prey died with ID=1303
+1966	one prey died with ID=1240
+1969	one prey died with ID=997
+1972	one prey died with ID=1308
+1978	one prey died with ID=1256
+1980	one prey died with ID=1139
+1980	one prey died with ID=1312
+1981	one prey died with ID=1268
+1982	one prey died with ID=1094
+1983	one prey died with ID=1309
+1984	one predator died and started again randomly with ID=17
+1985	one prey died with ID=1283
+1985	one prey died with ID=1128
+1986	one prey died with ID=1176
