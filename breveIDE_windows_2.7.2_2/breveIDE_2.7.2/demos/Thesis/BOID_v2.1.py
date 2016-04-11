@@ -56,7 +56,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -303,7 +303,7 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, geno, prey.lastScale)
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 				cPickle.dump(temp_prey, f)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -312,7 +312,7 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, geno, prey.lastScale)
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 			cPickle.dump(temp_prey, f)
 		f.close()
 
@@ -326,7 +326,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 				cPickle.dump(temp_predator, f)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -335,7 +335,7 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 			cPickle.dump(temp_predator, f)
 		f.close()
 
@@ -360,7 +360,7 @@ class Swarm( breve.Control ):
 				data_prey = cPickle.load(f)
 				
 				temp_prey = breve.createInstances( breve.Prey, 1)
-				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.geno, data_prey.lastScale)
+				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.visionAngle, data_prey.maxSteering, data_prey.geno, data_prey.lastScale)
 
 				temp_prey.ID = self.preyID
 				self.preyID += 1
@@ -376,7 +376,7 @@ class Swarm( breve.Control ):
 			try:
 				data_predator = cPickle.load(f)
 				temp_predator = breve.createInstances( breve.Predator, 1)
-				temp_predator.initializeFromData(data_predator.pos_x, data_predator.pos_y, data_predator.vel_x, data_predator.vel_y, data_predator.accel_x, data_predator.accel_y, data_predator.energy, data_predator.age, data_predator.isAlive, data_predator.maxVel, data_predator.maxAccel, data_predator.geno, data_predator.lastScale)
+				temp_predator.initializeFromData(data_predator.pos_x, data_predator.pos_y, data_predator.vel_x, data_predator.vel_y, data_predator.accel_x, data_predator.accel_y, data_predator.energy, data_predator.age, data_predator.isAlive, data_predator.maxVel, data_predator.maxAccel, data_predator.visionAngle, data_predator.maxSteering, data_predator.geno, data_predator.lastScale)
 
 				temp_predator.ID = self.predatorID
 				self.predatorID += 1
@@ -403,7 +403,7 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, geno, prey.lastScale)
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 				preys_alive.append(temp_prey)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -412,7 +412,7 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, geno, prey.lastScale)
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 			preys_dead.append(temp_prey)
 
 		# prepadors
@@ -424,7 +424,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 				predators_alive.append(temp_predator)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -433,7 +433,7 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 			predators_dead.append(temp_predator)
 
 
@@ -1467,7 +1467,7 @@ class Prey( breve.Mobile ):
  		self.age = 0
  		self.energy = 0.5
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, geno, lastScale):
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
@@ -1477,6 +1477,8 @@ class Prey( breve.Mobile ):
 		self.isAlive = isAlive
 		self.maxVel = maxVel
 		self.maxAccel = maxAccel
+		self.visionAngle = visionAngle
+		self.maxSteering = maxSteering
 		self.lastScale = lastScale
 
 		breve.deleteInstances( self.shape )
@@ -2007,7 +2009,7 @@ class Predator( breve.Mobile ):
  		self.age = 0
  		self.energy = 0.5
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, geno, lastScale):
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
@@ -2017,6 +2019,8 @@ class Predator( breve.Mobile ):
 		self.isAlive = isAlive
 		self.maxVel = maxVel
 		self.maxAccel = maxAccel
+		self.visionAngle = visionAngle
+		self.maxSteering = maxSteering
 		self.lastScale = lastScale
 
 		breve.deleteInstances( self.shape )
@@ -2439,7 +2443,7 @@ breve.myCustomShape = myCustomShape
 
 # auxiliar classes
 class Data_mobile:
-	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, geno, lastScale):
+	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.pos_x = pos_x
 		self.pos_y = pos_y
 		self.vel_x = vel_x
@@ -2455,6 +2459,8 @@ class Data_mobile:
 		# static
 		self.maxVel = maxVel
 		self.maxAccel = maxAccel
+		self.visionAngle = visionAngle
+		self.maxSteering = maxSteering
 		self.geno = geno
 		
 		self.lastScale = lastScale
