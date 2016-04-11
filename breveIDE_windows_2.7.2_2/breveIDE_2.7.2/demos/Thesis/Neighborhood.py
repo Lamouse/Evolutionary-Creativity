@@ -23,9 +23,9 @@ class Swarm( breve.Control ):
 		self.minY = -100
 		self.maxY = 100
 
-		self.targetZone = 25
-		self.socialZone = 10
-		self.separationZone = 2
+		self.targetZone = 40
+		self.socialZone = 20
+		self.separationZone = 3
 
 		# Feeder
 		self.feederMinDistance = 25
@@ -245,7 +245,7 @@ class Neighborhood1 (breve.Stationary ):
 
 	def init( self ):
 		self.shape = breve.createInstances(breve.Sphere, 1).initWith(self.controller.targetZone)
-		self.move( breve.vector(0,0, -35) )
+		self.move( breve.vector(0,0, -50) )
 		self.setShape(self.shape)
 		self.setColor( breve.vector(0, 1, 0) )
 
@@ -263,7 +263,7 @@ class Neighborhood2 (breve.Stationary ):
 
 	def init( self ):
 		self.shape = breve.createInstances(breve.Sphere, 1).initWith(self.controller.socialZone)
-		self.move( breve.vector(0,0, -10) )
+		self.move( breve.vector(0,0, -20) )
 		self.setShape(self.shape)
 		self.setColor( breve.vector(1, 1, 0) )
 
