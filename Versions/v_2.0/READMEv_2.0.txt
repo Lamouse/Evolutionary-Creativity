@@ -11,3 +11,4 @@ features added:
 	Evaluation Metrics
 		best fitness
 		mean fitness
+		diversity
