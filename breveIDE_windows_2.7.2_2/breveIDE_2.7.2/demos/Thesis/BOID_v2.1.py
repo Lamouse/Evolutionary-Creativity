@@ -72,9 +72,10 @@ class Swarm( breve.Control ):
 		self.minY = -100
 		self.maxY = 100
 
-		self.targetZone = 40
-		self.socialZone = 20
-		self.separationZone = 3
+		self.targetZone1 = 25
+		self.targetZone2 = 30
+		self.socialZone = 10
+		self.separationZone = 2
 
 		# Feeder
 		self.feederMinDistance = 25
@@ -268,7 +269,8 @@ class Swarm( breve.Control ):
 			self.save_log( 'Initial Predators: ' + str(self.initialNumPredators), initiation=True )
 			self.save_log( 'WorldX: [' + str(self.minX) + ', ' + str(self.maxX) + ']', initiation=True )
 			self.save_log( 'WorldY: [' + str(self.minY) + ', ' + str(self.maxY) + ']', initiation=True )
-			self.save_log( 'Target Zone: ' + str(self.targetZone), initiation=True )
+			self.save_log( 'Target Zone1: ' + str(self.targetZone1), initiation=True )
+			self.save_log( 'Target Zone2: ' + str(self.targetZone2), initiation=True )
 			self.save_log( 'Social Zone: ' + str(self.socialZone), initiation=True )
 			self.save_log( 'Separation Zone: ' + str(self.separationZone), initiation=True )
 			self.save_log( 'Max Food Supplies: ' + str(self.maxFoodSupply), initiation=True )
@@ -1406,7 +1408,7 @@ class Prey( breve.Mobile ):
 		self.maxVel = 0.5
 		self.maxAccel = 2
 		self.visionAngle = 150
-		self.maxSteering = 20
+		self.maxSteering = 30
 		self.geno = None
 
 		# PUSH
@@ -1764,7 +1766,7 @@ class Prey( breve.Mobile ):
 				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
 
 					#flee
-					if 0 < norm:
+					if 0 < norm < self.controller.separationZone:
 						v_x = self.pos_x-neighbor.pos_x
 						v_y = self.pos_y-neighbor.pos_y
 						v_x, v_y = self.normalizeVector(v_x, v_y)
@@ -1861,7 +1863,7 @@ class Prey( breve.Mobile ):
 
 					elif neighbor.isA( 'Predator' ) and neighbor.isAlive:
 						#flee
-						if 0 < norm:
+						if 0 < norm < self.controller.separationZone:
 							v_x = self.pos_x-neighbor.pos_x
 							v_y = self.pos_y-neighbor.pos_y
 							v_x, v_y = self.normalizeVector(v_x, v_y)
@@ -1976,7 +1978,7 @@ class Prey( breve.Mobile ):
 		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( self.controller.targetZone )
+		self.setNeighborhoodSize( self.controller.targetZone1 )
 
 
 breve.Prey = Prey
@@ -2000,10 +2002,10 @@ class Predator( breve.Mobile ):
 		self.isAlive = True
 
 		# static
-		self.maxVel = 0.8
+		self.maxVel = 0.73
 		self.maxAccel = 2
-		self.visionAngle = 120
-		self.maxSteering = 30
+		self.visionAngle = 130
+		self.maxSteering = 20
 		self.geno = None
 		
 		# PUSH
@@ -2520,7 +2522,7 @@ class Predator( breve.Mobile ):
 		self.shape = breve.createInstances( breve.myCustomShape, 1 )
 		self.setShape( self.shape )
 		self.adjustSize()
-		self.setNeighborhoodSize( self.controller.targetZone*1.5 )
+		self.setNeighborhoodSize( self.controller.targetZone2 )
 
 
 breve.Predator = Predator
