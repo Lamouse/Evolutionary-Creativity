@@ -5,8 +5,7 @@ import copy
 import cPickle
 import time
 import decimal
-import os 
-import sys
+import os
 
 __author__ = 'Paulo Pereira'
 
@@ -57,7 +56,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 2
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -89,7 +88,7 @@ class Swarm( breve.Control ):
 		self.pollPredators = breve.objectList()
 
 		# Generation
-		self.maxIteraction = 5000
+		self.maxIteraction = 10000
 		self.current_iteraction = 0
 		self.save_generation = 25
 		self.breeding_season = 50
@@ -98,6 +97,7 @@ class Swarm( breve.Control ):
 		self.prob_mutation = 0.1
 		self.evaluation_survivor = 0.9
 		self.initial_depth = 3
+		self.max_depth = 20
 		self.endSimulation = False
 
 		# Other thing
@@ -584,8 +584,8 @@ class Swarm( breve.Control ):
 		elif self.controller.repr == 1:
 			newBird1.geno = self.tree_copy(parent1.geno)
 			newBird2.geno = self.tree_copy(parent2.geno)
-			self.fill_parents(newBird1.geno)
-			self.fill_parents(newBird2.geno)
+			self.fill_parents(newBird1.geno, 1)
+			self.fill_parents(newBird2.geno, 1)
 
 		elif self.controller.repr == 2:
 			newBird1.pushInterpreter.clearStacks()
@@ -725,20 +725,21 @@ class Swarm( breve.Control ):
 
 
 	# GP code
-	def create_random_tree(self, depth, specie):
+	def create_random_tree(self, depth, specie, real_depth):
 		if depth < 1:
-		    return None
-		return Node(self.create_random_tree(depth-1, specie), self.create_random_tree(depth-1, specie), specie)
+			return None
+		return Node(self.create_random_tree(depth-1, specie, real_depth+1), self.create_random_tree(depth-1, specie, real_depth+1), specie, real_depth)
 
 
-	def fill_parents(self, tree):
-	    if tree.right is not None:
-	        # node
-	        tree.left.parent = tree
-	        tree.right.parent = tree
+	def fill_parents(self, tree, depth):
+		tree.depth = depth
+		if tree.right is not None:
+			# node
+			tree.left.parent = tree
+			tree.right.parent = tree
 
-	        self.fill_parents(tree.left)
-	        self.fill_parents(tree.right)
+			self.fill_parents(tree.left, depth+1)
+			self.fill_parents(tree.right, depth+1)
 
 
 	def compare_trees(self, tree1, tree2):
@@ -757,103 +758,131 @@ class Swarm( breve.Control ):
 		t3 = t1 + t2 + 1
 		return v3, t3
 
+	'''
 	def print_tree(self, tree):
-	    if tree.right is None:
-	        # leaf
-	        print tree.data, 
-	    else:
-	        # node
-	        print "(",
-	        self.print_tree(tree.left)
-	        print tree.data,
-	        self.print_tree(tree.right)
-	        print ")",
-
+		if tree.right is None:
+			# leaf
+			print tree.data, 
+		else:
+			# node
+			print "(",
+			self.print_tree(tree.left)
+			print tree.data,
+			self.print_tree(tree.right)
+			print ")",
+	'''
+	
 
 	def run_code(self, indiv, tree):
-	    if tree.right is None:
-	        # leaf
-	        exec "x, y = " + tree.data
-	        return [x, y]
-	    else:
-	        # node_list
-	        # for some reason this don't work, probability it don't work in python 2.3
-	        # return [0 if tree.data == "/" and y == 0 else eval('x'+tree.data+'y') for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right))]
+		if tree.right is None:
+			# leaf
+			exec "x, y = " + tree.data
+			return [x, y]
+		else:
+			# node_list
+			# for some reason this don't work, probability it don't work in python 2.3
+			# return [0 if tree.data == "/" and y == 0 else eval('x'+tree.data+'y') for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right))]
 
-	        result = []
-	        for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right)):
-	        	if tree.data == "/" and y == 0:
-	        		result.append(0)
-	        	else:
-	        		result.append(eval('x'+tree.data+'y'))
-	        return result
+			result = []
+			for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right)):
+				if tree.data == "/" and y == 0:
+					result.append(0)
+				else:
+					result.append(eval('x'+tree.data+'y'))
+			return result
 
 
 	def select_random_node(self, tree, list_nodes):
-	    if tree.right is not None:
-	        list_nodes.append(tree)
-	        self.select_random_node(tree.left, list_nodes)
-	        self.select_random_node(tree.right, list_nodes)
+		if tree.right is not None:
+			list_nodes.append(tree)
+			self.select_random_node(tree.left, list_nodes)
+			self.select_random_node(tree.right, list_nodes)
+
+
+	def get_max_depth(self, tree):
+		if tree.right is not None:
+			return max(self.get_max_depth(tree.left), self.get_max_depth(tree.right)) + 1
+		else:
+			return 1
 
 
 	def replace_tree(self, old_sub_tree, new_sub_tree):
-	    parent = old_sub_tree.parent
+		parent = old_sub_tree.parent
 
-	    if parent.left == old_sub_tree:
-	        parent.left = new_sub_tree
-	    else:
-	        parent.right = new_sub_tree
+		if parent.left == old_sub_tree:
+			parent.left = new_sub_tree
+		else:
+			parent.right = new_sub_tree
 
 
 	def tree_copy(self, parent1):
-	    if parent1 is None:
-	        return None
+		if parent1 is None:
+			return None
 
-	    current_node = copy.deepcopy(parent1)
-	    current_node.left = self.tree_copy(parent1.left)
-	    current_node.right = self.tree_copy(parent1.right)
-	    return current_node
+		current_node = copy.deepcopy(parent1)
+		current_node.left = self.tree_copy(parent1.left)
+		current_node.right = self.tree_copy(parent1.right)
+		return current_node
 
 
 	def tree_mutation(self, tree, specie):
-		node_list = []
-		self.select_random_node(tree, node_list)
-		if len(node_list)-1 < 1:
-			return
-		index = random.randint(1, len(node_list)-1)
-		depth = random.randint(1, 5)
-		new_sub_tree = self.create_random_tree(depth, specie)
+		temp = 99999
+		while temp >= self.max_depth:
+			node_list = []
+			self.select_random_node(tree, node_list)
+			if len(node_list)-1 < 1:
+				return
+			index = random.randint(1, len(node_list)-1)
+
+			temp = self.get_max_depth(node_list[index])
+			if node_list[index].depth > self.max_depth:
+				temp = 99999
+
+		depth = random.randint(1, min(self.max_depth-node_list[index].depth, self.initial_depth))
+		new_sub_tree = self.create_random_tree(depth, specie, 1)
 		self.replace_tree(node_list[index], new_sub_tree)
-		self.fill_parents(tree)
+		self.fill_parents(tree, 1)
 
 
 	def tree_crossover(self, parent1, parent2):
-	    tree_child1 = self.tree_copy(parent1)
-	    tree_child2 = self.tree_copy(parent2)
-	    self.fill_parents(tree_child1)
-	    self.fill_parents(tree_child2)
+		tree_child1 = self.tree_copy(parent1)
+		tree_child2 = self.tree_copy(parent2)
+		self.fill_parents(tree_child1, 1)
+		self.fill_parents(tree_child2, 1)
 
-	    node_list1 = []
-	    self.select_random_node(tree_child1, node_list1)
-	    if len(node_list1)-1 < 1:
-	    	return tree_child1, tree_child2
-	    index1 = random.randint(1, len(node_list1)-1)
+		temp = 99999
+		while temp >= self.max_depth:
+			node_list1 = []
+			self.select_random_node(tree_child1, node_list1)
+			if len(node_list1)-1 < 1:
+				return tree_child1, tree_child2
+			index1 = random.randint(1, len(node_list1)-1)
 
-	    node_list2 = []
-	    self.select_random_node(tree_child2, node_list2)
-	    if len(node_list2)-1 < 1:
-	    	return tree_child1, tree_child2
-	    index2 = random.randint(1, len(node_list2)-1)
+			temp = self.get_max_depth(node_list1[index1])
+			if node_list1[index1].depth > self.max_depth:
+				temp = 99999
 
-	    subtree_parent1 = node_list1[index1]
-	    subtree_parent2 = node_list2[index2]
+		temp = 99999
+		while temp >= self.max_depth:
+			node_list2 = []
+			self.select_random_node(tree_child2, node_list2)
+			if len(node_list2)-1 < 1:
+				return tree_child1, tree_child2
+			index2 = random.randint(1, len(node_list2)-1)
 
-	    self.replace_tree(subtree_parent1, subtree_parent2)
-	    self.replace_tree(subtree_parent2, subtree_parent1)
-	    self.fill_parents(tree_child1)
-	    self.fill_parents(tree_child2)
+			temp = self.get_max_depth(node_list2[index2])
+			if node_list2[index2].depth > self.max_depth:
+				temp = 99999
 
-	    return tree_child1, tree_child2
+		subtree_parent1 = node_list1[index1]
+		subtree_parent2 = node_list2[index2]
+
+		self.replace_tree(subtree_parent1, subtree_parent2)
+		self.replace_tree(subtree_parent2, subtree_parent1)
+		self.fill_parents(tree_child1, 1)
+		self.fill_parents(tree_child2, 1)
+
+		return tree_child1, tree_child2
 
 	# metric functions
 	def averageFitness(self, specie):
@@ -1195,20 +1224,20 @@ class Swarm( breve.Control ):
 						if not os.path.exists(directory_base+directory):
 							os.makedirs(directory_base+directory)
 
-	    			# save data
+					# save data
 					f =  open(directory_base+directory_list[0]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPrey_AverageFitness:
-  						f.write("%s\n" % item)
+						f.write("%s\n" % item)
 					f.close()
 
 					f =  open(directory_base+directory_list[1]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPrey_BestFitness:
-  						f.write("%s\n" % item)
-  					f.close()
+						f.write("%s\n" % item)
+					f.close()
 
-  					f =  open(directory_base+directory_list[2]+'/'+str(self.current_run)+'.txt', 'w')
+					f =  open(directory_base+directory_list[2]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPrey_Diversity:
-  						f.write("%s\n" % item)
+						f.write("%s\n" % item)
 					f.close()
 
 				if self.evaluatePredator:
@@ -1222,20 +1251,20 @@ class Swarm( breve.Control ):
 						if not os.path.exists(directory_base+directory):
 							os.makedirs(directory_base+directory)
 
-	    			# save data
+					# save data
 					f =  open(directory_base+directory_list[0]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_AverageFitness:
-  						f.write("%s\n" % item)
+						f.write("%s\n" % item)
 					f.close()
 
 					f =  open(directory_base+directory_list[1]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_BestFitness:
-  						f.write("%s\n" % item)
+						f.write("%s\n" % item)
 					f.close()
 
 					f =  open(directory_base+directory_list[2]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_Diversity:
-  						f.write("%s\n" % item)
+						f.write("%s\n" % item)
 					f.close()
 
 				if self.phase_portrait:
@@ -1244,9 +1273,9 @@ class Swarm( breve.Control ):
 					if not os.path.exists(directory):
 						os.makedirs(directory)
 
-					f =  open(diversity+'/'+str(self.current_run)+'.txt', 'w')
+					f =  open(directory+'/'+str(self.current_run)+'.txt', 'w')
 					for (item1, item2) in self.list_phase_portrait:
-  						f.write("%s %s\n" % (item1, item2))
+						f.write("%s %s\n" % (item1, item2))
 					f.close()
 
 				self.save_log( '\n--- Ended run ' + str(self.current_run) + ' ---\n\n' )
@@ -1452,24 +1481,25 @@ class Prey( breve.Mobile ):
 		if self.controller.repr == 0:
 			self.geno = [random.uniform(-5, 5) for x in range(6)]
 		elif self.controller.repr == 1:
-			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Prey")
+			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
+			self.controller.fill_parents(self.geno, 1)
 		elif self.controller.repr == 2:
 			self.pushCode = breve.createInstances( breve.PushProgram, 1 )
 			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
 	def initializeRandomly2(self):
- 		x = random.uniform(self.controller.minX, self.controller.maxX)
- 		y = random.uniform(self.controller.minY, self.controller.maxY)
- 		self.changePos(x,y)
+		x = random.uniform(self.controller.minX, self.controller.maxX)
+		y = random.uniform(self.controller.minY, self.controller.maxY)
+		self.changePos(x,y)
  
- 		vel_x = random.uniform(-self.maxVel, self.maxVel)
- 		vel_y = random.uniform(-self.maxVel, self.maxVel)
- 		self.changeVel(vel_x,vel_y)
+		vel_x = random.uniform(-self.maxVel, self.maxVel)
+		vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(vel_x,vel_y)
  
- 		self.changeAccel(0,0)
- 		self.age = 0
- 		self.energy = 0.5
+		self.changeAccel(0,0)
+		self.age = 0
+		self.energy = 0.5
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
@@ -1554,8 +1584,8 @@ class Prey( breve.Mobile ):
 		return [x, y]
 
 	def rotateVector(self, v, alpha):
-	    alpha = -math.radians(alpha)
-	    return [v[0]*math.cos(alpha)+v[1]*math.sin(alpha), -v[0]*math.sin(alpha)+v[1]*math.cos(alpha)]
+		alpha = -math.radians(alpha)
+		return [v[0]*math.cos(alpha)+v[1]*math.sin(alpha), -v[0]*math.sin(alpha)+v[1]*math.cos(alpha)]
 
 	def dotproduct(self, v1, v2):
 		temp = 0
@@ -2048,24 +2078,25 @@ class Predator( breve.Mobile ):
 		if self.controller.repr == 0:
 			self.geno = [random.uniform(-5, 5) for x in range(5)]
 		elif self.controller.repr == 1:
-			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Predator")
+			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Predator", 1)
+			self.controller.fill_parents(self.geno, 1)
 		elif self.controller.reprType == 2:
 			self.pushCode = breve.createInstances( breve.PushProgram, 1 )
 			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
 	def initializeRandomly2(self):
- 		x = random.uniform(self.controller.minX, self.controller.maxX)
- 		y = random.uniform(self.controller.minY, self.controller.maxY)
- 		self.changePos(x,y)
+		x = random.uniform(self.controller.minX, self.controller.maxX)
+		y = random.uniform(self.controller.minY, self.controller.maxY)
+		self.changePos(x,y)
  
- 		vel_x = random.uniform(-self.maxVel, self.maxVel)
- 		vel_y = random.uniform(-self.maxVel, self.maxVel)
- 		self.changeVel(vel_x,vel_y)
+		vel_x = random.uniform(-self.maxVel, self.maxVel)
+		vel_y = random.uniform(-self.maxVel, self.maxVel)
+		self.changeVel(vel_x,vel_y)
  
- 		self.changeAccel(0,0)
- 		self.age = 0
- 		self.energy = 0.5
+		self.changeAccel(0,0)
+		self.age = 0
+		self.energy = 0.5
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
@@ -2150,8 +2181,8 @@ class Predator( breve.Mobile ):
 		return [x, y]
 
 	def rotateVector(self, v, alpha):
-	    alpha = -math.radians(alpha)
-	    return [v[0]*math.cos(alpha)+v[1]*math.sin(alpha), -v[0]*math.sin(alpha)+v[1]*math.cos(alpha)]
+		alpha = -math.radians(alpha)
+		return [v[0]*math.cos(alpha)+v[1]*math.sin(alpha), -v[0]*math.sin(alpha)+v[1]*math.cos(alpha)]
 
 	def dotproduct(self, v1, v2):
 		temp = 0
@@ -2580,31 +2611,30 @@ class Data_Stationary:
 		self.VirtualEnergy = VirtualEnergy
 
 class Node:
-    def __init__(self, left, right, specie):
-        self.left = left
-        self.right = right
-        self.data = None
-        self.parent = None
+	def __init__(self, left, right, specie, depth):
+		self.left = left
+		self.right = right
+		self.data = None
+		self.parent = None
+		self.depth = depth
 
-        if specie == 'Prey':
-            self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
-                         "indiv.currentVelocity()", "indiv.currentEnergy()",
-                         "indiv.randV()"]
-        elif specie == 'Predator':
-            self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
-                         "indiv.currentVelocity()", "indiv.currentEnergy()",
-                         "indiv.randV()"]
-        self.node = ["+", "-", "*", "/"]
+		if specie == 'Prey':
+			self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
+					"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+		elif specie == 'Predator':
+			self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
+					"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+		self.node = ["+", "-", "*", "/"]
 
-        self.fill_data()
+		self.fill_data()
 
-    def fill_data(self):
-        if self.right is None:
-            # leaf
-            self.data = self.leaf[random.randint(0, len(self.leaf)-1)]
-        else:
-            # node
-            self.data = self.node[random.randint(0, len(self.node)-1)]
+	def fill_data(self):
+		if self.right is None:
+			# leaf
+			self.data = self.leaf[random.randint(0, len(self.leaf)-1)]
+		else:
+			# node
+			self.data = self.node[random.randint(0, len(self.node)-1)]
 
 
 Swarm()
