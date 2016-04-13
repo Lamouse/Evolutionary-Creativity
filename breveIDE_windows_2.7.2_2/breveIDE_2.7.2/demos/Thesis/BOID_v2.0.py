@@ -60,8 +60,8 @@ class Swarm( breve.Control ):
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
-		self.initialNumPreys = self.numPreys = 90
-		self.initialNumPredators = self.numPredators = 30
+		self.initialNumPreys = self.numPreys = 75
+		self.initialNumPredators = self.numPredators = 40
 		self.numDeadPreys = 0
 		self.numDeadPredators = 0
 
@@ -548,7 +548,7 @@ class Swarm( breve.Control ):
 		neighbour = breve.allInstances( specie )
 
 		for item in neighbour:
-			if item.isA( specie ) and item.isAlive:
+			if item.isA( specie ) and item.isAlive and item.ID != parent1.ID:
 				birds.append( item )
 		parent2 = self.tournament(birds, 5)
 		return parent2
@@ -898,7 +898,7 @@ class Swarm( breve.Control ):
 		return tree_child1, tree_child2
 
 	# metric functions
-	def getFitnessMetrics(self, specie):
+	def getFitnessMetrics(self, specie, real_tam):
 		temp_list = breve.allInstances( specie )
 		average = 0
 		tam = 0
@@ -915,7 +915,7 @@ class Swarm( breve.Control ):
 		if tam == 0:
 			average = 0
 		else:
-			average = average/(tam*1.0)
+			average = average/(real_tam*1.0)
 			
 		return average, best
 
@@ -992,7 +992,12 @@ class Swarm( breve.Control ):
 			string_final += string + '\n'
 
 			# save data
-			f =  open( directory + '/' + self.date+'_'+suffix+'_prey_log.txt', 'a+' )
+			if self.evaluatePredator:
+				n = 'predator'
+			else:
+				n = 'prey'
+
+			f =  open( directory + '/' + self.date+'_'+suffix+'_'+n+'_log.txt', 'a+' )
 			f.write( string_final )
 			f.close()
 
@@ -1144,7 +1149,7 @@ class Swarm( breve.Control ):
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
 				if self.evaluatePrey:
-					#aver, best = self.getFitnessMetrics('Prey')
+					#aver, best = self.getFitnessMetrics('Prey', self.initialNumPreys)
 					#self.listPrey_AverageFitness.append(aver)
 					#self.listPrey_BestFitness.append(best)
 					self.listPrey_AverageFitness.append(self.tempPrey_Average/(self.breeding_season*1.0))
@@ -1155,7 +1160,7 @@ class Swarm( breve.Control ):
 					self.tempPrey_Diversity = 0
 
 				if self.evaluatePredator:
-					#aver, best = self.getFitnessMetrics('Predator')
+					#aver, best = self.getFitnessMetrics('Predator', self.initialNumPredators)
 					#self.listPredator_AverageFitness.append(aver)
 					#self.listPredator_BestFitness.append(best)
 					self.listPredator_AverageFitness.append(self.tempPredator_Average/(self.breeding_season*1.0))
