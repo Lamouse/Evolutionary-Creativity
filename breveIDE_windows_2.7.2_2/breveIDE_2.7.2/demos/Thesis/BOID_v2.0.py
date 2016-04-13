@@ -56,7 +56,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -77,10 +77,10 @@ class Swarm( breve.Control ):
 		self.separationZone = 2
 
 		# Feeder
-		self.feederMinDistance = 25
-		self.maxFoodSupply = 300
-		self.minCreatedFoodSupply = 7
-		self.maxCreatedFoodSupply = 15
+		self.feederMinDistance = 30
+		self.maxFoodSupply = 100
+		self.minCreatedFoodSupply = 3
+		self.maxCreatedFoodSupply = 5
 		self.totalFoodSupply = 0
 
 		# List
@@ -159,6 +159,7 @@ class Swarm( breve.Control ):
 						temp_prey.createPush()
 
 				temp_prey.energy = 0.5
+				self.cumulativeEnergy = 0
 				created += 1
 
 				temp_prey.ID = self.preyID
@@ -195,6 +196,7 @@ class Swarm( breve.Control ):
 						temp_predator.createPush()
 						
 				temp_predator.energy = 0.5
+				self.cumulativeEnergy = 0
 				created += 1
 
 				temp_predator.ID = self.predatorID
@@ -230,6 +232,7 @@ class Swarm( breve.Control ):
 
 				newBird.age = 0
 				newBird.energy = 0.5
+				self.cumulativeEnergy = 0
 				newBird.isAlive = True
 				newBird.setNewColor()
 				created += 1
@@ -306,7 +309,7 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 				cPickle.dump(temp_prey, f)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -315,7 +318,7 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 			cPickle.dump(temp_prey, f)
 		f.close()
 
@@ -329,7 +332,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 				cPickle.dump(temp_predator, f)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -338,7 +341,7 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 			cPickle.dump(temp_predator, f)
 		f.close()
 
@@ -406,7 +409,7 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 				preys_alive.append(temp_prey)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -415,7 +418,7 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 			preys_dead.append(temp_prey)
 
 		# prepadors
@@ -427,7 +430,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 				predators_alive.append(temp_predator)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -436,7 +439,7 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 			predators_dead.append(temp_predator)
 
 
@@ -573,8 +576,17 @@ class Swarm( breve.Control ):
 		return candidate
 
 	def fitness(self, bird):
-		return bird.energy * (1/float(1+math.exp(- ((bird.age-100)/12.0) )))
-		#return bird.energy
+		temp1 = self.current_iteraction % self.breeding_season
+		if temp1 == 0:
+			temp1 = self.breeding_season
+
+		temp2 = min(bird.age, temp1)*1.0
+		if temp2 == 0:
+			return 0
+		return bird.cumulativeEnergy / temp2
+
+	def fitness1(self, bird):
+		return bird.energy
 
 	def duplicateGenes(self, newBird1, newBird2, parent1, parent2):
 		if self.controller.repr == 0:
@@ -685,6 +697,7 @@ class Swarm( breve.Control ):
 		newBird.changeAccel(0,0)
 		newBird.age = 0
 		newBird.energy = 0.5
+		self.cumulativeEnergy = 0
 		newBird.isAlive = True
 		newBird.setNewColor()
 		
@@ -885,13 +898,34 @@ class Swarm( breve.Control ):
 		return tree_child1, tree_child2
 
 	# metric functions
+	def getFitnessMetrics(self, specie):
+		temp_list = breve.allInstances( specie )
+		average = 0
+		tam = 0
+		best = -1
+		for item in temp_list:
+			if item.isAlive:
+				temp_best = self.fitness(item)
+
+				if temp_best > best:
+					best = temp_best
+				average += temp_best
+				tam += 1
+
+		if tam == 0:
+			average = 0
+		else:
+			average = average/(tam*1.0)
+			
+		return average, best
+
 	def averageFitness(self, specie):
 		temp_list = breve.allInstances( specie )
 		average = 0
 		tam = 0
 		for item in temp_list:
 			if item.isAlive:
-				average += self.fitness(item)
+				average += self.fitness1(item)
 				tam += 1
 
 		if tam == 0:
@@ -903,7 +937,7 @@ class Swarm( breve.Control ):
 		best = -1
 		for item in temp_list:
 			if item.isAlive:
-				temp_best = self.fitness(item)
+				temp_best = self.fitness1(item)
 				if temp_best > best:
 					best = temp_best
 		return best
@@ -962,6 +996,11 @@ class Swarm( breve.Control ):
 			f.write( string_final )
 			f.close()
 
+	def updateCumulativeEnergy( self, bird ):
+		if self.current_iteraction % self.breeding_season == 1:
+			bird.cumulativeEnergy = bird.energy
+		else:
+			bird.cumulativeEnergy += bird.energy
 
 	def resetSimulation( self ):
 		# clean data
@@ -1040,6 +1079,8 @@ class Swarm( breve.Control ):
 							self.save_log( 'one prey died with ID=' + str(prey.ID) )
 					else:
 						preys_list.append(prey)
+					self.updateCumulativeEnergy(prey)
+
 			for predator in breve.allInstances( "Predator" ):
 				if predator.isAlive:
 					if predator.energy <= 0:
@@ -1052,6 +1093,8 @@ class Swarm( breve.Control ):
 							self.save_log( 'one predator died with ID=' + str(predator.ID) )
 					else:
 						predators_list.append(predator)
+					self.updateCumulativeEnergy(predator)
+
 
 			# update neighborhoods
 			self.updateNeighbors()
@@ -1101,6 +1144,9 @@ class Swarm( breve.Control ):
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
 				if self.evaluatePrey:
+					#aver, best = self.getFitnessMetrics('Prey')
+					#self.listPrey_AverageFitness.append(aver)
+					#self.listPrey_BestFitness.append(best)
 					self.listPrey_AverageFitness.append(self.tempPrey_Average/(self.breeding_season*1.0))
 					self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
 					self.listPrey_Diversity.append(self.tempPrey_Diversity/(self.breeding_season*1.0))
@@ -1109,6 +1155,9 @@ class Swarm( breve.Control ):
 					self.tempPrey_Diversity = 0
 
 				if self.evaluatePredator:
+					#aver, best = self.getFitnessMetrics('Predator')
+					#self.listPredator_AverageFitness.append(aver)
+					#self.listPredator_BestFitness.append(best)
 					self.listPredator_AverageFitness.append(self.tempPredator_Average/(self.breeding_season*1.0))
 					self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
 					self.listPredator_Diversity.append(self.tempPredator_Diversity/(self.breeding_season*1.0))
@@ -1430,6 +1479,7 @@ class Prey( breve.Mobile ):
 
 		# change with time
 		self.energy = 1.0
+		self.cumulativeEnergy = 0
 		self.age = 0
 		self.isAlive = True
 
@@ -1500,6 +1550,7 @@ class Prey( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
@@ -1651,6 +1702,7 @@ class Prey( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 		self.isAlive = False
 		self.controller.pollPreys.append(self)
 		self.controller.numDeadPreys += 1
@@ -2028,6 +2080,7 @@ class Predator( breve.Mobile ):
 		
 		# change with time
 		self.energy = 1.0
+		self.cumulativeEnergy = 0
 		self.age = 0
 		self.isAlive = True
 
@@ -2097,6 +2150,7 @@ class Predator( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
@@ -2248,6 +2302,7 @@ class Predator( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 		self.isAlive = False
 		self.controller.pollPredators.append(self)
 		self.controller.numDeadPredators += 1
@@ -2579,7 +2634,7 @@ breve.myCustomShape = myCustomShape
 
 # auxiliar classes
 class Data_mobile:
-	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
+	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, cumulativeEnergy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.pos_x = pos_x
 		self.pos_y = pos_y
 		self.vel_x = vel_x
@@ -2589,6 +2644,7 @@ class Data_mobile:
 		
 		# change with time
 		self.energy = energy
+		self.cumulativeEnergy = cumulativeEnergy
 		self.age = age
 		self.isAlive = isAlive
 
