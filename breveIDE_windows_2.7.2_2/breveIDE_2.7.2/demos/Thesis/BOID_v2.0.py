@@ -30,8 +30,8 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = False
-		self.evaluatePredator = True
+		self.evaluatePrey = True
+		self.evaluatePredator = False
 		self.phase_portrait = False
 		
 		self.runs = 10
@@ -60,7 +60,7 @@ class Swarm( breve.Control ):
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
-		self.initialNumPreys = self.numPreys = 75
+		self.initialNumPreys = self.numPreys = 90
 		self.initialNumPredators = self.numPredators = 40
 		self.numDeadPreys = 0
 		self.numDeadPredators = 0
@@ -78,9 +78,9 @@ class Swarm( breve.Control ):
 
 		# Feeder
 		self.feederMinDistance = 30
-		self.maxFoodSupply = 100
-		self.minCreatedFoodSupply = 3
-		self.maxCreatedFoodSupply = 5
+		self.maxFoodSupply = 200
+		self.minCreatedFoodSupply = 6
+		self.maxCreatedFoodSupply = 10
 		self.totalFoodSupply = 0
 
 		# List
@@ -581,11 +581,14 @@ class Swarm( breve.Control ):
 			temp1 = self.breeding_season
 
 		temp2 = min(bird.age, temp1)*1.0
-		if temp2 == 0:
+		if temp2 <= 0:
 			return 0
-		return bird.cumulativeEnergy / temp2
+		energy = bird.cumulativeEnergy / temp2
+		#return 0.75*energy + 0.25*(1/float(1+math.exp(- ((bird.age-100)/12.0) )))
+		return energy
 
 	def fitness1(self, bird):
+		#return 0.75*bird.energy + 0.25*(1/float(1+math.exp(- ((bird.age-100)/12.0) )))
 		return bird.energy
 
 	def duplicateGenes(self, newBird1, newBird2, parent1, parent2):
@@ -1027,8 +1030,6 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Simulation
-		self.initialNumPreys = self.numPreys = 90
-		self.initialNumPredators = self.numPredators = 30
 		self.numDeadPreys = 0
 		self.numDeadPredators = 0
 
@@ -1413,7 +1414,7 @@ class Feeder (breve.Stationary ):
 		self.adjustSize()
 
 	def adjustSize( self ):
-		radius = breve.breveInternalFunctionFinder.sqrt( self, self.energy )
+		radius = breve.breveInternalFunctionFinder.sqrt( self, 2*self.energy )
 		newScale = ( ( radius ) + 0.000010 )
 		if ( newScale == self.lastScale ):
 			return
