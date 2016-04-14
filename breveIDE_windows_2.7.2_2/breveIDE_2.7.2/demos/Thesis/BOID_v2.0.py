@@ -30,8 +30,8 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = True
-		self.evaluatePredator = False
+		self.evaluatePrey = False
+		self.evaluatePredator = True
 		self.phase_portrait = False
 		
 		self.runs = 10
@@ -56,7 +56,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
