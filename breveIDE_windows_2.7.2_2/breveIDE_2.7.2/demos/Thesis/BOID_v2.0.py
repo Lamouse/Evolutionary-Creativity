@@ -30,24 +30,26 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = False
-		self.evaluatePredator = True
+		self.evaluatePrey = True
+		self.evaluatePredator = False
 		self.phase_portrait = False
 		
 		self.runs = 10
-		self.current_run = 0
+		self.current_run = 6
 		self.preyID = 1
 		self.predatorID = 1
 
 		self.listPrey_BestFitness = []
 		self.listPrey_AverageFitness = []
 		self.listPrey_Diversity = []
+		self.listPrey_Deaths = []
 		self.tempPrey_Best = 0
 		self.tempPrey_Average= 0
 		self.tempPrey_Diversity= 0
 		self.listPredator_BestFitness = []
 		self.listPredator_AverageFitness = []
 		self.listPredator_Diversity = []
+		self.listPredator_Deaths = []
 		self.tempPredator_Best = 0
 		self.tempPredator_Average = 0
 		self.tempPredator_Diversity = 0
@@ -1016,12 +1018,14 @@ class Swarm( breve.Control ):
 		self.listPrey_BestFitness = []
 		self.listPrey_AverageFitness = []
 		self.listPrey_Diversity = []
+		self.listPrey_Deaths = []
 		self.tempPrey_Best = 0
 		self.tempPrey_Average= 0
 		self.tempPrey_Diversity= 0
 		self.listPredator_BestFitness = []
 		self.listPredator_AverageFitness = []
 		self.listPredator_Diversity = []
+		self.listPredator_Deaths = []
 		self.tempPredator_Best = 0
 		self.tempPredator_Average = 0
 		self.tempPredator_Diversity = 0
@@ -1136,11 +1140,11 @@ class Swarm( breve.Control ):
 
 			if self.evaluatePrey:
 				self.tempPrey_Average += self.averageFitness('Prey')
-				self.tempPrey_Best += self.bestFitness('Prey')
+				#self.tempPrey_Best += self.bestFitness('Prey')
 				self.tempPrey_Diversity += self.diversity_genotype('Prey')
 			if self.evaluatePredator:
 				self.tempPredator_Average += self.averageFitness('Predator')
-				self.tempPredator_Best += self.bestFitness('Predator')
+				#self.tempPredator_Best += self.bestFitness('Predator')
 				self.tempPredator_Diversity += self.diversity_genotype('Predator')
 			if self.phase_portrait:
 				self.tempPrey_pp += self.numPreys
@@ -1150,23 +1154,25 @@ class Swarm( breve.Control ):
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
 				if self.evaluatePrey:
-					#aver, best = self.getFitnessMetrics('Prey', self.initialNumPreys)
+					aver, best = self.getFitnessMetrics('Prey', self.initialNumPreys)
 					#self.listPrey_AverageFitness.append(aver)
-					#self.listPrey_BestFitness.append(best)
+					self.listPrey_BestFitness.append(best)
 					self.listPrey_AverageFitness.append(self.tempPrey_Average/(self.breeding_season*1.0))
-					self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
+					#self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
 					self.listPrey_Diversity.append(self.tempPrey_Diversity/(self.breeding_season*1.0))
+					self.listPrey_Deaths.append(self.initialNumPreys-self.numPreys)
 					self.tempPrey_Average = 0
 					self.tempPrey_Best = 0
 					self.tempPrey_Diversity = 0
 
 				if self.evaluatePredator:
-					#aver, best = self.getFitnessMetrics('Predator', self.initialNumPredators)
+					aver, best = self.getFitnessMetrics('Predator', self.initialNumPredators)
 					#self.listPredator_AverageFitness.append(aver)
-					#self.listPredator_BestFitness.append(best)
+					self.listPredator_BestFitness.append(best)
 					self.listPredator_AverageFitness.append(self.tempPredator_Average/(self.breeding_season*1.0))
-					self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
+					#self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
 					self.listPredator_Diversity.append(self.tempPredator_Diversity/(self.breeding_season*1.0))
+					self.listPredator_Deaths.append(self.initialNumPredators-self.numPredators)
 					self.tempPredator_Average = 0
 					self.tempPredator_Best = 0
 					self.tempPredator_Diversity = 0
@@ -1273,7 +1279,7 @@ class Swarm( breve.Control ):
 					
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_prey_'
-					directory_list = ['average', 'best', 'diversity']
+					directory_list = ['average', 'best', 'diversity', 'deaths']
 
 					for directory in directory_list:
 						if not os.path.exists(directory_base+directory):
@@ -1295,12 +1301,17 @@ class Swarm( breve.Control ):
 						f.write("%s\n" % item)
 					f.close()
 
+					f =  open(directory_base+directory_list[3]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPrey_Deaths:
+						f.write("%s\n" % item)
+					f.close()
+
 				if self.evaluatePredator:
 					suffix = self.controller.reprType[self.controller.repr]
 					
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_predator_'
-					directory_list = ['average', 'best', 'diversity']
+					directory_list = ['average', 'best', 'diversity', 'deaths']
 
 					for directory in directory_list:
 						if not os.path.exists(directory_base+directory):
@@ -1319,6 +1330,11 @@ class Swarm( breve.Control ):
 
 					f =  open(directory_base+directory_list[2]+'/'+str(self.current_run)+'.txt', 'w')
 					for item in self.listPredator_Diversity:
+						f.write("%s\n" % item)
+					f.close()
+
+					f =  open(directory_base+directory_list[3]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPredator_Deaths:
 						f.write("%s\n" % item)
 					f.close()
 
@@ -1678,9 +1694,9 @@ class Prey( breve.Mobile ):
 
 	def eat( self, feeder ):
 		if feeder.energy > 0:
-			if self.energy <= 0.90:
-				self.addEnergy(0.1)
-				feeder.addEnergy(-0.1)
+			if self.energy <= 0.95:
+				self.addEnergy(0.05)
+				feeder.addEnergy(-0.05)
 			else:
 				feeder.addEnergy(self.energy-1)
 				self.energy = 1.0
@@ -1927,7 +1943,7 @@ class Prey( breve.Mobile ):
 							t_x = neighbor.pos_x-self.pos_x
 							t_y = neighbor.pos_y-self.pos_y
 
-						if norm <= max(neighbor.lastScale,3):
+						if norm <= 2:
 							self.eat(neighbor) 
 
 					elif neighbor.isA( 'Prey' ) and neighbor.isAlive:
@@ -1989,6 +2005,8 @@ class Prey( breve.Mobile ):
 		return [accel_x, accel_y]
 
 	def fly(self):
+		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
+
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -2033,12 +2051,11 @@ class Prey( breve.Mobile ):
 					norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
 					if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
 
-						if norm <= max(neighbor.lastScale,3):
+						if norm <= 2:
 							self.eat(neighbor)
 
 		self.changeAccel(accel_x, accel_y)
 		
-		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
 		self.adjustSize()
 		self.age += 1
 
@@ -2278,9 +2295,9 @@ class Predator( breve.Mobile ):
 
 	def eat( self, prey ):
 		if prey.energy > 0:
-			if self.energy <= 0.90:
-				self.addEnergy(0.1)
-				prey.addEnergy(-0.1)
+			if self.energy <= 0.95:
+				self.addEnergy(0.05)
+				prey.addEnergy(-0.05)
 			else:
 				prey.addEnergy(self.energy-1)
 				self.energy = 1.0
@@ -2537,6 +2554,8 @@ class Predator( breve.Mobile ):
 		return [accel_x, accel_y]
 
 	def fly(self):
+		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
+
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -2586,7 +2605,6 @@ class Predator( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 
-		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
 		self.adjustSize()
 		self.age += 1
 
