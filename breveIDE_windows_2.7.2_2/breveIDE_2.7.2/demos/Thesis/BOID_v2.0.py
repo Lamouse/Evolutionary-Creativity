@@ -30,12 +30,12 @@ class Swarm( breve.Control ):
 
 		# Evaluation
 		self.isToEvaluate = False
-		self.evaluatePrey = True
+		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
 		
 		self.runs = 10
-		self.current_run = 6
+		self.current_run = 0
 		self.preyID = 1
 		self.predatorID = 1
 
@@ -58,7 +58,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -978,7 +978,11 @@ class Swarm( breve.Control ):
 			result, tam = self.compare_trees(item1.geno, item2.geno)
 			result /= (tam*1.0)
 		elif self.repr == 2:
-			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (max(item1.pushCode.getTopLevelSize(), item2.pushCode.getTopLevelSize())*1.0)
+			temp = max(item1.pushCode.getTopLevelSize(), item2.pushCode.getTopLevelSize())*1.0
+			if temp == 0:
+				result = 0
+			else:
+				result = item1.pushCode.getTopLevelDifference(item2.pushCode) / temp
 			
 		return result
 
