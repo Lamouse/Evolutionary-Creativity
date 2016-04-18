@@ -33,6 +33,9 @@ class Swarm( breve.Control ):
 		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
+
+		# Sexual Selection
+		self.sexualSelection = True
 		
 		self.runs = 10
 		self.current_run = 0
@@ -762,51 +765,72 @@ class Swarm( breve.Control ):
 
 	def compare_trees(self, tree1, tree2):
 		temp = 0
-		if tree1.data != tree2.data:
-			temp = 1
+		tam = 0
+
+		if self.controller.repr == 1:	
+			if tree1.vector != tree2.vector:
+				temp += 1
+			tam += 1
+
+		if self.controller.sexualSelection:
+			if tree1.float_size != tree2.float_size:
+				temp += 1
+			if tree1.float_bright != tree2.float_bright:
+				temp += 1
+			tam += 2
 
 		# Leaf
 		if tree1.right is None or tree2.right is None:
-			return temp, 1
+			return temp, tam
 		
 		# Node
 		v1, t1 = self.compare_trees(tree1.left, tree2.left)
 		v2, t2 = self.compare_trees(tree1.right, tree2.right)
 		v3 = v1 + v2 + temp
-		t3 = t1 + t2 + 1
+		t3 = t1 + t2 + tam
 		return v3, t3
 
-	'''
+
 	def print_tree(self, tree):
 		if tree.right is None:
 			# leaf
-			print tree.data, 
+			print tree.vector, 
 		else:
 			# node
 			print "(",
 			self.print_tree(tree.left)
-			print tree.data,
+			print tree.vector,
 			self.print_tree(tree.right)
 			print ")",
-	'''
 	
 
 	def run_code(self, indiv, tree):
 		if tree.right is None:
 			# leaf
-			exec "x, y = " + tree.data
-			return [x, y]
+			exec "v1, v2 = " + tree.vector
+
+			if indiv.getType() == 'Prey':
+				exec "size = " + tree.float_size
+				exec "bright = " + tree.float_bright
+				return [v1, v2, size, bright]
+			else:
+				return [v1, v2]
 		else:
 			# node_list
 			# for some reason this don't work, probability it don't work in python 2.3
 			# return [0 if tree.data == "/" and y == 0 else eval('x'+tree.data+'y') for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right))]
-
 			result = []
-			for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right)):
-				if tree.data == "/" and y == 0:
+
+			if indiv.getType() == 'Prey':
+				operator = [tree.vector, tree.vector, tree.float_size, tree.float_size]
+			else:
+				operator = [tree.vector, tree.vector]
+			
+			for x, y, opr in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right), operator):
+				if opr == "/" and y == 0:
 					result.append(0)
 				else:
-					result.append(eval('x'+tree.data+'y'))
+					result.append(eval('x'+opr+'y'))
 			return result
 
 
@@ -2024,7 +2048,8 @@ class Prey( breve.Mobile ):
 			accel_x, accel_y = self.calculateAccel()
 		else:
 			if self.controller.repr == 1:
-				accel_x, accel_y = self.controller.run_code(self, self.geno)
+				accel_x, accel_y, size, bright = self.controller.run_code(self, self.geno)
+				print accel_x, accel_y, size, bright
 			elif self.controller.repr == 2:
 
 				# clean the stacks
@@ -2698,27 +2723,51 @@ class Node:
 	def __init__(self, left, right, specie, depth):
 		self.left = left
 		self.right = right
-		self.data = None
 		self.parent = None
 		self.depth = depth
 
-		if specie == 'Prey':
-			self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
-					"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
-		elif specie == 'Predator':
-			self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
-					"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+		if self.controller.repr == 1:
+			self.vector = None
+			
+			if specie == 'Prey':
+				self.leaf_vector = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
+						"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+
+				if self.controller.sexualSelection:
+					self.float_size = None
+					self.float_bright = None
+
+					self.leaf_float = ["indiv.getEnergy()", "indiv.distanceMatingSeason()", "indiv.getNumPreysNeigh()",
+						"indiv.getNumPredatorsNeigh()", "indiv.getTailSize()", "indiv.getTailBrightness()"]
+
+			elif specie == 'Predator':
+				self.leaf_vector = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
+						"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+
 		self.node = ["+", "-", "*", "/"]
 
-		self.fill_data()
+		self.fill_data(specie)
 
-	def fill_data(self):
+	def fill_data(self, specie):
+		# leaf
 		if self.right is None:
-			# leaf
-			self.data = self.leaf[random.randint(0, len(self.leaf)-1)]
+		
+			if self.controller.repr == 1:	
+				self.vector = self.leaf_vector[random.randint(0, len(self.leaf_vector)-1)]
+
+			if specie == 'Prey' and self.controller.sexualSelection:
+				self.float_size = self.leaf_float[random.randint(0, len(self.leaf_float)-1)]
+				self.float_bright = self.leaf_float[random.randint(0, len(self.leaf_float)-1)]
+		
+		# node
 		else:
-			# node
-			self.data = self.node[random.randint(0, len(self.node)-1)]
+			
+			if self.controller.repr == 1:	
+				self.vector = self.node[random.randint(0, len(self.node)-1)]
+
+			if specie == 'Prey' and self.controller.sexualSelection:
+				self.float_size = self.node[random.randint(0, len(self.node)-1)]
+				self.float_bright = self.node[random.randint(0, len(self.node)-1)]
 
 
 Swarm()
