@@ -61,7 +61,7 @@ class Swarm( breve.Control ):
 		self.tempPredator_pp = 0
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -749,7 +749,7 @@ class Swarm( breve.Control ):
 	def create_random_tree(self, depth, specie, real_depth):
 		if depth < 1:
 			return None
-		return Node(self.create_random_tree(depth-1, specie, real_depth+1), self.create_random_tree(depth-1, specie, real_depth+1), specie, real_depth)
+		return Node(self.create_random_tree(depth-1, specie, real_depth+1), self.create_random_tree(depth-1, specie, real_depth+1), specie, real_depth, self.repr, self.sexualSelection)
 
 
 	def fill_parents(self, tree, depth):
@@ -827,8 +827,11 @@ class Swarm( breve.Control ):
 				operator = [tree.vector, tree.vector]
 			
 			for x, y, opr in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right), operator):
-				if opr == "/" and y == 0:
-					result.append(0)
+				if opr == "/":
+					if y == 0:
+						result.append(0)
+					else:
+						result.append(eval('x'+opr+'(y*1.0)'))
 				else:
 					result.append(eval('x'+opr+'y'))
 			return result
@@ -1546,6 +1549,10 @@ class Prey( breve.Mobile ):
 			self.pushCode = None
 			self.createPush()
 
+		if self.controller.sexualSelection:
+			self.tailSize = 0
+			self.tailBrigh = 0
+
 		self.lastScale = 1
 		Prey.init( self )
 
@@ -1936,6 +1943,60 @@ class Prey( breve.Mobile ):
 			return
 		return [rand_x, rand_y]
 
+	def getEnergy(self):
+		return self.energy
+
+	def getTailSize(self):
+		return self.tailSize
+
+	def getTailBrightness(self):
+		return self.tailBrigh
+
+	def distanceMatingSeason(self):
+		dist = self.controller.breeding_season - (self.controller.current_iteraction % self.controller.breeding_season)
+		return dist
+
+	def getNumPreysNeigh(self):
+		count = 0
+		neighbors = self.getNeighbors()
+		
+		v1 = self.normalizeVector(self.vel_x, self.vel_y)
+		for neighbor in neighbors:
+
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
+				v2 = self.normalizeVector(neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y)
+				a = math.degrees(self.angle(v1, v2))
+
+				norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
+				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
+
+					if 0 < norm < self.controller.socialZone:
+						count += 1
+
+		return count
+
+	def getNumPredatorsNeigh(self):
+		count = 0
+		neighbors = self.getNeighbors()
+		
+		v1 = self.normalizeVector(self.vel_x, self.vel_y)
+		for neighbor in neighbors:
+
+			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				v2 = self.normalizeVector(neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y)
+				a = math.degrees(self.angle(v1, v2))
+
+				norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
+				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
+
+					if 0 < norm < self.controller.socialZone:
+						count += 1
+
+		return count
+
+	def randF(self):
+		rand = random.uniform(0, 10)
+		return rand
 
 	# GA
 	def calculateAccel(self):
@@ -2720,25 +2781,25 @@ class Data_Stationary:
 		self.VirtualEnergy = VirtualEnergy
 
 class Node:
-	def __init__(self, left, right, specie, depth):
+	def __init__(self, left, right, specie, depth, representation, sexualSelection = False):
 		self.left = left
 		self.right = right
 		self.parent = None
 		self.depth = depth
 
-		if self.controller.repr == 1:
+		if representation == 1:
 			self.vector = None
 			
 			if specie == 'Prey':
 				self.leaf_vector = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
 						"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
 
-				if self.controller.sexualSelection:
+				if sexualSelection:
 					self.float_size = None
 					self.float_bright = None
 
 					self.leaf_float = ["indiv.getEnergy()", "indiv.distanceMatingSeason()", "indiv.getNumPreysNeigh()",
-						"indiv.getNumPredatorsNeigh()", "indiv.getTailSize()", "indiv.getTailBrightness()"]
+						"indiv.getNumPredatorsNeigh()", "indiv.getTailSize()", "indiv.getTailBrightness()", "indiv.randF()"]
 
 			elif specie == 'Predator':
 				self.leaf_vector = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
@@ -2746,26 +2807,26 @@ class Node:
 
 		self.node = ["+", "-", "*", "/"]
 
-		self.fill_data(specie)
+		self.fill_data(specie, representation, sexualSelection)
 
-	def fill_data(self, specie):
+	def fill_data(self, specie, representation, sexualSelection):
 		# leaf
 		if self.right is None:
 		
-			if self.controller.repr == 1:	
+			if representation == 1:	
 				self.vector = self.leaf_vector[random.randint(0, len(self.leaf_vector)-1)]
 
-			if specie == 'Prey' and self.controller.sexualSelection:
+			if specie == 'Prey' and sexualSelection:
 				self.float_size = self.leaf_float[random.randint(0, len(self.leaf_float)-1)]
 				self.float_bright = self.leaf_float[random.randint(0, len(self.leaf_float)-1)]
 		
 		# node
 		else:
 			
-			if self.controller.repr == 1:	
+			if representation == 1:	
 				self.vector = self.node[random.randint(0, len(self.node)-1)]
 
-			if specie == 'Prey' and self.controller.sexualSelection:
+			if specie == 'Prey' and sexualSelection:
 				self.float_size = self.node[random.randint(0, len(self.node)-1)]
 				self.float_bright = self.node[random.randint(0, len(self.node)-1)]
 
