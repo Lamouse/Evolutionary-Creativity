@@ -588,7 +588,12 @@ class Swarm( breve.Control ):
 		for item in neighbour:
 			if item.isA( specie ) and item.isAlive and item.ID != parent1.ID:
 				birds.append( item )
-		parent2 = self.tournament(birds, 5)
+
+		if specie == 'Predator' or self.sexualSelection == 0:
+			parent2 = self.tournament(birds, 5)
+		else:
+			parent2 = self.matingChoice(parent1, birds, 5)
+
 		return parent2
 
 	def selectParent( self, specie):
@@ -603,15 +608,53 @@ class Swarm( breve.Control ):
 		leng = breve.length(birds)
 		if leng == 0:
 			return None
-		candidate = birds[random.randint(0,leng-1)]
+		elif leng <= 5:
+			candidates = birds
+		else:
+			indexes = random.sample(range(0, breve.length(birds)), 5)
+			candidates = []
+			for index in indexes:
+				candidates.append(birds[index])
+
+		candidate = candidates[0]
 		fit = self.fitness(candidate)
-		for i in range(dim-1):
-			temp_candidate = birds[random.randint(0,leng-1)]
+		for i in range(1,dim):
+			temp_candidate = candidates[i]
 			temp_fit = self.fitness(temp_candidate)
 			if temp_fit > fit:
 				candidate = temp_candidate
 				fit = temp_fit
 		return candidate
+
+	def matingChoice( self, female, birds, dim):
+		leng = breve.length(birds)
+		if leng == 0:
+			return None
+		elif leng <= 5:
+			candidates = birds
+		else:
+			indexes = random.sample(range(0, breve.length(birds)), 5)
+			candidates = []
+			for index in indexes:
+				candidates.append(birds[index])
+
+		best_candidate = candidates[0]
+		best_dist = self.sexual_metric(female, best_candidate)
+		for i in range(1,5):
+			temp_candidate = candidates[i]
+			temp_dist = self.sexual_metric(female, temp_candidate)
+			if temp_dist < best_dist:
+				best_candidate = temp_candidate
+				best_dist = temp_dist
+		return best_candidate
+
+	def sexual_metric( self, female, candidate):
+		if self.sexualSelection == 1:
+			return abs(female.tailSize - candidate.tailSize)
+		elif self.sexualSelection == 2:
+			return abs(female.tailBrigh - candidate.tailBrigh)
+		else:
+			return abs((female.tailSize+female.tailBrigh) - (candidate.tailSize+candidate.tailBrigh))
 
 	def fitness(self, bird):
 		temp1 = self.current_iteraction % self.breeding_season
