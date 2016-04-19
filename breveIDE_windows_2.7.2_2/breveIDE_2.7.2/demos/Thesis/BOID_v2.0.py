@@ -29,14 +29,14 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Evaluation
-		self.isToEvaluate = False
+		self.isToEvaluate = True
 		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
 
 		# Sexual Selection
 		self.ssType = ['off', 'size', 'brightness', 'size+brightness']
-		self.sexualSelection = 1
+		self.sexualSelection = 3
 		
 		self.runs = 10
 		self.current_run = 0
@@ -67,7 +67,7 @@ class Swarm( breve.Control ):
 			self.tempPrey_Brightness = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -320,7 +320,13 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+				if self.sexualSelection > 0:
+					sgeno = None
+					if self.repr != 1:
+						sgeno = prey.sexualGenotype
+					temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
+				else:
+					temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 				cPickle.dump(temp_prey, f)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -329,7 +335,13 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+			if self.sexualSelection > 0:
+				sgeno = None
+				if self.repr != 1:
+					sgeno = prey.sexualGenotype
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
+			else:
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 			cPickle.dump(temp_prey, f)
 		f.close()
 
@@ -377,7 +389,7 @@ class Swarm( breve.Control ):
 				data_prey = cPickle.load(f)
 				
 				temp_prey = breve.createInstances( breve.Prey, 1)
-				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.visionAngle, data_prey.maxSteering, data_prey.geno, data_prey.lastScale)
+				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.visionAngle, data_prey.maxSteering, data_prey.geno, data_prey.lastScale, data_prey.sexualgeno, data_prey.tailSize, data_prey.tailBrigh)
 
 				temp_prey.ID = self.preyID
 				self.preyID += 1
@@ -420,7 +432,13 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+				if self.sexualSelection > 0:
+					sgeno = None
+					if self.repr != 1:
+						sgeno = prey.sexualGenotype
+					temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
+				else:
+					temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 				preys_alive.append(temp_prey)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -429,7 +447,13 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+			if self.sexualSelection > 0:
+				sgeno = None
+				if self.repr != 1:
+					sgeno = prey.sexualGenotype
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
+			else:
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
 			preys_dead.append(temp_prey)
 
 		# prepadors
@@ -489,7 +513,7 @@ class Swarm( breve.Control ):
 		while True:
 			try:
 				data_prey = cPickle.load(f)
-				preys_list.append(data_prey.geno)
+				preys_list.append([data_prey.geno, data_prey.sexualgeno])
 			except EOFError:
 				break
 		f.close()
@@ -501,14 +525,18 @@ class Swarm( breve.Control ):
 		random.shuffle(index_list)
 		index_list = index_list[0:len(preys_list)]
 	
-		for (index, geno) in zip(index_list, preys_list):
+		for (index, genes) in zip(index_list, preys_list):
 			temp_prey = preys[index]
 
 			if self.controller.repr == 2:
 				temp_prey.pushInterpreter.clearStacks()
-				temp_prey.pushCode.setFrom(geno)
+				temp_prey.pushCode.setFrom(genes[0])
 			else:
-				temp_prey.geno = geno
+				temp_prey.geno = genes[0]
+
+			if self.sexualSelection > 0 and self.repr != 1:
+				temp_prey.sexualGenotype = genes[1]
+
 
 	def load_metrics_predators(self):
 		suffix = self.controller.reprType[self.controller.repr]
@@ -1628,12 +1656,12 @@ class Prey( breve.Mobile ):
 			self.createPush()
 
 		# Sexual Selection
-		if self.controller.repr != 1:
-			self.sexualGenotype = None
-
 		if self.controller.sexualSelection > 0:
 			self.tailSize = 0
 			self.tailBrigh = 0
+
+			if self.controller.repr != 1:
+				self.sexualGenotype = None
 
 		self.lastScale = 1
 		Prey.init( self )
@@ -1693,7 +1721,7 @@ class Prey( breve.Mobile ):
 		self.energy = 0.5
 		self.cumulativeEnergy = 0
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno, tailSize, tailBrigh)):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
@@ -1719,6 +1747,13 @@ class Prey( breve.Mobile ):
 			self.pushCode.setFrom(geno)
 		else:
 			self.geno = geno
+
+		if self.controller.sexualSelection > 0:
+			self.tailSize = tailSize
+			self.tailBrigh = tailBrigh
+
+			if self.controller.repr != 1:
+				self.sexualGenotype = sexualgeno
 
 	def setNewColor( self ):
 		self.setColor( breve.vector( 0, 1, 0 ) )
@@ -2843,7 +2878,7 @@ breve.myCustomShape = myCustomShape
 
 # auxiliar classes
 class Data_mobile:
-	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, cumulativeEnergy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
+	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, cumulativeEnergy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno = None, tailSize = 0, tailBrigh = 0):
 		self.pos_x = pos_x
 		self.pos_y = pos_y
 		self.vel_x = vel_x
@@ -2863,6 +2898,11 @@ class Data_mobile:
 		self.visionAngle = visionAngle
 		self.maxSteering = maxSteering
 		self.geno = geno
+
+		# sexual selection
+		self.sexualgeno = sexualgeno
+		self.tailSize = tailSize
+		self.tailBrigh = tailBrigh
 		
 		self.lastScale = lastScale
 
