@@ -29,7 +29,7 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Evaluation
-		self.isToEvaluate = True
+		self.isToEvaluate = False
 		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
@@ -67,7 +67,7 @@ class Swarm( breve.Control ):
 			self.tempPrey_Brightness = 0
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -387,7 +387,6 @@ class Swarm( breve.Control ):
 		while True:
 			try:
 				data_prey = cPickle.load(f)
-				
 				temp_prey = breve.createInstances( breve.Prey, 1)
 				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.visionAngle, data_prey.maxSteering, data_prey.geno, data_prey.lastScale, data_prey.sexualgeno, data_prey.tailSize, data_prey.tailBrigh)
 
@@ -398,7 +397,7 @@ class Swarm( breve.Control ):
 			except EOFError:
 				break
 		f.close()
-
+		
 		# prepadors
 		f =  open('data/predator_'+suffix+'.pkl', 'rb')
 		while True:
@@ -663,7 +662,6 @@ class Swarm( breve.Control ):
 			pos = random.randint(0, len(parent1.geno))
 			newBird1.geno = parent1.geno[0:pos] + parent2.geno[pos:]
 			newBird2.geno = parent2.geno[0:pos] + parent1.geno[pos:]
-			newBird1.sexualGenotype, newBird2.sexualGenotype = self.tree_crossover(parent1.sexualGenotype, parent2.sexualGenotype)
 
 		elif self.controller.repr == 1:
 			newBird1.geno, newBird2.geno = self.tree_crossover(parent1.geno, parent2.geno)
@@ -671,6 +669,8 @@ class Swarm( breve.Control ):
 		elif self.controller.repr == 2:
 			self.crossover_push(newBird1, parent1, parent2)
 			self.crossover_push(newBird2, parent2, parent1)
+
+		if self.controller.sexualSelection > 0 and self.controller.repr != 1 and newBird1.getType() == 'Prey':
 			newBird1.sexualGenotype, newBird2.sexualGenotype = self.tree_crossover(parent1.sexualGenotype, parent2.sexualGenotype)
 
 	def crossover_push(self, newBird, parent1, parent2):
@@ -711,10 +711,6 @@ class Swarm( breve.Control ):
 				if prob <= self.prob_mutation:
 					newBird.geno[i] += random.uniform(-0.5, 0.5)
 
-			prob = random.random()
-			if prob <= self.prob_mutation:
-				self.tree_mutation(newBird.sexualGenotype, newBird.getType())
-
 		elif self.controller.repr == 1:
 			prob = random.random()
 			if prob <= self.prob_mutation:
@@ -737,6 +733,7 @@ class Swarm( breve.Control ):
 				else:
 					newBird.pushInterpreter.pushCode( newBird.pushCode )
 
+		if self.controller.sexualSelection > 0 and self.controller.repr != 1 and newBird1.getType() == 'Prey':
 			prob = random.random()
 			if prob <= self.prob_mutation:
 				self.tree_mutation(newBird.sexualGenotype, newBird.getType())
@@ -821,13 +818,15 @@ class Swarm( breve.Control ):
 				temp += 1
 			tam += 1
 
+		'''
 		if self.controller.sexualSelection > 0:
 			if tree1.float_size != tree2.float_size:
 				temp += 1
 			if tree1.float_bright != tree2.float_bright:
 				temp += 1
 			tam += 2
-
+		'''
+		
 		# Leaf
 		if tree1.right is None or tree2.right is None:
 			return temp, tam
@@ -1697,7 +1696,6 @@ class Prey( breve.Mobile ):
 
 		if self.controller.repr == 0:
 			self.geno = [random.uniform(-5, 5) for x in range(6)]
-			self.sexualGenotype = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
 		elif self.controller.repr == 1:
 			self.geno = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
 			self.controller.fill_parents(self.geno, 1)
@@ -1705,6 +1703,8 @@ class Prey( breve.Mobile ):
 			self.pushCode = breve.createInstances( breve.PushProgram, 1 )
 			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
+
+		if self.controller.sexualSelection > 0 and self.controller.repr != 1:
 			self.sexualGenotype = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
 
 	def initializeRandomly2(self):
@@ -1721,7 +1721,7 @@ class Prey( breve.Mobile ):
 		self.energy = 0.5
 		self.cumulativeEnergy = 0
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno, tailSize, tailBrigh)):
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno=None, tailSize=0, tailBrigh=0):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
@@ -2220,7 +2220,11 @@ class Prey( breve.Mobile ):
 	def fly(self):
 		self.addEnergy( -0.01 - 0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
 		if self.controller.sexualSelection == 2 or self.controller.sexualSelection == 3:
-			self.addEnergy(-0.01*(1/float(1+math.exp( - self.tailBrigh + 5 ) ) ) )
+			try:
+				tempEnergy = -0.01*(1/float(1+math.exp( - self.tailBrigh + 5 ) ) )
+			except:
+				tempEnergy = -0.01
+			self.addEnergy( tempEnergy )
 
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
@@ -2233,10 +2237,16 @@ class Prey( breve.Mobile ):
 
 		if self.controller.repr == 0:
 			accel_x, accel_y = self.calculateAccel()
-			size, bright = self.controller.run_code(self, self.sexualGenotype)
+
+			if self.controller.sexualSelection > 0:
+				size, bright = self.controller.run_code(self, self.sexualGenotype)
 		else:
 			if self.controller.repr == 1:
-				accel_x, accel_y, size, bright = self.controller.run_code(self, self.geno)
+				if self.controller.sexualSelection > 0:
+					accel_x, accel_y, size, bright = self.controller.run_code(self, self.geno)
+				else:
+					accel_x, accel_y = self.controller.run_code(self, self.geno)
+
 			elif self.controller.repr == 2:
 
 				# clean the stacks
@@ -2255,8 +2265,9 @@ class Prey( breve.Mobile ):
 				accel_y = accel.y
 				size, bright = self.controller.run_code(self, self.sexualGenotype)
 
-			self.tailSize = size
-			self.tailBrigh = bright
+			if self.controller.sexualSelection > 0:
+				self.tailSize = size
+				self.tailBrigh = bright
 
 			# eat
 			neighbors = self.getNeighbors()
