@@ -29,14 +29,14 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Evaluation
-		self.isToEvaluate = False
+		self.isToEvaluate = True
 		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
 
 		# Sexual Selection
 		self.ssType = ['off', 'size', 'brightness', 'size+brightness']
-		self.sexualSelection = 3
+		self.sexualSelection = 0
 		
 		self.runs = 10
 		self.current_run = 0
@@ -67,7 +67,7 @@ class Swarm( breve.Control ):
 			self.tempPrey_Brightness = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -303,6 +303,9 @@ class Swarm( breve.Control ):
 	def save_data(self):
 		suffix = self.controller.reprType[self.controller.repr]
 
+		if self.sexualSelection > 0:
+			suffix += '_' + self.ssType[self.sexualSelection]
+
 		# feeders
 		f =  open('data/feeder_'+suffix+'.pkl', 'wb')
 		for feeder in breve.allInstances( "Feeder" ):
@@ -371,6 +374,9 @@ class Swarm( breve.Control ):
 	def load_data(self):
 		suffix = self.controller.reprType[self.controller.repr]
 
+		if self.sexualSelection > 0:
+			suffix += '_' + self.ssType[self.sexualSelection]
+
 		# feeders
 		f =  open('data/feeder_'+suffix+'.pkl', 'rb')
 		while True:
@@ -416,6 +422,9 @@ class Swarm( breve.Control ):
 
 	def save_metrics(self):
 		suffix = self.controller.reprType[self.controller.repr]
+
+		if self.sexualSelection > 0:
+			suffix += '_' + self.ssType[self.sexualSelection]
 
 		preys_alive = []
 		preys_dead = []
@@ -488,7 +497,7 @@ class Swarm( breve.Control ):
 
 
 		# save the data on files
-		f =  open('metrics/data/prey_'+suffix+'.pkl', 'wb')
+		f = open('metrics/data/prey_'+suffix+'.pkl', 'wb')
 		for prey in preys_final:
 			cPickle.dump(prey, f)
 		f.close()
@@ -500,6 +509,9 @@ class Swarm( breve.Control ):
 
 	def load_metrics_preys(self):
 		suffix = self.controller.reprType[self.controller.repr]
+
+		if self.sexualSelection > 0:
+			suffix += '_' + self.ssType[self.sexualSelection]
 
 		preys = breve.allInstances( "Prey" )
 		tam = len(preys)
@@ -539,6 +551,9 @@ class Swarm( breve.Control ):
 
 	def load_metrics_predators(self):
 		suffix = self.controller.reprType[self.controller.repr]
+
+		if self.sexualSelection > 0:
+			suffix += '_' + self.ssType[self.sexualSelection]
 
 		predators = breve.allInstances( "Predator" )
 		tam = len(predators)
@@ -793,8 +808,8 @@ class Swarm( breve.Control ):
 		newBird.isAlive = True
 
 		if self.sexualSelection > 0 and newBird.getType() == 'Prey':
-			self.tailSize = 0
-			self.tailBrigh = 0
+			self.tailSize = random.uniform(0,10)
+			self.tailBrigh = random.uniform(0,10)
 
 		newBird.setNewColor()
 		
@@ -1139,6 +1154,9 @@ class Swarm( breve.Control ):
 		if self.evaluatePrey or self.evaluatePredator:
 			suffix = self.controller.reprType[self.controller.repr]
 
+			if self.sexualSelection > 0:
+				suffix += '_' + self.ssType[self.sexualSelection]
+
 			# check folders
 			directory = 'metrics/log'
 			if not os.path.exists(directory):
@@ -1445,6 +1463,9 @@ class Swarm( breve.Control ):
 
 				if self.evaluatePrey:
 					suffix = self.controller.reprType[self.controller.repr]
+
+					if self.sexualSelection > 0:
+						suffix += '_' + self.ssType[self.sexualSelection]
 					
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_prey_'
@@ -1488,6 +1509,9 @@ class Swarm( breve.Control ):
 				if self.evaluatePredator:
 					suffix = self.controller.reprType[self.controller.repr]
 					
+					if self.sexualSelection > 0:
+						suffix += '_' + self.ssType[self.sexualSelection]
+
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_predator_'
 					directory_list = ['average', 'best', 'diversity', 'deaths']
@@ -1519,6 +1543,10 @@ class Swarm( breve.Control ):
 
 				if self.phase_portrait:
 					suffix = self.controller.reprType[self.controller.repr]
+
+					if self.sexualSelection > 0:
+						suffix += '_' + self.ssType[self.sexualSelection]
+
 					directory = 'metrics/phase_portrait/results/'+self.date+'_'+suffix
 					if not os.path.exists(directory):
 						os.makedirs(directory)
@@ -1747,8 +1775,13 @@ class Prey( breve.Mobile ):
 			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
-		if self.controller.sexualSelection > 0 and self.controller.repr != 1:
-			self.sexualGenotype = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
+		if self.controller.sexualSelection > 0:
+			self.tailSize = random.uniform(0,10)
+			self.tailBrigh = random.uniform(0,10)
+
+			if self.controller.repr != 1:
+				self.sexualGenotype = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
+
 
 	def initializeRandomly2(self):
 		x = random.uniform(self.controller.minX, self.controller.maxX)
@@ -1839,7 +1872,7 @@ class Prey( breve.Mobile ):
 			y *= n
 		
 		try:
-			if self.controller.sexualSelection == 1 or self.controller.sexualSelection == 3:
+			if self.controller.sexualSelection == 1 or self.controller.sexualSelection >= 3:
 				limit = self.maxVel - (self.maxVel/2.0) * (1/float(1+math.exp( - self.tailSize + 5.0 ) ) )
 			else:
 				limit = self.maxVel
@@ -2262,7 +2295,7 @@ class Prey( breve.Mobile ):
 
 	def fly(self):
 		self.addEnergy( -0.01 - 0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
-		if self.controller.sexualSelection == 2 or self.controller.sexualSelection == 3:
+		if self.controller.sexualSelection == 2 or self.controller.sexualSelection >= 3:
 			try:
 				tempEnergy = -0.01*(1/float(1+math.exp( - self.tailBrigh + 5 ) ) )
 			except:
