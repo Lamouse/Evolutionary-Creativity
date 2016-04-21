@@ -67,7 +67,7 @@ class Swarm( breve.Control ):
 			self.tempPrey_Brightness = 0
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
