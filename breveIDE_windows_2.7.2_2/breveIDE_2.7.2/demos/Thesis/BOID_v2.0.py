@@ -29,14 +29,14 @@ class Swarm( breve.Control ):
 		self.movie = None
 
 		# Evaluation
-		self.isToEvaluate = True
-		self.evaluatePrey = False
+		self.isToEvaluate = False
+		self.evaluatePrey = True
 		self.evaluatePredator = False
 		self.phase_portrait = False
 
 		# Sexual Selection
 		self.ssType = ['off', 'size', 'brightness', 'size+brightness']
-		self.sexualSelection = 0
+		self.sexualSelection = 3
 		
 		self.runs = 10
 		self.current_run = 0
@@ -791,7 +791,7 @@ class Swarm( breve.Control ):
 				else:
 					newBird.pushInterpreter.pushCode( newBird.pushCode )
 
-		if self.controller.sexualSelection > 0 and self.controller.repr != 1 and newBird1.getType() == 'Prey':
+		if self.controller.sexualSelection > 0 and self.controller.repr != 1 and newBird.getType() == 'Prey':
 			prob = random.random()
 			if prob <= self.prob_mutation:
 				self.tree_mutation(newBird.sexualGenotype, newBird.getType())
@@ -808,8 +808,10 @@ class Swarm( breve.Control ):
 		newBird.isAlive = True
 
 		if self.sexualSelection > 0 and newBird.getType() == 'Prey':
-			self.tailSize = random.uniform(0,10)
-			self.tailBrigh = random.uniform(0,10)
+			s = random.uniform(0,1)
+			b = random.uniform(0,1)
+			self.tailSize = s*parent1.tailSize + (1-s)*parent2.tailSize
+			self.tailBrigh = b*parent1.tailBrigh + (1-b)*parent2.tailBrigh
 
 		newBird.setNewColor()
 		
@@ -917,14 +919,14 @@ class Swarm( breve.Control ):
 
 			if self.repr == 1:
 				exec "v1, v2 = " + tree.vector
-				result.append(v1)
-				result.append(v2)
+				result.append(self.check_inf(v1))
+				result.append(self.check_inf(v2))
 
 			if indiv.getType() == 'Prey' and self.sexualSelection > 0:
 				exec "size = " + tree.float_size
 				exec "bright = " + tree.float_bright
-				result.append(size)
-				result.append(bright)
+				result.append(self.check_inf(size))
+				result.append(self.check_inf(bright))
 			
 			return result
 
@@ -944,20 +946,44 @@ class Swarm( breve.Control ):
 				operator.append(tree.float_bright)
 
 			for x, y, opr in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right), operator):
+				x1 = self.check_inf(x)
+				y1 = self.check_inf(y)
+
 				if opr == "/":
 					try:
-						if y == 0:
+						if y1 == 0:
 							result.append(0)
 						else:
-							result.append(eval('x'+opr+'(y*1.0)'))
+							result.append( self.check_inf(eval('x1'+opr+'(y1*1.0)')) )
 					except:
 						print 'Exception probably -1.#IND'
 						result.append(0)
 				else:
-					result.append(eval('x'+opr+'y'))
+					result.append( self.check_inf(eval('x1'+opr+'y1')) )
 
 			return result
 
+	def check_inf(self, num):
+		# bug no python 2.3
+		try:
+			# check 1.#IND
+			temp = abs(1/(num*1.0))
+			if temp >= 0:
+				# check for infinite
+				inf = 1e300 * 1e300
+				if abs(num) == inf:
+					if num == inf:
+						num = 9999.9
+					else:
+						num = -9999.9
+
+				result = num
+			else:
+				result = 0.0
+		except:
+			result = 0.0
+
+		return result
 
 	def select_random_node(self, tree, list_nodes):
 		if tree.right is not None:
@@ -1469,7 +1495,11 @@ class Swarm( breve.Control ):
 					
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_prey_'
-					directory_list = ['average', 'best', 'diversity', 'deaths', 'tailSize', 'tailBrightness']
+					directory_list = ['average', 'best', 'diversity', 'deaths']
+
+					if self.sexualSelection > 0:
+						directory_list.append('tailSize')
+						directory_list.append('tailBrightness')
 
 					for directory in directory_list:
 						if not os.path.exists(directory_base+directory):
@@ -1496,15 +1526,16 @@ class Swarm( breve.Control ):
 						f.write("%s\n" % item)
 					f.close()
 
-					f =  open(directory_base+directory_list[4]+'/'+str(self.current_run)+'.txt', 'w')
-					for item in self.listPrey_Size:
-						f.write("%s\n" % item)
-					f.close()
+					if self.sexualSelection > 0:
+						f =  open(directory_base+directory_list[4]+'/'+str(self.current_run)+'.txt', 'w')
+						for item in self.listPrey_Size:
+							f.write("%s\n" % item)
+						f.close()
 
-					f =  open(directory_base+directory_list[5]+'/'+str(self.current_run)+'.txt', 'w')
-					for item in self.listPrey_Brightness:
-						f.write("%s\n" % item)
-					f.close()
+						f =  open(directory_base+directory_list[5]+'/'+str(self.current_run)+'.txt', 'w')
+						for item in self.listPrey_Brightness:
+							f.write("%s\n" % item)
+						f.close()
 
 				if self.evaluatePredator:
 					suffix = self.controller.reprType[self.controller.repr]
@@ -2341,10 +2372,6 @@ class Prey( breve.Mobile ):
 				accel_y = accel.y
 				size, bright = self.controller.run_code(self, self.sexualGenotype)
 
-			if self.controller.sexualSelection > 0:
-				self.tailSize = size
-				self.tailBrigh = bright
-
 			# eat
 			neighbors = self.getNeighbors()
 
@@ -2360,6 +2387,10 @@ class Prey( breve.Mobile ):
 
 						if norm <= 2:
 							self.eat(neighbor)
+
+		if self.controller.sexualSelection > 0:
+			self.tailSize = size
+			self.tailBrigh = bright
 
 		self.changeAccel(accel_x, accel_y)
 		

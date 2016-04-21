@@ -50,7 +50,8 @@ def warn(message, category=None, stacklevel=1):
             filename = filename[:-1]
     else:
         if module == "__main__":
-            filename = sys.argv[0]
+            #filename = sys.argv[0]
+            filename = 'breve'
         if not filename:
             filename = module
     registry = globals.setdefault("__warningregistry__", {})
