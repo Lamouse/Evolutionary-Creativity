@@ -67,7 +67,7 @@ class Swarm( breve.Control ):
 			self.tempPrey_Brightness = 0
 
 		# Representation
-		self.repr = 0
+		self.repr = 1
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
@@ -250,6 +250,10 @@ class Swarm( breve.Control ):
 
 				kind = newBird.getType()
 				self.save_log( kind + str(newBird.ID) + ' revived' )
+
+				if kind == 'Prey' and self.sexualSelection > 0:
+					newBird.tailSize = random.uniform(0,10)
+					newBird.tailBrigh = random.uniform(0,10) 
 			
 	def add_new_agents( self ):
 		self.save_log( '--- Started run ' + str(self.current_run) + ' ---\n' )
@@ -623,17 +627,17 @@ class Swarm( breve.Control ):
 		leng = breve.length(birds)
 		if leng == 0:
 			return None
-		elif leng <= 5:
+		elif leng <= dim:
 			candidates = birds
 		else:
-			indexes = random.sample(range(0, breve.length(birds)), 5)
+			indexes = random.sample(range(0, breve.length(birds)), dim)
 			candidates = []
 			for index in indexes:
 				candidates.append(birds[index])
 
 		candidate = candidates[0]
 		fit = self.fitness(candidate)
-		for i in range(1,dim):
+		for i in range(1, min(dim,leng)):
 			temp_candidate = candidates[i]
 			temp_fit = self.fitness(temp_candidate)
 			if temp_fit > fit:
@@ -645,17 +649,17 @@ class Swarm( breve.Control ):
 		leng = breve.length(birds)
 		if leng == 0:
 			return None
-		elif leng <= 5:
+		elif leng <= dim:
 			candidates = birds
 		else:
-			indexes = random.sample(range(0, breve.length(birds)), 5)
+			indexes = random.sample(range(0, breve.length(birds)), dim)
 			candidates = []
 			for index in indexes:
 				candidates.append(birds[index])
 
 		best_candidate = candidates[0]
 		best_dist = self.sexual_metric(female, best_candidate)
-		for i in range(1,5):
+		for i in range(1, min(dim,leng)):
 			temp_candidate = candidates[i]
 			temp_dist = self.sexual_metric(female, temp_candidate)
 			if temp_dist < best_dist:
@@ -1828,6 +1832,10 @@ class Prey( breve.Mobile ):
 		self.energy = 0.5
 		self.cumulativeEnergy = 0
 
+		if self.controller.sexualSelection > 0:
+			self.tailSize = random.uniform(0,10)
+			self.tailBrigh = random.uniform(0,10)
+
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno=None, tailSize=0, tailBrigh=0):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
@@ -2389,8 +2397,8 @@ class Prey( breve.Mobile ):
 							self.eat(neighbor)
 
 		if self.controller.sexualSelection > 0:
-			self.tailSize = size
-			self.tailBrigh = bright
+			self.tailSize = max(size, 0.0)
+			self.tailBrigh = max(bright, 0.0)
 
 		self.changeAccel(accel_x, accel_y)
 		
