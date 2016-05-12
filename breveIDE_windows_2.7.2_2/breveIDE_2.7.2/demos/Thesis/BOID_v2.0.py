@@ -25,18 +25,18 @@ class Swarm( breve.Control ):
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
-		self.isToRecord = False
+		self.isToRecord = True
 		self.movie = None
 
 		# Evaluation
-		self.isToEvaluate = False
-		self.evaluatePrey = True
+		self.isToEvaluate = True
+		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
 
 		# Sexual Selection
 		self.ssType = ['off', 'size', 'brightness', 'size+brightness']
-		self.sexualSelection = 3
+		self.sexualSelection = 0
 		
 		self.runs = 10
 		self.current_run = 0
@@ -48,8 +48,8 @@ class Swarm( breve.Control ):
 		self.listPrey_Diversity = []
 		self.listPrey_Deaths = []
 		self.tempPrey_Best = 0
-		self.tempPrey_Average= 0
-		self.tempPrey_Diversity= 0
+		self.tempPrey_Average = 0
+		self.tempPrey_Diversity = 0
 		self.listPredator_BestFitness = []
 		self.listPredator_AverageFitness = []
 		self.listPredator_Diversity = []
@@ -57,14 +57,18 @@ class Swarm( breve.Control ):
 		self.tempPredator_Best = 0
 		self.tempPredator_Average = 0
 		self.tempPredator_Diversity = 0
+		
+		if self.sexualSelection > 0:
+			self.listPrey_Diversity_Sexual = []
+			self.listPrey_Size = []
+			self.listPrey_Brightness = []
+			self.tempPrey_Diversity_Sexual = 0
+			self.tempPrey_Size = 0
+			self.tempPrey_Brightness = 0
+
 		self.list_phase_portrait = []
 		self.tempPrey_pp = 0
 		self.tempPredator_pp = 0
-		if self.sexualSelection > 0:
-			self.listPrey_Size = []
-			self.listPrey_Brightness = []
-			self.tempPrey_Size = 0
-			self.tempPrey_Brightness = 0
 
 		# Representation
 		self.repr = 0
@@ -99,14 +103,14 @@ class Swarm( breve.Control ):
 		self.pollPredators = breve.objectList()
 
 		# Generation
-		self.maxIteraction = 5000
+		self.maxIteraction = 10000
 		self.current_iteraction = 0
 		self.save_generation = 25
 		self.breeding_season = 50
 		self.breeding_inc = 0.5
 		self.max_pop_predators = 0.6
 		self.prob_mutation = 0.1
-		self.evaluation_survivor = 0.9
+		self.evaluation_survivor = 0.3
 		self.initial_depth = 3
 		self.max_depth = 20
 		self.endSimulation = False
@@ -872,6 +876,26 @@ class Swarm( breve.Control ):
 			self.fill_parents(tree.left, depth+1)
 			self.fill_parents(tree.right, depth+1)
 
+	def compare_trees_sexual(self, tree1, tree2):
+		temp = 0
+		tam = 0
+
+		if tree1.float_size != tree2.float_size:
+			temp += 1
+		if tree1.float_bright != tree2.float_bright:
+			temp += 1
+		tam += 2
+		
+		# Leaf
+		if tree1.right is None or tree2.right is None:
+			return temp, tam
+		
+		# Node
+		v1, t1 = self.compare_trees(tree1.left, tree2.left)
+		v2, t2 = self.compare_trees(tree1.right, tree2.right)
+		v3 = v1 + v2 + temp
+		t3 = t1 + t2 + tam
+		return v3, t3
 
 	def compare_trees(self, tree1, tree2):
 		temp = 0
@@ -1160,6 +1184,33 @@ class Swarm( breve.Control ):
 			return 0
 		return result / (tam*1.0)
 
+	def diversity_genotype_sexual(self, specie):
+		tam = 0
+		result = 0
+
+		boid_list = []
+		temp_list = breve.allInstances( specie )
+		for item in temp_list:
+			if item.isAlive:
+				boid_list.append(item)
+
+		for i in range(0, len(boid_list)):
+			for y in range(i+1, len(boid_list)):
+				
+				if self.controller.repr == 1:
+					result_temp, tam_temp = self.compare_trees_sexual(boid_list[i].geno, boid_list[y].geno)
+				else:
+					result_temp, tam_temp = self.compare_trees_sexual(boid_list[i].sexualGenotype, boid_list[y].sexualGenotype)
+
+				result_temp /= (tam_temp*1.0)
+
+				result += result_temp
+				tam += 1
+
+		if tam == 0:
+			return 0
+		return result / (tam*1.0)
+
 	def compare_genotype(self, item1, item2):
 		result = 0
 
@@ -1325,7 +1376,7 @@ class Swarm( breve.Control ):
 			for predator in predators_list:
 				predator.fly()
 
-			# management of the energy from feeders
+			# management of energy from feeders
 			self.totalFoodSupply = 0
 			for feeder in breve.allInstances( "Feeder" ):
 				if feeder.rapid:
@@ -1348,7 +1399,9 @@ class Swarm( breve.Control ):
 				self.tempPrey_Average += self.averageFitness('Prey')
 				#self.tempPrey_Best += self.bestFitness('Prey')
 				self.tempPrey_Diversity += self.diversity_genotype('Prey')
+
 				if self.sexualSelection > 0:
+					self.tempPrey_Diversity_Sexual += self.diversity_genotype_sexual('Prey')
 					s, b = self.sexual_selection('Prey')
 					self.tempPrey_Size += s
 					self.tempPrey_Brightness += b
@@ -1357,6 +1410,7 @@ class Swarm( breve.Control ):
 				self.tempPredator_Average += self.averageFitness('Predator')
 				#self.tempPredator_Best += self.bestFitness('Predator')
 				self.tempPredator_Diversity += self.diversity_genotype('Predator')
+
 			if self.phase_portrait:
 				self.tempPrey_pp += self.numPreys
 				self.tempPredator_pp += self.numPredators
@@ -1377,8 +1431,10 @@ class Swarm( breve.Control ):
 					self.tempPrey_Diversity = 0
 
 					if self.sexualSelection > 0:
+						self.listPrey_Diversity_Sexual.append(self.tempPrey_Diversity_Sexual/(self.breeding_season*1.0))
 						self.listPrey_Size.append(self.tempPrey_Size/(self.breeding_season*1.0))
 						self.listPrey_Brightness.append(self.tempPrey_Brightness/(self.breeding_season*1.0))
+						self.tempPrey_Diversity_Sexual = 0
 						self.tempPrey_Size = 0
 						self.tempPrey_Brightness = 0
 
@@ -1402,6 +1458,7 @@ class Swarm( breve.Control ):
 				# preys
 				if not self.evaluatePredator:
 					if self.evaluatePrey:
+
 						tam_temp = (self.initialNumPreys*self.evaluation_survivor)
 						if self.numPreys > tam_temp:
 							preys_list.sort(self.descendingCmp)
@@ -1411,6 +1468,7 @@ class Swarm( breve.Control ):
 								preys_list.remove(temp_boid)
 								self.numPreys -= 1
 								self.save_log( 'one prey died with ID=' + str(temp_boid.ID) )
+
 						tam_prey = int(math.ceil((self.initialNumPreys-self.numPreys)/2))
 					else:
 						tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
@@ -1426,6 +1484,7 @@ class Swarm( breve.Control ):
 				# predators
 				if not self.evaluatePrey:
 					if self.evaluatePredator:
+
 						tam_temp = (self.initialNumPredators*self.evaluation_survivor)
 						if self.numPredators > tam_temp:
 							predators_list.sort(self.descendingCmp)
@@ -1435,6 +1494,7 @@ class Swarm( breve.Control ):
 								predators_list.remove(temp_boid)
 								self.numPredators -= 1
 								self.save_log( 'one predator died with ID=' + str(temp_boid.ID) )
+
 						tam_predator = int(math.ceil((self.initialNumPredators-self.numPredators)/2))
 					else:
 						predator_max = self.numPreys*self.max_pop_predators
@@ -1502,8 +1562,10 @@ class Swarm( breve.Control ):
 					directory_list = ['average', 'best', 'diversity', 'deaths']
 
 					if self.sexualSelection > 0:
+						directory_list.append('diversitySexual')
 						directory_list.append('tailSize')
 						directory_list.append('tailBrightness')
+
 
 					for directory in directory_list:
 						if not os.path.exists(directory_base+directory):
@@ -1531,12 +1593,18 @@ class Swarm( breve.Control ):
 					f.close()
 
 					if self.sexualSelection > 0:
+
 						f =  open(directory_base+directory_list[4]+'/'+str(self.current_run)+'.txt', 'w')
-						for item in self.listPrey_Size:
+						for item in self.listPrey_Diversity_Sexual:
 							f.write("%s\n" % item)
 						f.close()
 
 						f =  open(directory_base+directory_list[5]+'/'+str(self.current_run)+'.txt', 'w')
+						for item in self.listPrey_Size:
+							f.write("%s\n" % item)
+						f.close()
+
+						f =  open(directory_base+directory_list[6]+'/'+str(self.current_run)+'.txt', 'w')
 						for item in self.listPrey_Brightness:
 							f.write("%s\n" % item)
 						f.close()
@@ -1639,9 +1707,9 @@ class Feeder (breve.Stationary ):
 
 	def rapidGrow(self):
 		if self.rapid:
-			if self.VirtualEnergy > 0.5:
-				self.energy += 0.5
-				self.VirtualEnergy -= 0.5
+			if self.VirtualEnergy > 0.1:
+				self.energy += 0.1
+				self.VirtualEnergy -= 0.1
 			else:
 				self.energy += self.VirtualEnergy
 				self.VirtualEnergy = 0
