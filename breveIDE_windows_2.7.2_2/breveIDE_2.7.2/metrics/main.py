@@ -29,7 +29,6 @@ if __name__ == '__main__':
 				for result in results:
 					final_results.append(np.mean(result))
 
-				
 				plt.plot(final_results)
 				plt.ylabel('fitness')
 				plt.xlabel('number of generation')

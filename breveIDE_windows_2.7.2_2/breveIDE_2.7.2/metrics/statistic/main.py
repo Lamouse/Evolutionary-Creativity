@@ -107,7 +107,7 @@ if __name__ == '__main__':
 	plt.errorbar(data2_x, data2_mean, yerr=data2_sem, fmt='go', markersize=1)
 
 	plt.ylabel('fitness')
-	plt.xlabel('number of generation')
+	plt.xlabel('number of generations')
 	plt.savefig('data.png', bbox_inches='tight')
 	plt.close()
 
