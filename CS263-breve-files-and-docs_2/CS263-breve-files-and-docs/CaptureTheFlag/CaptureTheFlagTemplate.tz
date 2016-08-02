@@ -1,0 +1,84 @@
+@use CaptureTheFlag.
+
+Controller myCaptureTheFlagController.
+
+CaptureTheFlagController : myCaptureTheFlagController {
+    + variables:
+        redTeam, blueTeam (list).
+
+    + to init:
+        blueTeam = 10 new myBluePlayer.
+        blueTeam set-team to 0.
+
+        redTeam = 10 new myRedPlayer.
+        redTeam set-team to 1.
+}
+
+CaptureTheFlagPlayer : myBluePlayer {
+	+ to init:
+		print "my id number is: ", (self get-id-number).
+
+    + to iterate:
+        flag, jail (object).
+        angle (double).
+
+        self set-speed to 1.
+
+        # if we're carrying the flag, go home
+
+        if (self has-flag): {
+            angle = self get-angle to (self get-my-home-location).
+
+            if angle > 0: self turn-right.
+            else if angle < 0: self turn-left.
+
+            super iterate.
+            return.
+        }
+
+        # try to find the flag
+
+        flag = (self sense-other-flag).
+
+        if flag: {
+            angle = (self get-angle to (flag get-location)).
+
+            if angle > 0: self turn-right.
+            else if angle < 0: self turn-left.
+
+            super iterate.
+            return.
+        }
+        
+        
+        angle = (self get-angle to (self get-other-home-location)).
+
+        if angle < 0: self turn-left.
+        else if angle > 0: self turn-right.
+
+        super iterate.
+}
+
+CaptureTheFlagPlayer : myRedPlayer {
+	+ to init:
+		print "my id number is: ", (self get-id-number).
+
+    + to iterate:
+        flag (object).    
+        angle (double).
+
+        flag = (self sense-my-flag).
+
+        if flag: {
+            angle = (self get-angle to (flag get-location)).
+
+            if angle > 0: self turn-right.
+            else if angle < 0: self turn-left.
+
+            self set-speed to .3.
+        } else {
+            self set-speed to 1.0.
+        }
+
+        super iterate.
+}

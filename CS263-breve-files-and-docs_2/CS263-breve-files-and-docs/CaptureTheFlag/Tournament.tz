@@ -1,0 +1,20 @@
+@use CaptureTheFlag.
+@use Champion.
+@use RunnerUp.
+
+Controller myCaptureTheFlagTournament.
+
+CaptureTheFlagController : myCaptureTheFlagTournament {
+    + variables:
+        oneTeam, zeroTeam (list).
+
+    + to init:
+        bit (int).
+        
+        bit = random[1].
+        
+        zeroTeam = 10 new RunnersUp.
+        zeroTeam set-team to |(bit - 1)|.
+        oneTeam = 10 new Champions.
+        oneTeam set-team to bit.
+}

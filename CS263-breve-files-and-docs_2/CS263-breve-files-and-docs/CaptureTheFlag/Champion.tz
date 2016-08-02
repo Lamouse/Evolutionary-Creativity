@@ -1,0 +1,200 @@
+# Written by Paul Swartz, 2004
+
+@use CaptureTheFlag.
+
+@define swREGULAR_DEFENSE 4.
+@define swINTERCEPT_DEFENSE 2.
+
+CaptureTheFlagPlayer : Champion (aka Champions) {
+    + variables:
+        number (int).
+        ourPosession, theirPosession (float).
+        ourFlag, theirFlag (object).
+        teammates (list).
+
+    + to init:
+        number = self get-id-number.
+        print number.
+
+    # important checks
+
+    + to check-for-winning:
+        if ourPosession > (theirPosession+150): return 1.
+        return 0.
+
+    + to check-boss:
+        if number == 1: return 1.
+        return 0.
+
+    + to check-defense:
+        if (controller get-time) > 300 && (self check-for-winning): return 1.
+        if (controller get-time) > 300 && !(self check-for-winning) && number > 3: return 0.
+        if number <= swREGULAR_DEFENSE + swINTERCEPT_DEFENSE: return 1.
+        return 0.
+
+    + to learn-about-their-flag flag f (object):
+        theirFlag = f.
+
+    + to move-towards vec v (vector) at-speed s (float):
+        angle (float).
+        o (object).
+        
+        #if (self check-if-offsides): {
+        #    foreach o in (self sense-other-team): v -= 0.1*(o get-location).
+        #    v /= (1 + |(self sense-other-team)|).
+        #}
+        angle = self get-angle to v.
+        if |(self get-location) - v| > 10 && |angle| < 1: self set-speed to s.
+        if |(self get-location) - v| < 10 && |angle| < 0.5: self set-speed to s.
+        #if |(self get-location) - v| < 2: self set-speed to (s / 2.0).
+        if (self check-if-offsides): { # avoid other players
+             o = self get-closest from (self sense-other-team) to (self get-location).
+            
+            if o && |(self get-object-angle to o)| < 1 && |(o get-location) - (self get-location)| < 8: {
+                angle = - (self get-object-angle to o).
+            }
+       }
+        if theirFlag && v == (theirFlag get-location): { # just go for the flag
+            angle = self get-angle to v.
+        }
+        if angle < 0.0: self turn-left.
+        if angle > 0.0: self turn-right.
+        #self set-speed to s.
+
+    + to move-to-intercept obj o (object) at-speed s (float):
+        loc, vel (vector).
+        dist (float).
+        loc = o get-location.
+        vel = o get-velocity.
+        dist = 0.4 * |(self get-location) - loc|.
+        dist *= |(self get-object-angle to o)|.
+
+        vel *= dist.
+
+        if dist < 2.5 : vel = (0,0,0).
+
+        self move-towards vec (loc + vel) at-speed s.
+
+    + to get-closest from l (list) to v (vector):
+        bestDistance, bar (float).
+        best, foo (object).
+        if !l: return 0.
+        
+        bestDistance = 2510.
+        foreach foo in l: {
+            bar = |(foo get-location) - v|.
+            if bar < bestDistance: {
+                bestDistance = bar.
+                best = foo.
+            }
+        }
+        return best.
+
+    + to iterate:
+        a (object).
+        v (vector).
+
+        if !teammates || !ourFlag: {
+            if |(self sense-my-team)| == 10:
+                teammates = (self sense-my-team).
+            if (self sense-my-flag):
+                ourFlag = (self sense-my-flag).
+
+            v = (20.0, 0.5, 0.0).
+
+            if (self get-team) == BLUE:
+                v::x = -(v::x).
+            self move-towards vec v at-speed 1.0.
+        } else {
+            # update variables
+            if (ourFlag get-carrier):
+                theirPosession += 1.
+            if (theirFlag && (theirFlag get-carrier)):
+                ourPosession += 1.
+            if (self check-defense):
+                self defense-iterate.
+            else self offense-iterate.
+        }
+        super iterate.
+
+    + to defense-iterate:
+        closestA, closestD (object).
+        home (vector).
+        
+        if number <= swINTERCEPT_DEFENSE / 2.0: {
+            home = (18, 0, 18).
+            if (self get-team) == BLUE: home = (-18, 0, -18).
+        } else {
+            home = (ourFlag get-location).
+        }
+
+        # transition from offense to defense
+        if (self check-if-offsides): {
+            self move-towards vec (self get-my-home-location) at-speed 1.0.
+            return.
+        }
+        
+        # someone has our flag!
+        if (ourFlag get-carrier): {
+            self move-to-intercept obj (ourFlag get-carrier) at-speed 1.0.
+            return.
+        }
+        
+        if number <= swINTERCEPT_DEFENSE: { 
+             closestA = (self get-closest from (self sense-other-team) to (self get-location)).
+            if closestA && |(closestA get-location) - home| < 10: {
+                self move-to-intercept obj closestA at-speed 1.0.
+                return.
+            } else if closestA && |(self get-location) - home| < 1: {
+                if (self get-object-angle to closestA) < 0.0: self turn-left.
+                if (self get-object-angle to closestA) > 0.0: self turn-right.
+                self set-speed to 0.
+                return.
+            }
+        }
+        if |(self get-location) - home| > 1: {
+            self move-towards vec home at-speed 1.0.
+            return.
+#        } else if |(self get-location) - home| > 1: {
+#            self move-towards vec home at-speed 0.4.
+#            return.
+        } else {
+            if (self get-angle to home) < 0.0: self turn-left.
+            if (self get-angle to home) > 0.0: self turn-right.
+            self set-speed to 0.
+            return.
+        }
+
+    + to offense-iterate:
+        closest (object).
+        jailedCount (int).
+        jail, flag (vector).
+        jail = (20, 0, 20).
+        if (self get-team) == RED: jail = (-20, 0, -20).
+
+        if (self get-team) == BLUE: jailedCount = (controller get-jailed-blue-count).
+        else jailedCount = (controller get-jailed-red-count).
+
+        if !theirFlag && (self sense-other-flag): {
+            foreach closest in teammates:
+                closest learn-about-their-flag flag (self sense-other-flag).
+         }
+        if (self has-flag): {
+            self move-towards vec (self get-my-home-location) at-speed 1.0.
+            return.
+        }
+        if jailedCount: {
+            closest = (self get-closest from (self sense-my-team) to jail).
+            if closest == self: {
+                self move-towards vec jail at-speed 1.0.
+                return.
+            }
+        }
+       if theirFlag: flag = (theirFlag get-location).
+        else {
+            flag = (-20, 0.5, 0).
+            if (self get-team) == BLUE: flag = (20, 0.5, 0).
+        }
+        if number == 10: self move-towards vec jail at-speed 0.8.
+        else self move-towards vec flag at-speed 1.0.
+}

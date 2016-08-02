@@ -1,0 +1,84 @@
+@use WUBWorld.
+
+Controller myWUBWorldControl.
+
+WUBWorldControl : myWUBWorldControl {
+    + to init:
+        15 new myAgent.
+
+    + to mutate with-genome g (list):
+        # Write your own code here to mutate a genome.
+        # Remember that mutating by small amounts makes it easier
+        # to optimize good behavior, but that agents can get
+        # stuck in suboptimal behaviors.  Mutating by large
+        # amounts reduces the likelihood of getting stuck in
+        # suboptimal behaviors, but makes it harder to optimize
+        # good behavior.
+
+        # Example:
+        # g{4} += .01.
+
+        print "Change me!".
+
+        return g.
+}
+
+Agent : myAgent {
+    + to init:
+        # turn on evolution.
+        
+        self allow-evolution.
+    
+    
+    
+        # map the initial genome -- make sure you call this AFTER you've 
+        # initialized all other aspects of your agent. 
+    
+        self map-genome. 
+        
+    + to map-genome:
+        # This code is called automatically called when the agent is "reborn".        
+        # Write your own code here to map the values in your genome to agent behaviors.
+        
+        # Example:
+        # perceptron set-weight number 0 to (self get-gene number 0).
+
+        print "Change me!".
+
+    + to iterate:
+        # Put code for the iterate method here.
+
+        super iterate.
+
+     + to get-closest-wall:
+        bestDistance (double).
+        best, item (object).
+                                                                                                                                                            
+        bestDistance = 200.
+                                                                                                                                                            
+        foreach item in (self sense-walls): {
+        
+            if |(self get-location) - (item get-location)| < bestDistance: {
+                best = item.
+                bestDistance = |(self get-location) - (item get-location)|.
+            }
+        }
+                                                                                                                                                            
+        return best.
+
+     + to get-closest-wub:
+        bestDistance (double).   
+        best, item (object).
+                                                                                                                                                            
+        bestDistance = 200.
+                                                                                                                                                            
+        foreach item in (self sense-wubs): {
+            if |(self get-location) - (item get-location)| < bestDistance: {
+                best = item.
+                bestDistance = |(self get-location) - (item get-location)|.
+            }
+        }
+                                                                                                                                                            
+        return best.
+
+}

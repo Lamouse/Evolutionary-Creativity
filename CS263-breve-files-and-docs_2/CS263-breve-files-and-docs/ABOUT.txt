@@ -1,0 +1,40 @@
+BraitenbergTutorial.pdf
+	
+	An introduction to autonomous agents and the breve programming
+	environment.  Uses the "Braitenberg" classes included in breve 
+	1.9.
+
+WUBWorld_1
+
+	A breve simulation introducing "WUBWorld", where students can
+	program autonomous agents to interact with a dynamic environment.
+	In this first version, students learn to direct the agent to 
+	collect pieces of food.
+
+WUBWorld_2
+
+	An update to WUBWorld which introduces obstacles and enemies 
+	into the environment.  The agent must now eat food in order to
+	survive, while avoiding enemies and navigating around obstacles.
+
+WUBWorld_3
+
+	A version of WUBWorld which includes code for building neural
+	networks.  It also allows the agents to attack enemies by 
+	firing towards them.  Students can use the neuron class to make
+	decisions about when to attack or how to move. 
+	
+WUBWorld_4
+	
+	The final update to WUBWorld introduces a whole mess of 
+	complications: smarter enemies, enemy rebirth, and deadly "shock 
+	waves".  To cope with the more complicated world, agents are 
+	given the ability to evolve.  When an agent dies, it can be 
+	reborn, selecting traits and behaviors from more successful 
+	agents.
+
+CaptureTheFlag
+
+	A two-team multi-agent version of the game "Capture The Flag".
+	Students apply the AI techniques learned with WUBWorld in order
+	to create effective Capture The Flag players.

@@ -23,15 +23,15 @@ class Swarm( breve.Control ):
 		self.minY = -100
 		self.maxY = 100
 
-		self.targetZone = 40
-		self.socialZone = 15
-		self.separationZone = 3
+		self.targetZone = 25
+		self.socialZone = 10
+		self.separationZone = 2
 
 		# Feeder
 		self.feederMinDistance = 25
-		self.maxFoodSupply = 300
-		self.minCreatedFoodSupply = 7
-		self.maxCreatedFoodSupply = 15
+		self.maxFoodSupply = 350
+		self.minCreatedFoodSupply = 6
+		self.maxCreatedFoodSupply = 10
 		self.totalFoodSupply = 0
 
 		# Other thing

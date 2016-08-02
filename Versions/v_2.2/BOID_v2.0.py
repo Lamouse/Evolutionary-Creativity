@@ -6,6 +6,7 @@ import cPickle
 import time
 import decimal
 import os
+import gc
 
 __author__ = 'Paulo Pereira'
 
@@ -16,7 +17,8 @@ class Swarm( breve.Control ):
 		breve.Control.__init__( self )
 
 		self.date = time.strftime("%Y%m%d%H%M")
-
+		#self.date = '201606242254'
+		
 		# Random Number Generator
 		random.seed( 5 )
 		self.setRandomSeed( 5 )
@@ -25,7 +27,7 @@ class Swarm( breve.Control ):
 		self.showCorpse = True
 		self.isToLoad = False
 		self.isToSave = False
-		self.isToRecord = True
+		self.isToRecord = False
 		self.movie = None
 
 		# Evaluation
@@ -33,37 +35,27 @@ class Swarm( breve.Control ):
 		self.evaluatePrey = False
 		self.evaluatePredator = False
 		self.phase_portrait = False
-		
-		self.runs = 1
-		self.current_run = 0
-		self.preyID = 1
-		self.predatorID = 1
 
-		self.listPrey_BestFitness = []
-		self.listPrey_AverageFitness = []
-		self.listPrey_Diversity = []
-		self.tempPrey_Best = 0
-		self.tempPrey_Average= 0
-		self.tempPrey_Diversity= 0
-		self.listPredator_BestFitness = []
-		self.listPredator_AverageFitness = []
-		self.listPredator_Diversity = []
-		self.tempPredator_Best = 0
-		self.tempPredator_Average = 0
-		self.tempPredator_Diversity = 0
-		self.list_phase_portrait = []
-		self.tempPrey_pp = 0
-		self.tempPredator_pp = 0
+		# Sexual Selection
+		self.sexualSelection = 0
+		self.ssType = ['off', 'size', 'brightness', 'size+brightness']
+		self.percentage = False
 
 		# Representation
-		self.repr = 1
+		self.repr = 0
 		self.reprType = ['ga', 'gp', 'push']
 
 		# Simulation
-		self.initialNumPreys = self.numPreys = 90
-		self.initialNumPredators = self.numPredators = 30
+		self.runs = 30
+		self.current_run = 0
+		
+		self.initialNumPreys = self.numPreys = 80
+		self.initialNumPredators = self.numPredators = 20
+		
 		self.numDeadPreys = 0
 		self.numDeadPredators = 0
+		self.preyID = 1
+		self.predatorID = 1
 
 		# World
 		self.minX = -200
@@ -71,16 +63,17 @@ class Swarm( breve.Control ):
 		self.minY = -100
 		self.maxY = 100
 
+		# Neighbourhoods
 		self.targetZone1 = 25
 		self.targetZone2 = 30
 		self.socialZone = 10
 		self.separationZone = 2
 
 		# Feeder
-		self.feederMinDistance = 25
-		self.maxFoodSupply = 300
-		self.minCreatedFoodSupply = 7
-		self.maxCreatedFoodSupply = 15
+		self.feederMinDistance = 40
+		self.maxFoodSupply = 230
+		self.minCreatedFoodSupply = 6
+		self.maxCreatedFoodSupply = 10
 		self.totalFoodSupply = 0
 
 		# List
@@ -95,10 +88,37 @@ class Swarm( breve.Control ):
 		self.breeding_inc = 0.5
 		self.max_pop_predators = 0.6
 		self.prob_mutation = 0.1
-		self.evaluation_survivor = 0.9
+		self.evaluation_survivor = 0.6
 		self.initial_depth = 3
-		self.max_depth = 20
+		self.max_depth = 5
 		self.endSimulation = False
+
+		# Evaluation Metrics
+		self.listPrey_BestFitness = []
+		self.listPrey_AverageFitness = []
+		self.listPrey_Diversity = []
+		self.listPrey_Deaths = []
+		self.tempPrey_Best = 0
+		self.tempPrey_Average = 0
+		self.tempPrey_Diversity = 0
+		self.listPredator_BestFitness = []
+		self.listPredator_AverageFitness = []
+		self.listPredator_Diversity = []
+		self.listPredator_Deaths = []
+		self.tempPredator_Best = 0
+		self.tempPredator_Average = 0
+		self.tempPredator_Diversity = 0
+		
+		self.listPrey_Diversity_Sexual = []
+		self.listPrey_Size = []
+		self.listPrey_Brightness = []
+		self.tempPrey_Diversity_Sexual = 0
+		self.tempPrey_Size = 0
+		self.tempPrey_Brightness = 0
+
+		self.list_phase_portrait = []
+		self.tempPrey_pp = 0
+		self.tempPredator_pp = 0
 
 		# Other thing
 		Swarm.init( self )
@@ -159,6 +179,7 @@ class Swarm( breve.Control ):
 						temp_prey.createPush()
 
 				temp_prey.energy = 0.5
+				self.cumulativeEnergy = 0
 				created += 1
 
 				temp_prey.ID = self.preyID
@@ -195,6 +216,7 @@ class Swarm( breve.Control ):
 						temp_predator.createPush()
 						
 				temp_predator.energy = 0.5
+				self.cumulativeEnergy = 0
 				created += 1
 
 				temp_predator.ID = self.predatorID
@@ -230,12 +252,21 @@ class Swarm( breve.Control ):
 
 				newBird.age = 0
 				newBird.energy = 0.5
+				self.cumulativeEnergy = 0
 				newBird.isAlive = True
 				newBird.setNewColor()
 				created += 1
 
 				kind = newBird.getType()
 				self.save_log( kind + str(newBird.ID) + ' revived' )
+
+				if kind == 'Prey':
+					if self.controller.percentage:
+						self.tailSize = random.uniform(0,1)
+						self.tailBrigh = random.uniform(0,1)
+					else:
+						self.tailSize = random.uniform(0,10)
+						self.tailBrigh = random.uniform(0,10)
 			
 	def add_new_agents( self ):
 		self.save_log( '--- Started run ' + str(self.current_run) + ' ---\n' )
@@ -289,6 +320,9 @@ class Swarm( breve.Control ):
 	def save_data(self):
 		suffix = self.controller.reprType[self.controller.repr]
 
+		#if self.sexualSelection > 0:
+		#	suffix += '_' + self.ssType[self.sexualSelection]
+
 		# feeders
 		f =  open('data/feeder_'+suffix+'.pkl', 'wb')
 		for feeder in breve.allInstances( "Feeder" ):
@@ -306,7 +340,11 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+				sgeno = None
+				if self.repr != 1:
+					sgeno = prey.sexualGenotype
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
+				
 				cPickle.dump(temp_prey, f)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -315,7 +353,11 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+			sgeno = None
+			if self.repr != 1:
+				sgeno = prey.sexualGenotype
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
+
 			cPickle.dump(temp_prey, f)
 		f.close()
 
@@ -329,7 +371,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 				cPickle.dump(temp_predator, f)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -338,12 +380,15 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 			cPickle.dump(temp_predator, f)
 		f.close()
 
 	def load_data(self):
 		suffix = self.controller.reprType[self.controller.repr]
+
+		#if self.sexualSelection > 0:
+		#	suffix += '_' + self.ssType[self.sexualSelection]
 
 		# feeders
 		f =  open('data/feeder_'+suffix+'.pkl', 'rb')
@@ -361,9 +406,8 @@ class Swarm( breve.Control ):
 		while True:
 			try:
 				data_prey = cPickle.load(f)
-				
 				temp_prey = breve.createInstances( breve.Prey, 1)
-				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.visionAngle, data_prey.maxSteering, data_prey.geno, data_prey.lastScale)
+				temp_prey.initializeFromData(data_prey.pos_x, data_prey.pos_y, data_prey.vel_x, data_prey.vel_y, data_prey.accel_x, data_prey.accel_y, data_prey.energy, data_prey.age, data_prey.isAlive, data_prey.maxVel, data_prey.maxAccel, data_prey.visionAngle, data_prey.maxSteering, data_prey.geno, data_prey.lastScale, data_prey.sexualgeno, data_prey.tailSize, data_prey.tailBrigh)
 
 				temp_prey.ID = self.preyID
 				self.preyID += 1
@@ -372,7 +416,7 @@ class Swarm( breve.Control ):
 			except EOFError:
 				break
 		f.close()
-
+		
 		# prepadors
 		f =  open('data/predator_'+suffix+'.pkl', 'rb')
 		while True:
@@ -392,6 +436,9 @@ class Swarm( breve.Control ):
 	def save_metrics(self):
 		suffix = self.controller.reprType[self.controller.repr]
 
+		#if self.sexualSelection > 0:
+		#	suffix += '_' + self.ssType[self.sexualSelection]
+
 		preys_alive = []
 		preys_dead = []
 		predators_alive = []
@@ -406,7 +453,10 @@ class Swarm( breve.Control ):
 					geno = prey.geno
 
 				temp_accel = prey.getAcceleration()
-				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+				sgeno = None
+				if self.repr != 1:
+					sgeno = prey.sexualGenotype
+				temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
 				preys_alive.append(temp_prey)
 		for prey in self.pollPreys:
 			if self.controller.repr == 2:
@@ -415,7 +465,10 @@ class Swarm( breve.Control ):
 				geno = prey.geno
 
 			temp_accel = prey.getAcceleration()
-			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale)
+			sgeno = None
+			if self.repr != 1:
+				sgeno = prey.sexualGenotype
+			temp_prey = Data_mobile(prey.pos_x, prey.pos_y, prey.vel_x, prey.vel_y, temp_accel.x, temp_accel.y, prey.energy, prey.cumulativeEnergy, prey.age, prey.isAlive, prey.maxVel, prey.maxAccel, prey.visionAngle, prey.maxSteering, geno, prey.lastScale, sgeno, prey.tailSize, prey.tailBrigh)
 			preys_dead.append(temp_prey)
 
 		# prepadors
@@ -427,7 +480,7 @@ class Swarm( breve.Control ):
 					geno = predator.geno
 
 				temp_accel = predator.getAcceleration()
-				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+				temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 				predators_alive.append(temp_predator)
 		for predator in self.pollPredators:
 			if self.controller.repr == 2:
@@ -436,7 +489,7 @@ class Swarm( breve.Control ):
 				geno = predator.geno
 
 			temp_accel = predator.getAcceleration()
-			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
+			temp_predator = Data_mobile(predator.pos_x, predator.pos_y, predator.vel_x, predator.vel_y, temp_accel.x, temp_accel.y, predator.energy, predator.cumulativeEnergy, predator.age, predator.isAlive, predator.maxVel, predator.maxAccel, predator.visionAngle, predator.maxSteering, geno, predator.lastScale)
 			predators_dead.append(temp_predator)
 
 
@@ -451,7 +504,7 @@ class Swarm( breve.Control ):
 
 
 		# save the data on files
-		f =  open('metrics/data/prey_'+suffix+'.pkl', 'wb')
+		f = open('metrics/data/prey_'+suffix+'.pkl', 'wb')
 		for prey in preys_final:
 			cPickle.dump(prey, f)
 		f.close()
@@ -464,6 +517,9 @@ class Swarm( breve.Control ):
 	def load_metrics_preys(self):
 		suffix = self.controller.reprType[self.controller.repr]
 
+		#if self.sexualSelection > 0:
+		#	suffix += '_' + self.ssType[self.sexualSelection]
+
 		preys = breve.allInstances( "Prey" )
 		tam = len(preys)
 
@@ -475,7 +531,7 @@ class Swarm( breve.Control ):
 		while True:
 			try:
 				data_prey = cPickle.load(f)
-				preys_list.append(data_prey.geno)
+				preys_list.append([data_prey.geno, data_prey.sexualgeno])
 			except EOFError:
 				break
 		f.close()
@@ -487,17 +543,24 @@ class Swarm( breve.Control ):
 		random.shuffle(index_list)
 		index_list = index_list[0:len(preys_list)]
 	
-		for (index, geno) in zip(index_list, preys_list):
+		for (index, genes) in zip(index_list, preys_list):
 			temp_prey = preys[index]
 
 			if self.controller.repr == 2:
 				temp_prey.pushInterpreter.clearStacks()
-				temp_prey.pushCode.setFrom(geno)
+				temp_prey.pushCode.setFrom(genes[0])
 			else:
-				temp_prey.geno = geno
+				temp_prey.geno = genes[0]
+
+			if self.repr != 1:
+				temp_prey.sexualGenotype = genes[1]
+
 
 	def load_metrics_predators(self):
 		suffix = self.controller.reprType[self.controller.repr]
+
+		#if self.sexualSelection > 0:
+		#	suffix += '_' + self.ssType[self.sexualSelection]
 
 		predators = breve.allInstances( "Predator" )
 		tam = len(predators)
@@ -545,9 +608,14 @@ class Swarm( breve.Control ):
 		neighbour = breve.allInstances( specie )
 
 		for item in neighbour:
-			if item.isA( specie ) and item.isAlive:
+			if item.isA( specie ) and item.isAlive and item.ID != parent1.ID:
 				birds.append( item )
-		parent2 = self.tournament(birds, 5)
+
+		if specie == 'Predator' or self.sexualSelection == 0:
+			parent2 = self.tournament(birds, 5)
+		else:
+			parent2 = self.matingChoice(parent1, birds, 5)
+
 		return parent2
 
 	def selectParent( self, specie):
@@ -562,19 +630,71 @@ class Swarm( breve.Control ):
 		leng = breve.length(birds)
 		if leng == 0:
 			return None
-		candidate = birds[random.randint(0,leng-1)]
+		elif leng <= dim:
+			candidates = birds
+		else:
+			indexes = random.sample(range(0, breve.length(birds)), dim)
+			candidates = []
+			for index in indexes:
+				candidates.append(birds[index])
+
+		candidate = candidates[0]
 		fit = self.fitness(candidate)
-		for i in range(dim-1):
-			temp_candidate = birds[random.randint(0,leng-1)]
+		for i in range(1, min(dim,leng)):
+			temp_candidate = candidates[i]
 			temp_fit = self.fitness(temp_candidate)
 			if temp_fit > fit:
 				candidate = temp_candidate
 				fit = temp_fit
 		return candidate
 
+	def matingChoice( self, female, birds, dim):
+		leng = breve.length(birds)
+		if leng == 0:
+			return None
+		elif leng <= dim:
+			candidates = birds
+		else:
+			indexes = random.sample(range(0, breve.length(birds)), dim)
+			candidates = []
+			for index in indexes:
+				candidates.append(birds[index])
+
+		best_candidate = candidates[0]
+		best_dist = self.sexual_metric(female, best_candidate)
+		for i in range(1, min(dim,leng)):
+			temp_candidate = candidates[i]
+			temp_dist = self.sexual_metric(female, temp_candidate)
+			if temp_dist < best_dist:
+				best_candidate = temp_candidate
+				best_dist = temp_dist
+		return best_candidate
+
+	def sexual_metric( self, female, candidate):
+		if self.sexualSelection == 1:
+			return abs(female.tailSize - candidate.tailSize)
+		elif self.sexualSelection == 2:
+
+			return self.compare_genotype(female, candidate)
+			#return abs(female.tailBrigh - candidate.tailBrigh)
+		else:
+			return abs((female.tailSize+female.tailBrigh) - (candidate.tailSize+candidate.tailBrigh))
+
 	def fitness(self, bird):
-		return bird.energy * (1/float(1+math.exp(- ((bird.age-100)/12.0) )))
-		#return bird.energy
+		temp1 = self.current_iteraction % self.breeding_season
+		if temp1 == 0:
+			temp1 = self.breeding_season
+
+		temp2 = min(bird.age, temp1)*1.0
+		if temp2 <= 0:
+			return 0
+		energy = bird.cumulativeEnergy / temp2
+		#return 0.75*energy + 0.25*(1/float(1+math.exp(- ((bird.age-100)/12.0) )))
+		return energy
+
+	def fitness1(self, bird):
+		#return 0.75*bird.energy + 0.25*(1/float(1+math.exp(- ((bird.age-100)/12.0) )))
+		return bird.energy
 
 	def duplicateGenes(self, newBird1, newBird2, parent1, parent2):
 		if self.controller.repr == 0:
@@ -616,6 +736,9 @@ class Swarm( breve.Control ):
 		elif self.controller.repr == 2:
 			self.crossover_push(newBird1, parent1, parent2)
 			self.crossover_push(newBird2, parent2, parent1)
+
+		if self.controller.repr != 1 and newBird1.getType() == 'Prey':
+			newBird1.sexualGenotype, newBird2.sexualGenotype = self.tree_crossover(parent1.sexualGenotype, parent2.sexualGenotype)
 
 	def crossover_push(self, newBird, parent1, parent2):
 		newBird.pushInterpreter.clearStacks()
@@ -677,6 +800,11 @@ class Swarm( breve.Control ):
 				else:
 					newBird.pushInterpreter.pushCode( newBird.pushCode )
 
+		if self.controller.repr != 1 and newBird.getType() == 'Prey':
+			prob = random.random()
+			if prob <= self.prob_mutation:
+				self.tree_mutation(newBird.sexualGenotype, newBird.getType())
+
 	def createNewBird(self, newBird, parent1, parent2):
 		p = random.uniform(0,1)
 		v = random.uniform(0,1)
@@ -685,7 +813,15 @@ class Swarm( breve.Control ):
 		newBird.changeAccel(0,0)
 		newBird.age = 0
 		newBird.energy = 0.5
+		self.cumulativeEnergy = 0
 		newBird.isAlive = True
+
+		if newBird.getType() == 'Prey':
+			s = random.uniform(0,1)
+			b = random.uniform(0,1)
+			self.tailSize = s*parent1.tailSize + (1-s)*parent2.tailSize
+			self.tailBrigh = b*parent1.tailBrigh + (1-b)*parent2.tailBrigh
+
 		newBird.setNewColor()
 		
 	def evolutionayAlgorithm(self, array):
@@ -728,7 +864,7 @@ class Swarm( breve.Control ):
 	def create_random_tree(self, depth, specie, real_depth):
 		if depth < 1:
 			return None
-		return Node(self.create_random_tree(depth-1, specie, real_depth+1), self.create_random_tree(depth-1, specie, real_depth+1), specie, real_depth)
+		return Node(self.create_random_tree(depth-1, specie, real_depth+1), self.create_random_tree(depth-1, specie, real_depth+1), specie, real_depth, self.repr, self.sexualSelection)
 
 
 	def fill_parents(self, tree, depth):
@@ -741,56 +877,146 @@ class Swarm( breve.Control ):
 			self.fill_parents(tree.left, depth+1)
 			self.fill_parents(tree.right, depth+1)
 
+	def compare_trees_sexual(self, tree1, tree2):
+		temp = 0
+		tam = 0
+
+		if self.sexualSelection != 2:
+			if tree1.float_size != tree2.float_size:
+				temp += 1
+			tam += 1
+
+		if self.sexualSelection != 1:
+			if tree1.float_bright != tree2.float_bright:
+				temp += 1
+			tam += 1
+		
+		# Leaf
+		if tree1.right is None or tree2.right is None:
+			return temp, tam
+		
+		# Node
+		v1, t1 = self.compare_trees_sexual(tree1.left, tree2.left)
+		v2, t2 = self.compare_trees_sexual(tree1.right, tree2.right)
+		v3 = v1 + v2 + temp
+		t3 = t1 + t2 + tam
+		return v3, t3
 
 	def compare_trees(self, tree1, tree2):
 		temp = 0
-		if tree1.data != tree2.data:
-			temp = 1
+		tam = 0
 
+		if self.controller.repr == 1:	
+			if tree1.vector != tree2.vector:
+				temp += 1
+			tam += 1
+
+		'''
+		if self.controller.sexualSelection > 0:
+			if tree1.float_size != tree2.float_size:
+				temp += 1
+			if tree1.float_bright != tree2.float_bright:
+				temp += 1
+			tam += 2
+		'''
+		
 		# Leaf
 		if tree1.right is None or tree2.right is None:
-			return temp, 1
+			return temp, tam
 		
 		# Node
 		v1, t1 = self.compare_trees(tree1.left, tree2.left)
 		v2, t2 = self.compare_trees(tree1.right, tree2.right)
 		v3 = v1 + v2 + temp
-		t3 = t1 + t2 + 1
+		t3 = t1 + t2 + tam
 		return v3, t3
 
-	'''
+
 	def print_tree(self, tree):
 		if tree.right is None:
 			# leaf
-			print tree.data, 
+			print tree.vector, 
 		else:
 			# node
 			print "(",
 			self.print_tree(tree.left)
-			print tree.data,
+			print tree.vector,
 			self.print_tree(tree.right)
 			print ")",
-	'''
 	
 
 	def run_code(self, indiv, tree):
 		if tree.right is None:
 			# leaf
-			exec "x, y = " + tree.data
-			return [x, y]
+			result = []
+
+			if self.repr == 1:
+				exec "v1, v2 = " + tree.vector
+				result.append(self.check_inf(v1))
+				result.append(self.check_inf(v2))
+
+			if indiv.getType() == 'Prey':
+				exec "size = " + tree.float_size
+				exec "bright = " + tree.float_bright
+				result.append(self.check_inf(size))
+				result.append(self.check_inf(bright))
+			
+			return result
+
 		else:
 			# node_list
 			# for some reason this don't work, probability it don't work in python 2.3
 			# return [0 if tree.data == "/" and y == 0 else eval('x'+tree.data+'y') for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right))]
-
 			result = []
-			for x, y in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right)):
-				if tree.data == "/" and y == 0:
-					result.append(0)
+			operator = []
+
+			if self.repr == 1:
+				operator.append(tree.vector)
+				operator.append(tree.vector)
+				
+			if indiv.getType() == 'Prey':
+				operator.append(tree.float_size)
+				operator.append(tree.float_bright)
+
+			for x, y, opr in zip(self.run_code(indiv, tree.left), self.run_code(indiv, tree.right), operator):
+				x1 = self.check_inf(x)
+				y1 = self.check_inf(y)
+
+				if opr == "/":
+					try:
+						if y1 == 0:
+							result.append(0)
+						else:
+							result.append( self.check_inf(eval('x1'+opr+'(y1*1.0)')) )
+					except:
+						print 'Exception probably -1.#IND'
+						result.append(0)
 				else:
-					result.append(eval('x'+tree.data+'y'))
+					result.append( self.check_inf(eval('x1'+opr+'y1')) )
+
 			return result
 
+	def check_inf(self, num):
+		# bug no python 2.3
+		try:
+			# check 1.#IND
+			temp = abs(1/(num*1.0))
+			if temp >= 0:
+				# check for infinite
+				inf = 1e300 * 1e300
+				if abs(num) == inf:
+					if num == inf:
+						num = 9999.9
+					else:
+						num = -9999.9
+
+				result = num
+			else:
+				result = 0.0
+		except:
+			result = 0.0	
+
+		return result
 
 	def select_random_node(self, tree, list_nodes):
 		if tree.right is not None:
@@ -815,6 +1041,17 @@ class Swarm( breve.Control ):
 			parent.right = new_sub_tree
 
 
+	def clean_tree(self, tree):
+		if tree.right is not None:
+			self.clean_tree(tree.left)
+			self.clean_tree(tree.right)
+
+		tree.parent = None
+		tree.left = None
+		tree.right = None
+		tree = None
+
+
 	def tree_copy(self, parent1):
 		if parent1 is None:
 			return None
@@ -835,7 +1072,7 @@ class Swarm( breve.Control ):
 			index = random.randint(1, len(node_list)-1)
 
 			temp = self.get_max_depth(node_list[index])
-			if node_list[index].depth > self.max_depth:
+			if node_list[index].depth >= self.max_depth:
 				temp = 99999
 
 		depth = random.randint(1, min(self.max_depth-node_list[index].depth, self.initial_depth))
@@ -885,13 +1122,34 @@ class Swarm( breve.Control ):
 		return tree_child1, tree_child2
 
 	# metric functions
+	def getFitnessMetrics(self, specie, real_tam):
+		temp_list = breve.allInstances( specie )
+		average = 0
+		tam = 0
+		best = -1
+		for item in temp_list:
+			if item.isAlive:
+				temp_best = self.fitness(item)
+
+				if temp_best > best:
+					best = temp_best
+				average += temp_best
+				tam += 1
+
+		if tam == 0:
+			average = 0
+		else:
+			average = average/(real_tam*1.0)
+			
+		return average, best
+
 	def averageFitness(self, specie):
 		temp_list = breve.allInstances( specie )
 		average = 0
 		tam = 0
 		for item in temp_list:
 			if item.isAlive:
-				average += self.fitness(item)
+				average += self.fitness1(item)
 				tam += 1
 
 		if tam == 0:
@@ -903,10 +1161,25 @@ class Swarm( breve.Control ):
 		best = -1
 		for item in temp_list:
 			if item.isAlive:
-				temp_best = self.fitness(item)
+				temp_best = self.fitness1(item)
 				if temp_best > best:
 					best = temp_best
 		return best
+
+	def sexual_selection(self, specie):
+		temp_list = breve.allInstances( specie )
+		size = 0
+		bright = 0
+		tam = 0
+		for item in temp_list:
+			if item.isAlive:
+				size += item.tailSize
+				bright += item.tailBrigh
+				tam += 1
+
+		if tam == 0:
+			return 0, 0
+		return size/(tam*1.0), bright/(tam*1.0)
 
 	def diversity_genotype(self, specie):
 		tam = 0
@@ -927,6 +1200,33 @@ class Swarm( breve.Control ):
 			return 0
 		return result / (tam*1.0)
 
+	def diversity_genotype_sexual(self, specie):
+		tam = 0
+		result = 0
+
+		boid_list = []
+		temp_list = breve.allInstances( specie )
+		for item in temp_list:
+			if item.isAlive:
+				boid_list.append(item)
+
+		for i in range(0, len(boid_list)):
+			for y in range(i+1, len(boid_list)):
+				
+				if self.controller.repr == 1:
+					result_temp, tam_temp = self.compare_trees_sexual(boid_list[i].geno, boid_list[y].geno)
+				else:
+					result_temp, tam_temp = self.compare_trees_sexual(boid_list[i].sexualGenotype, boid_list[y].sexualGenotype)
+
+				result_temp /= (tam_temp*1.0)
+
+				result += result_temp
+				tam += 1
+
+		if tam == 0:
+			return 0
+		return result / (tam*1.0)
+
 	def compare_genotype(self, item1, item2):
 		result = 0
 
@@ -939,13 +1239,20 @@ class Swarm( breve.Control ):
 			result, tam = self.compare_trees(item1.geno, item2.geno)
 			result /= (tam*1.0)
 		elif self.repr == 2:
-			result = item1.pushCode.getTopLevelDifference(item2.pushCode) / (max(item1.pushCode.getTopLevelSize(), item2.pushCode.getTopLevelSize())*1.0)
+			temp = max(item1.pushCode.getTopLevelSize(), item2.pushCode.getTopLevelSize())*1.0
+			if temp == 0:
+				result = 0
+			else:
+				result = item1.pushCode.getTopLevelDifference(item2.pushCode) / temp
 			
 		return result
 
 	def save_log( self, string, initiation=False ):
 		if self.evaluatePrey or self.evaluatePredator:
 			suffix = self.controller.reprType[self.controller.repr]
+
+			if self.sexualSelection > 0:
+				suffix += '_' + self.ssType[self.sexualSelection]
 
 			# check folders
 			directory = 'metrics/log'
@@ -958,39 +1265,80 @@ class Swarm( breve.Control ):
 			string_final += string + '\n'
 
 			# save data
-			f =  open( directory + '/' + self.date+'_'+suffix+'_prey_log.txt', 'a+' )
+			if self.evaluatePredator:
+				n = 'predator'
+			else:
+				n = 'prey'
+
+			f =  open( directory + '/' + self.date+'_'+suffix+'_'+n+'_log.txt', 'a+' )
 			f.write( string_final )
 			f.close()
 
+	def updateCumulativeEnergy( self, bird ):
+		if self.current_iteraction % self.breeding_season == 1:
+			bird.cumulativeEnergy = bird.energy
+		else:
+			bird.cumulativeEnergy += bird.energy
 
 	def resetSimulation( self ):
-		# clean data
+		# remove all agents
+		for prey in breve.allInstances( "Prey" ):
+			if self.repr == 2:
+				breve.deleteInstances( prey.pushCode )
+			elif self.repr == 1:
+				self.clean_tree(prey.geno)
+			if self.repr != 1:
+				self.clean_tree(prey.sexualGenotype)
+			prey.dropDead(corpse=False)
 
+		for predator in breve.allInstances( "Predator" ):
+			if self.repr == 2:
+				breve.deleteInstances( predator.pushCode )
+			elif self.repr == 1:
+				self.clean_tree(predator.geno)
+			predator.dropDead(corpse=False)
+
+		for corpse in breve.allInstances( "Corpse" ):
+			breve.deleteInstances( corpse.shape )
+			breve.deleteInstances( corpse )
+
+		for feeder in breve.allInstances( "Feeder" ):
+			breve.deleteInstances( feeder.shape )
+			breve.deleteInstances( feeder )
+		self.totalFoodSupply = 0
+
+		# clean data
 		self.listPrey_BestFitness = []
 		self.listPrey_AverageFitness = []
 		self.listPrey_Diversity = []
+		self.listPrey_Deaths = []
 		self.tempPrey_Best = 0
 		self.tempPrey_Average= 0
 		self.tempPrey_Diversity= 0
 		self.listPredator_BestFitness = []
 		self.listPredator_AverageFitness = []
 		self.listPredator_Diversity = []
+		self.listPredator_Deaths = []
 		self.tempPredator_Best = 0
 		self.tempPredator_Average = 0
 		self.tempPredator_Diversity = 0
 		self.list_phase_portrait = []
 		self.tempPrey_pp = 0
 		self.tempPredator_pp = 0
+		self.listPrey_Diversity_Sexual = []
+		self.listPrey_Size = []
+		self.listPrey_Brightness = []
+		self.tempPrey_Diversity_Sexual = 0
+		self.tempPrey_Size = 0
+		self.tempPrey_Brightness = 0
 
 		# Simulation
-		self.initialNumPreys = self.numPreys = 90
-		self.initialNumPredators = self.numPredators = 30
 		self.numDeadPreys = 0
 		self.numDeadPredators = 0
 
 		# List
-		self.pollPreys = breve.objectList()
-		self.pollPredators = breve.objectList()
+		# self.pollPreys = breve.objectList()
+		# self.pollPredators = breve.objectList()
 
 		# Generation
 		self.current_iteraction = 0
@@ -998,21 +1346,10 @@ class Swarm( breve.Control ):
 		self.preyID = 1
 		self.predatorID = 1
 
-
-		# remove all agents
-
-		for prey in breve.allInstances( "Prey" ):
-			prey.dropDead(corpse=False)
-
-		for predator in breve.allInstances( "Predator" ):
-			predator.dropDead(corpse=False)
-
-		for corpse in breve.allInstances( "Corpse" ):
-			breve.deleteInstances( corpse.shape )
-			breve.deleteInstances( corpse )
+		# Garbage Collector
+		gc.collect()
 
 		# add new agents
-
 		self.add_new_agents()
 
 
@@ -1040,6 +1377,8 @@ class Swarm( breve.Control ):
 							self.save_log( 'one prey died with ID=' + str(prey.ID) )
 					else:
 						preys_list.append(prey)
+					self.updateCumulativeEnergy(prey)
+
 			for predator in breve.allInstances( "Predator" ):
 				if predator.isAlive:
 					if predator.energy <= 0:
@@ -1052,6 +1391,8 @@ class Swarm( breve.Control ):
 							self.save_log( 'one predator died with ID=' + str(predator.ID) )
 					else:
 						predators_list.append(predator)
+					self.updateCumulativeEnergy(predator)
+
 
 			# update neighborhoods
 			self.updateNeighbors()
@@ -1066,7 +1407,7 @@ class Swarm( breve.Control ):
 			for predator in predators_list:
 				predator.fly()
 
-			# management of the energy from feeders
+			# management of energy from feeders
 			self.totalFoodSupply = 0
 			for feeder in breve.allInstances( "Feeder" ):
 				if feeder.rapid:
@@ -1087,12 +1428,19 @@ class Swarm( breve.Control ):
 
 			if self.evaluatePrey:
 				self.tempPrey_Average += self.averageFitness('Prey')
-				self.tempPrey_Best += self.bestFitness('Prey')
+				#self.tempPrey_Best += self.bestFitness('Prey')
 				self.tempPrey_Diversity += self.diversity_genotype('Prey')
+
+				self.tempPrey_Diversity_Sexual += self.diversity_genotype_sexual('Prey')
+				s, b = self.sexual_selection('Prey')
+				self.tempPrey_Size += s
+				self.tempPrey_Brightness += b
+
 			if self.evaluatePredator:
 				self.tempPredator_Average += self.averageFitness('Predator')
-				self.tempPredator_Best += self.bestFitness('Predator')
+				#self.tempPredator_Best += self.bestFitness('Predator')
 				self.tempPredator_Diversity += self.diversity_genotype('Predator')
+
 			if self.phase_portrait:
 				self.tempPrey_pp += self.numPreys
 				self.tempPredator_pp += self.numPredators
@@ -1101,17 +1449,32 @@ class Swarm( breve.Control ):
 			# breeding
 			if self.current_iteraction % self.breeding_season == 0:
 				if self.evaluatePrey:
+					aver, best = self.getFitnessMetrics('Prey', self.initialNumPreys)
+					#self.listPrey_AverageFitness.append(aver)
+					self.listPrey_BestFitness.append(best)
 					self.listPrey_AverageFitness.append(self.tempPrey_Average/(self.breeding_season*1.0))
-					self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
+					#self.listPrey_BestFitness.append(self.tempPrey_Best/(self.breeding_season*1.0))
 					self.listPrey_Diversity.append(self.tempPrey_Diversity/(self.breeding_season*1.0))
+					self.listPrey_Deaths.append(self.initialNumPreys-self.numPreys)
 					self.tempPrey_Average = 0
 					self.tempPrey_Best = 0
 					self.tempPrey_Diversity = 0
 
+					self.listPrey_Diversity_Sexual.append(self.tempPrey_Diversity_Sexual/(self.breeding_season*1.0))
+					self.listPrey_Size.append(self.tempPrey_Size/(self.breeding_season*1.0))
+					self.listPrey_Brightness.append(self.tempPrey_Brightness/(self.breeding_season*1.0))
+					self.tempPrey_Diversity_Sexual = 0
+					self.tempPrey_Size = 0
+					self.tempPrey_Brightness = 0
+
 				if self.evaluatePredator:
+					aver, best = self.getFitnessMetrics('Predator', self.initialNumPredators)
+					#self.listPredator_AverageFitness.append(aver)
+					self.listPredator_BestFitness.append(best)
 					self.listPredator_AverageFitness.append(self.tempPredator_Average/(self.breeding_season*1.0))
-					self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
+					#self.listPredator_BestFitness.append(self.tempPredator_Best/(self.breeding_season*1.0))
 					self.listPredator_Diversity.append(self.tempPredator_Diversity/(self.breeding_season*1.0))
+					self.listPredator_Deaths.append(self.initialNumPredators-self.numPredators)
 					self.tempPredator_Average = 0
 					self.tempPredator_Best = 0
 					self.tempPredator_Diversity = 0
@@ -1124,6 +1487,7 @@ class Swarm( breve.Control ):
 				# preys
 				if not self.evaluatePredator:
 					if self.evaluatePrey:
+
 						tam_temp = (self.initialNumPreys*self.evaluation_survivor)
 						if self.numPreys > tam_temp:
 							preys_list.sort(self.descendingCmp)
@@ -1133,6 +1497,7 @@ class Swarm( breve.Control ):
 								preys_list.remove(temp_boid)
 								self.numPreys -= 1
 								self.save_log( 'one prey died with ID=' + str(temp_boid.ID) )
+
 						tam_prey = int(math.ceil((self.initialNumPreys-self.numPreys)/2))
 					else:
 						tam_prey = int(math.ceil((self.breeding_inc*self.numPreys)/2))
@@ -1148,6 +1513,7 @@ class Swarm( breve.Control ):
 				# predators
 				if not self.evaluatePrey:
 					if self.evaluatePredator:
+
 						tam_temp = (self.initialNumPredators*self.evaluation_survivor)
 						if self.numPredators > tam_temp:
 							predators_list.sort(self.descendingCmp)
@@ -1157,6 +1523,7 @@ class Swarm( breve.Control ):
 								predators_list.remove(temp_boid)
 								self.numPredators -= 1
 								self.save_log( 'one predator died with ID=' + str(temp_boid.ID) )
+
 						tam_predator = int(math.ceil((self.initialNumPredators-self.numPredators)/2))
 					else:
 						predator_max = self.numPreys*self.max_pop_predators
@@ -1190,7 +1557,10 @@ class Swarm( breve.Control ):
 
 
 			# to display on screen
-			self.setDisplayText("Generation: "+str((int) (math.ceil(self.current_iteraction/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
+			temp_str = ''
+			if self.evaluatePrey or self.evaluatePredator:
+				temp_str = str(self.current_run+1) + '-'
+			self.setDisplayText("Generation: " + temp_str + str((int) (math.ceil(self.current_iteraction/self.breeding_season))), xLoc = -0.950000, yLoc = -0.550000, messageNumber = 5, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Preys Alive: "+str(self.numPreys), xLoc = -0.950000, yLoc = -0.650000, messageNumber = 4, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Predators Alive: "+str(self.numPredators), xLoc = -0.950000, yLoc = -0.750000, messageNumber = 3, theColor = breve.vector( 1, 1, 1 ))
 			self.setDisplayText("Dead Preys: "+str(self.numDeadPreys), xLoc = -0.950000, yLoc = -0.850000, messageNumber = 2, theColor = breve.vector( 1, 1, 1 ))
@@ -1215,10 +1585,16 @@ class Swarm( breve.Control ):
 
 				if self.evaluatePrey:
 					suffix = self.controller.reprType[self.controller.repr]
+
+					if self.sexualSelection > 0:
+						suffix += '_' + self.ssType[self.sexualSelection]
+
+					if self.controller.percentage:
+						suffix += '_perc'
 					
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_prey_'
-					directory_list = ['average', 'best', 'diversity']
+					directory_list = ['average', 'best', 'diversity', 'deaths', 'diversitySexual', 'tailSize', 'tailBrightness']
 
 					for directory in directory_list:
 						if not os.path.exists(directory_base+directory):
@@ -1240,12 +1616,35 @@ class Swarm( breve.Control ):
 						f.write("%s\n" % item)
 					f.close()
 
+					f =  open(directory_base+directory_list[3]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPrey_Deaths:
+						f.write("%s\n" % item)
+					f.close()
+
+					f =  open(directory_base+directory_list[4]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPrey_Diversity_Sexual:
+						f.write("%s\n" % item)
+					f.close()
+
+					f =  open(directory_base+directory_list[5]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPrey_Size:
+						f.write("%s\n" % item)
+					f.close()
+
+					f =  open(directory_base+directory_list[6]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPrey_Brightness:
+						f.write("%s\n" % item)
+					f.close()
+
 				if self.evaluatePredator:
 					suffix = self.controller.reprType[self.controller.repr]
 					
+					if self.sexualSelection > 0:
+						suffix += '_' + self.ssType[self.sexualSelection]
+
 					# check folders
 					directory_base = 'metrics/results/'+self.date+'_'+suffix+'_predator_'
-					directory_list = ['average', 'best', 'diversity']
+					directory_list = ['average', 'best', 'diversity', 'deaths']
 
 					for directory in directory_list:
 						if not os.path.exists(directory_base+directory):
@@ -1267,8 +1666,17 @@ class Swarm( breve.Control ):
 						f.write("%s\n" % item)
 					f.close()
 
+					f =  open(directory_base+directory_list[3]+'/'+str(self.current_run)+'.txt', 'w')
+					for item in self.listPredator_Deaths:
+						f.write("%s\n" % item)
+					f.close()
+
 				if self.phase_portrait:
 					suffix = self.controller.reprType[self.controller.repr]
+
+					if self.sexualSelection > 0:
+						suffix += '_' + self.ssType[self.sexualSelection]
+
 					directory = 'metrics/phase_portrait/results/'+self.date+'_'+suffix
 					if not os.path.exists(directory):
 						os.makedirs(directory)
@@ -1326,9 +1734,9 @@ class Feeder (breve.Stationary ):
 
 	def rapidGrow(self):
 		if self.rapid:
-			if self.VirtualEnergy > 0.5:
-				self.energy += 0.5
-				self.VirtualEnergy -= 0.5
+			if self.VirtualEnergy > 0.1:
+				self.energy += 0.1
+				self.VirtualEnergy -= 0.1
 			else:
 				self.energy += self.VirtualEnergy
 				self.VirtualEnergy = 0
@@ -1359,7 +1767,7 @@ class Feeder (breve.Stationary ):
 		self.adjustSize()
 
 	def adjustSize( self ):
-		radius = breve.breveInternalFunctionFinder.sqrt( self, self.energy )
+		radius = breve.breveInternalFunctionFinder.sqrt( self, 2*self.energy )
 		newScale = ( ( radius ) + 0.000010 )
 		if ( newScale == self.lastScale ):
 			return
@@ -1430,6 +1838,7 @@ class Prey( breve.Mobile ):
 
 		# change with time
 		self.energy = 1.0
+		self.cumulativeEnergy = 0
 		self.age = 0
 		self.isAlive = True
 
@@ -1445,6 +1854,13 @@ class Prey( breve.Mobile ):
 			self.pushInterpreter = None
 			self.pushCode = None
 			self.createPush()
+
+		# Sexual Selection
+		self.tailSize = 0
+		self.tailBrigh = 0
+
+		if self.controller.repr != 1:
+			self.sexualGenotype = None
 
 		self.lastScale = 1
 		Prey.init( self )
@@ -1488,6 +1904,17 @@ class Prey( breve.Mobile ):
 			self.pushCode.makeRandomCode( self.pushInterpreter, 80 )
 			self.pushInterpreter.pushVector( breve.vector(self.vel_x,self.vel_y,0) )
 
+		if self.controller.percentage:
+			self.tailSize = random.uniform(0,1)
+			self.tailBrigh = random.uniform(0,1)
+		else:
+			self.tailSize = random.uniform(0,10)
+			self.tailBrigh = random.uniform(0,10)
+
+		if self.controller.repr != 1:
+			self.sexualGenotype = self.controller.create_random_tree(self.controller.initial_depth, "Prey", 1)
+
+
 	def initializeRandomly2(self):
 		x = random.uniform(self.controller.minX, self.controller.maxX)
 		y = random.uniform(self.controller.minY, self.controller.maxY)
@@ -1500,8 +1927,16 @@ class Prey( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 
-	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
+		if self.controller.percentage:
+			self.tailSize = random.uniform(0,1)
+			self.tailBrigh = random.uniform(0,1)
+		else:
+			self.tailSize = random.uniform(0,10)
+			self.tailBrigh = random.uniform(0,10)
+
+	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno=None, tailSize=0, tailBrigh=0):
 		self.changePos(pos_x, pos_y)
 		self.changeVel(vel_x, vel_y)
 		self.changeAccel(accel_x, accel_y)
@@ -1527,6 +1962,12 @@ class Prey( breve.Mobile ):
 			self.pushCode.setFrom(geno)
 		else:
 			self.geno = geno
+
+		self.tailSize = tailSize
+		self.tailBrigh = tailBrigh
+
+		if self.controller.repr != 1:
+			self.sexualGenotype = sexualgeno
 
 	def setNewColor( self ):
 		self.setColor( breve.vector( 0, 1, 0 ) )
@@ -1568,9 +2009,38 @@ class Prey( breve.Mobile ):
 			x *= n
 			y *= n
 		
-		if n > self.maxVel:
-			x = x/n * self.maxVel
-			y = y/n * self.maxVel
+		
+		if self.controller.sexualSelection != 2:
+			if self.controller.percentage:
+
+				x = 1/float(1+math.exp( (-(self.tailSize)+0.5)*9.5 ))
+				#x = self.tailSize/10
+
+				limit = self.maxVel * (1-x)
+
+				# error
+				if self.tailSize < 0 or self.tailSize > 1:
+					print 'ops2: ' + str(self.tailSize)
+
+			else:
+				try:
+					#x = 1/float(1+math.exp( - self.tailSize + 5 ) )
+					x = self.tailSize/10
+
+					limit = self.maxVel * (1-x)
+
+				except:
+					limit = 0.0
+
+				# error
+				if self.tailSize < 0 or self.tailSize > 10:
+					print 'ops2: ' + str(self.tailSize)
+		else:
+			limit = self.maxVel
+	
+		if n > limit:
+			x = x/n * limit
+			y = y/n * limit
 
 		self.vel_x = x
 		self.vel_y = y
@@ -1621,9 +2091,9 @@ class Prey( breve.Mobile ):
 
 	def eat( self, feeder ):
 		if feeder.energy > 0:
-			if self.energy <= 0.90:
-				self.addEnergy(0.1)
-				feeder.addEnergy(-0.1)
+			if self.energy <= 0.95:
+				self.addEnergy(0.05)
+				feeder.addEnergy(-0.05)
 			else:
 				feeder.addEnergy(self.energy-1)
 				self.energy = 1.0
@@ -1651,6 +2121,7 @@ class Prey( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 		self.isAlive = False
 		self.controller.pollPreys.append(self)
 		self.controller.numDeadPreys += 1
@@ -1826,14 +2297,114 @@ class Prey( breve.Mobile ):
 		return [self.energy, self.energy]
 
 	def randV(self):
-		rand_x = random.uniform(0, 10)
-		rand_y = random.uniform(0, 10)
+		rand_x = random.uniform(0, 5)
+		rand_y = random.uniform(0, 5)
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
 			return
 		return [rand_x, rand_y]
 
+	def getTailSize(self):
+		return self.tailSize
+
+	def getTailBrightness(self):
+		return self.tailBrigh
+
+	def distanceMatingSeason(self):
+		dist = self.controller.breeding_season - (self.controller.current_iteraction % self.controller.breeding_season)
+		
+		if self.controller.percentage:
+			temp = 1 - (dist*1.0) / self.controller.breeding_season
+		else:
+			temp = dist*1.0
+
+		return temp
+
+	def getNumPreysNeigh(self):
+		count = 0
+		total = 0
+		neighbors = self.getNeighbors()
+		
+		v1 = self.normalizeVector(self.vel_x, self.vel_y)
+		for neighbor in neighbors:
+
+			if neighbor.isA( 'Prey' ) and neighbor.isAlive:
+				v2 = self.normalizeVector(neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y)
+				a = math.degrees(self.angle(v1, v2))
+
+				norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
+				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
+
+					if 0 < norm < self.controller.socialZone:
+						count += 1
+						total += 1
+
+			elif self.controller.percentage and neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				v2 = self.normalizeVector(neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y)
+				a = math.degrees(self.angle(v1, v2))
+
+				norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
+				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
+
+					if 0 < norm < self.controller.socialZone:
+						total += 1
+
+		if self.controller.percentage:
+			if total > 0:
+				temp = (count*1.0) / total
+			else:
+				temp = 0
+		else:
+			temp = count*1.0
+
+		return temp
+
+	def getNumPredatorsNeigh(self):
+		count = 0
+		total = 0
+		neighbors = self.getNeighbors()
+		
+		v1 = self.normalizeVector(self.vel_x, self.vel_y)
+		for neighbor in neighbors:
+
+			if neighbor.isA( 'Predator' ) and neighbor.isAlive:
+				v2 = self.normalizeVector(neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y)
+				a = math.degrees(self.angle(v1, v2))
+
+				norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
+				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
+
+					if 0 < norm < self.controller.socialZone:
+						count += 1
+						total += 1
+
+			elif self.controller.percentage and neighbor.isA( 'Prey' ) and neighbor.isAlive:
+				v2 = self.normalizeVector(neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y)
+				a = math.degrees(self.angle(v1, v2))
+
+				norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
+				if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
+
+					if 0 < norm < self.controller.socialZone:
+						total += 1
+
+		if self.controller.percentage:
+			if total > 0:
+				temp = (count*1.0) / total
+			else:
+				temp = 0
+		else:
+			temp = count*1.0
+
+		return temp
+
+	def randF(self):
+		if self.controller.percentage:
+			rand = random.uniform(0, 1)
+		else:
+			rand = random.uniform(0, 5)
+		return rand
 
 	# GA
 	def calculateAccel(self):
@@ -1869,7 +2440,7 @@ class Prey( breve.Mobile ):
 							t_x = neighbor.pos_x-self.pos_x
 							t_y = neighbor.pos_y-self.pos_y
 
-						if norm <= max(neighbor.lastScale,3):
+						if norm <= 2:
 							self.eat(neighbor) 
 
 					elif neighbor.isA( 'Prey' ) and neighbor.isAlive:
@@ -1931,6 +2502,31 @@ class Prey( breve.Mobile ):
 		return [accel_x, accel_y]
 
 	def fly(self):
+		self.addEnergy( -0.01 - 0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
+		if self.controller.sexualSelection != 1:
+			if self.controller.percentage:
+
+				tempEnergy = -0.02 *(1/float(1+math.exp( (-(self.energy*self.tailBrigh)+0.5)*9.5 )))
+
+				# error
+				if self.tailBrigh < 0 or self.tailBrigh > 1:
+					print 'ops1: ' + str(self.tailBrigh)
+
+			else:
+				try:
+					#tempEnergy =  -1*(1/float(1+math.exp( - self.tailBrigh + 5 ) ))
+					
+					tempEnergy = -0.02*self.tailBrigh/10
+
+				except:
+					tempEnergy = -0.02
+
+				# error
+				if self.tailBrigh < 0 or self.tailBrigh > 10:
+					print 'ops1: ' + str(self.tailBrigh)
+
+			self.addEnergy( tempEnergy )
+
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -1942,9 +2538,11 @@ class Prey( breve.Mobile ):
 
 		if self.controller.repr == 0:
 			accel_x, accel_y = self.calculateAccel()
+			size, bright = self.controller.run_code(self, self.sexualGenotype)
 		else:
 			if self.controller.repr == 1:
-				accel_x, accel_y = self.controller.run_code(self, self.geno)
+				accel_x, accel_y, size, bright = self.controller.run_code(self, self.geno)
+
 			elif self.controller.repr == 2:
 
 				# clean the stacks
@@ -1962,6 +2560,8 @@ class Prey( breve.Mobile ):
 				accel_x = accel.x
 				accel_y = accel.y
 
+				size, bright = self.controller.run_code(self, self.sexualGenotype)
+
 			# eat
 			neighbors = self.getNeighbors()
 
@@ -1975,12 +2575,32 @@ class Prey( breve.Mobile ):
 					norm = self.norm([neighbor.pos_x-self.pos_x, neighbor.pos_y-self.pos_y])
 					if a <= self.visionAngle or (0 < norm < self.controller.separationZone):
 
-						if norm <= max(neighbor.lastScale,3):
+						if norm <= 2:
 							self.eat(neighbor)
+
+		if self.controller.percentage:
+			if self.tailSize > 1.0:
+				self.tailSize = 1.0
+			elif self.tailSize < 0.0:
+				self.tailSize = 0.0
+
+			if self.tailBrigh > 1.0:
+				self.tailBrigh = 1.0
+			elif self.tailBrigh < 0.0:
+				self.tailBrigh = 0.0
+		else:
+			if self.tailSize > 10.0:
+				self.tailSize = 10.0
+			elif self.tailSize < 0.0:
+				self.tailSize = 0.0
+
+			if self.tailBrigh > 10.0:
+				self.tailBrigh = 10.0
+			elif self.tailBrigh < 0.0:
+				self.tailBrigh = 0.0
 
 		self.changeAccel(accel_x, accel_y)
 		
-		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
 		self.adjustSize()
 		self.age += 1
 
@@ -2028,6 +2648,7 @@ class Predator( breve.Mobile ):
 		
 		# change with time
 		self.energy = 1.0
+		self.cumulativeEnergy = 0
 		self.age = 0
 		self.isAlive = True
 
@@ -2097,6 +2718,7 @@ class Predator( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 
 	def initializeFromData(self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
 		self.changePos(pos_x, pos_y)
@@ -2218,9 +2840,9 @@ class Predator( breve.Mobile ):
 
 	def eat( self, prey ):
 		if prey.energy > 0:
-			if self.energy <= 0.90:
-				self.addEnergy(0.1)
-				prey.addEnergy(-0.1)
+			if self.energy <= 0.95:
+				self.addEnergy(0.05)
+				prey.addEnergy(-0.05)
 			else:
 				prey.addEnergy(self.energy-1)
 				self.energy = 1.0
@@ -2248,6 +2870,7 @@ class Predator( breve.Mobile ):
 		self.changeAccel(0,0)
 		self.age = 0
 		self.energy = 0.5
+		self.cumulativeEnergy = 0
 		self.isAlive = False
 		self.controller.pollPredators.append(self)
 		self.controller.numDeadPredators += 1
@@ -2390,8 +3013,8 @@ class Predator( breve.Mobile ):
 		return [self.energy, self.energy]
 
 	def randV(self):
-		rand_x = random.uniform(0, 10)
-		rand_y = random.uniform(0, 10)
+		rand_x = random.uniform(0, 5)
+		rand_y = random.uniform(0, 5)
 
 		if self.controller.repr == 2:
 			self.pushInterpreter.pushVector( breve.vector(rand_x, rand_y, 0) )
@@ -2476,6 +3099,8 @@ class Predator( breve.Mobile ):
 		return [accel_x, accel_y]
 
 	def fly(self):
+		self.addEnergy( -0.01 - 0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
+
 		pos = self.getLocation()
 		self.changePos(pos.x, pos.y)
 		self.myPoint( breve.vector( 0, 1, 0 ), self.getVelocity())
@@ -2525,7 +3150,6 @@ class Predator( breve.Mobile ):
 
 		self.changeAccel(accel_x, accel_y)
 
-		self.addEnergy(-0.01 -0.01*(1/float(1+math.exp(-((self.age-100)/12.0) ) ) ) )
 		self.adjustSize()
 		self.age += 1
 
@@ -2579,7 +3203,7 @@ breve.myCustomShape = myCustomShape
 
 # auxiliar classes
 class Data_mobile:
-	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale):
+	def __init__( self, pos_x, pos_y, vel_x, vel_y, accel_x, accel_y, energy, cumulativeEnergy, age, isAlive, maxVel, maxAccel, visionAngle, maxSteering, geno, lastScale, sexualgeno = None, tailSize = 0, tailBrigh = 0):
 		self.pos_x = pos_x
 		self.pos_y = pos_y
 		self.vel_x = vel_x
@@ -2589,6 +3213,7 @@ class Data_mobile:
 		
 		# change with time
 		self.energy = energy
+		self.cumulativeEnergy = cumulativeEnergy
 		self.age = age
 		self.isAlive = isAlive
 
@@ -2598,6 +3223,11 @@ class Data_mobile:
 		self.visionAngle = visionAngle
 		self.maxSteering = maxSteering
 		self.geno = geno
+
+		# sexual selection
+		self.sexualgeno = sexualgeno
+		self.tailSize = tailSize
+		self.tailBrigh = tailBrigh
 		
 		self.lastScale = lastScale
 
@@ -2611,30 +3241,56 @@ class Data_Stationary:
 		self.VirtualEnergy = VirtualEnergy
 
 class Node:
-	def __init__(self, left, right, specie, depth):
+	def __init__(self, left, right, specie, depth, representation, sexualSelection):
 		self.left = left
 		self.right = right
-		self.data = None
 		self.parent = None
 		self.depth = depth
 
+		if representation == 1:
+			self.vector = None
+			
 		if specie == 'Prey':
-			self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
-					"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+				self.float_size = None
+				self.float_bright = None
+
+		self.fill_data(specie, representation, sexualSelection)
+
+	def fill_data(self, specie, representation, sexualSelection):
+		# Available Genotypes
+		if specie == 'Prey':
+			leaf_vector = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()", "indiv.flee()",
+							"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
+
+			leaf_float = ["indiv.getEnergy()", "indiv.distanceMatingSeason()", "indiv.getNumPreysNeigh()",
+					"indiv.getNumPredatorsNeigh()", "indiv.getTailSize()", "indiv.getTailBrightness()", "indiv.randF()"]
+
 		elif specie == 'Predator':
-			self.leaf = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
-					"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
-		self.node = ["+", "-", "*", "/"]
+			leaf_vector = ["indiv.alignment()", "indiv.cohesion()", "indiv.separation()", "indiv.target()",
+						"indiv.currentVelocity()", "indiv.currentEnergy()", "indiv.randV()"]
 
-		self.fill_data()
+		node = ["+", "-", "*", "/"]
 
-	def fill_data(self):
+
+		# leaf
 		if self.right is None:
-			# leaf
-			self.data = self.leaf[random.randint(0, len(self.leaf)-1)]
+		
+			if representation == 1:	
+				self.vector = leaf_vector[random.randint(0, len(leaf_vector)-1)]
+
+			if specie == 'Prey':
+				self.float_size = leaf_float[random.randint(0, len(leaf_float)-1)]
+				self.float_bright = leaf_float[random.randint(0, len(leaf_float)-1)]
+		
+		# node
 		else:
-			# node
-			self.data = self.node[random.randint(0, len(self.node)-1)]
+			
+			if representation == 1:	
+				self.vector = node[random.randint(0, len(node)-1)]
+
+			if specie == 'Prey':
+				self.float_size = node[random.randint(0, len(node)-1)]
+				self.float_bright = node[random.randint(0, len(node)-1)]
 
 
 Swarm()

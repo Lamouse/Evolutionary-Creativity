@@ -1,0 +1,211 @@
+# Written by Mikel Waxler, 2004
+
+@use CaptureTheFlag.
+@define wxGURD  0.
+@define wxSWEP  1. 
+@define wxFLEX  2.
+@define wxATAK  3.
+
+# Define wxCOLOR to give the positions different colors
+@define wxCOLOR 0.
+
+CaptureTheFlagPlayer : RunnerUp (aka RunnersUp) {
+    + variables:
+        myFlag, enFlag, 
+        myJail, enJail,
+        target
+        (object).
+        
+        type,
+        convicts,
+        breaker,
+        guardOffset
+        (int).
+        
+        angle (float).
+        baddies (list).
+        
+    + to init:
+        foo, temp (int).
+        
+        temp = self get-id-number.
+        if (temp == 1) : type = wxGURD.  # Guards
+        if (temp == 2) : type = wxGURD.  # Guards
+        if (temp == 3) : type = wxSWEP.  # Sweepers
+        if (temp == 4) : type = wxSWEP.
+        if (temp == 5) : type = wxFLEX.
+        if (temp == 6) : type = wxFLEX.  # Break/attackers
+        if (temp == 7) : type = wxATAK.  # Attackers   
+        if (temp == 8) : type = wxATAK.        
+        if (temp == 9) : type = wxATAK.        
+        if (temp ==10) : type = wxATAK.        
+        
+        
+        #setup Sweep offset
+        if (type == wxSWEP):  self set-offset with-base 4 and-scale 5.
+      
+        #setup Flex offset
+        if (self get-team): temp= -1.
+        else temp=1.
+        if (type == wxFLEX): self set-offset with-base 5 and-scale (4 * temp).
+        # setup attacker offset.
+        if (type == wxATAK): self set-offset with-base 9 and-scale 7.
+    
+    + to set-offset with-base number (int) and-scale scale (int):
+        guardOffset = ((self get-id-number) - number).
+        if guardOffset > -1: guardOffset++.
+        guardOffset *= scale.
+    
+
+
+    + to iterate:
+        baddies = self sense-other-team.
+        enFlag = (self sense-other-flag).
+        myFlag = (self sense-my-flag).        
+        self set-speed to 1.0.
+        # If anyone gets the flag, RUN HOME!!       
+        if (self has-flag): {
+            self score.
+        }else {
+            if type==wxGURD : self guard.
+            if type==wxSWEP : self guard.
+            if type==wxFLEX : self flex.
+            if type==wxATAK : self attack.
+        }
+        if (wxCOLOR):{
+        if type==wxGURD : self set-color to (1, 1, 0).    
+        if type==wxSWEP : self set-color to (0, 1, 0).
+        if type==wxFLEX : self set-color to (0.6, 1, 0.6).
+        if type==wxATAK : self set-color to (0,1,1).         
+        }
+        super iterate.
+                    
+    + to wxTrack with-angle angle (float):
+        if angle > 0: self turn-right.
+           else if angle < 0: self turn-left.
+        #Turn Sharp if angle is great
+           #if angle > 1.5: self turn-right.
+           #else if angle < -1.5: self turn-left.
+
+    + to owxTrack with-angle angle (float):
+        if angle > 0: self turn-right.
+           else if angle < 0: self turn-left.
+           
+    ############################################
+    ###  G U A R D S
+    ############################################
+
+    + to guard:
+        getEm (int).
+        foreach target in baddies :
+            if (target has-flag) :
+                getEm =1.
+                
+        if getEm : {
+            self save-flag.
+        }else{        
+            if type==0 : self guard-flag.
+            if type==1 : self sweep with-offset guardOffset.
+        }
+        
+    + to guard-flag:       
+           # or else guard the flag or go find it.
+        if myFlag: {
+            angle = (self get-angle to (myFlag get-location)).
+            self wxTrack with-angle angle.
+            self wxTrack with-angle angle.            
+        }else {
+            if (self get-team):    angle = self get-angle to (15,0,0).
+            else angle = self get-angle to (-15,0,0).
+            self wxTrack with-angle angle.         
+        }        
+    
+    + to save-flag: 
+        myFlag = (self sense-my-flag).
+        if myFlag:{
+            angle = (self get-angle to (myFlag get-location)).
+            self wxTrack with-angle angle.
+        }
+        
+    
+    
+    ############################################
+    ###  S W E E P E R S 
+    ############################################
+    
+    + to sweep with-offset offset (int):
+        chase (int).
+        if baddies: {
+            target = self get-closest-opponent.
+            angle = self get-angle to (target get-location).
+            if ( 
+                 |(target get-location) - (self get-location)| 
+                 < 
+                 |(self get-other-home-location) - (self get-location)|):
+                chase =1.
+            else chase =0.
+                
+        }
+        
+        if (chase==0): {
+            if (self get-team):    angle = self get-angle to (5,0,offset).
+            else angle = self get-angle to (-5,0,offset).
+        }
+        self owxTrack with-angle angle.
+        
+    
+    ############################################
+    ###  F L E X  SWEEP/BREAK
+    ############################################
+
+    + to flex:    
+        help (int).   
+        if (self get-team):    help = controller get-jailed-red-count.
+        else help = controller get-jailed-blue-count.
+        
+        if (help >=2): self go-for-jail-break.
+        else self sweep with-offset guardOffset.
+            
+    
+    + to go-for-jail-break:
+        jail (vector).
+        if (self get-team): jail = (-20, 0 , -20).
+        else jail = (20, 0 , 20).
+        angle = self get-angle to jail.
+        self wxTrack with-angle angle.        
+        
+    ############################################
+    ###  A T T A C K E R S
+    ############################################
+        
+    + to attack:        
+        #self debug-offset from foo.
+        
+        if ((controller get-time) < 250) : 
+            self sweep with-offset guardOffset.
+        else self flag-run. 
+    
+    + to flag-run:
+        enFlag = (self sense-other-flag).
+        if enFlag: {
+            # go get flag
+               angle = (self get-angle to (enFlag get-location)).
+               self wxTrack with-angle angle.
+           }else{
+                   # head towords flag
+                   if (self get-team):    angle = self get-angle to (-20,0,0).
+                else angle = self get-angle to (20,0,0).
+                self wxTrack with-angle angle.
+           }
+   
+
+    + to score:
+        angle = self get-angle to (self get-my-home-location).
+        self wxTrack with-angle angle.
+        
+    + to debug-offset from foo (int):
+         printf "ID== ".
+        printf  (self get-id-number).      
+        printf "   offset==  ".
+           print     foo.
+}           

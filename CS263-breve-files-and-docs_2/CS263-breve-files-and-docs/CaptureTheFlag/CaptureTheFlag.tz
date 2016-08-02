@@ -1,0 +1,613 @@
+@use Control.
+@use Shape.
+@use Mobile.
+@use Stationary.
+@use Sound.
+
+@define WORLD_SIZE             50.
+@define SENSOR_DISTANCE        20.
+
+@define BLUE                   0.
+@define RED                    1.
+
+@define GAME_LENGTH            500.
+
+Control : CaptureTheFlagController {
+    + variables:
+        left, right (object).
+        redFlag, blueFlag (object).
+        redJail, blueJail (object).
+        redP, blueP (int).
+        totalRedP, totalBlueP, iterations (float).
+		idCounter1, idCounter2 (int).
+		firstClass (string).
+        
+    + to get-blue-jail-location:
+        return (blueJail get-location).
+
+    + to get-red-jail-location:
+        return (redJail get-location).
+
+    + to init:
+        left = (new Stationary register with-shape (new Cube init-with size (WORLD_SIZE / 2.0, .2, WORLD_SIZE)) at-location (-WORLD_SIZE/4.0, 0, 0)).
+        left set-color to (.7, .7, 1.0).
+
+        right = (new Stationary register with-shape (new Cube init-with size (WORLD_SIZE / 2.0, .2, WORLD_SIZE)) at-location (WORLD_SIZE/4.0, 0, 0)).
+        right set-color to (1.0, .7, .7).
+
+        self set-integration-step to 0.2.
+
+        self enable-lighting.
+        self move-light to (0, 10, 0).
+
+        self enable-shadow-volumes.
+        
+        self point-camera at (0, 0, 0) from (0, 60, 60).
+
+        blueJail = new Jail.
+        blueJail move to (WORLD_SIZE / 2.0 - 5, 0, WORLD_SIZE / 2.0 - 5).
+        blueJail set-team to BLUE.
+
+        redJail = new Jail.
+        redJail move to (-WORLD_SIZE / 2.0 + 5, 0, -WORLD_SIZE / 2.0 + 5).
+        redJail set-team to RED.
+
+        blueFlag = new Flag.
+        blueFlag set-team to BLUE.
+        blueFlag move to (-WORLD_SIZE / 2.0 + 5, 1.0, 0).
+
+        redFlag = new Flag.
+        redFlag set-team to RED.
+        redFlag move to (WORLD_SIZE / 2.0 - 5, 1.0, 0).
+
+    + to set-text to t (string):
+        self set-display-text to t at-x -.95 at-y -.95.
+
+    + to win-for-red:
+        print "*** The Red team wins! ***".
+        self report.
+        die "The Red team wins!".
+
+    + to win-for-blue:
+        print "*** The Blue team wins! ***".
+        self report.
+        die "The Blue team wins!".
+
+    + to tie:
+        self report.
+        die "TIE game.".
+
+    + to report:
+        totalRedP /= iterations.
+        totalBlueP /= iterations.
+        totalRedP *= 10.
+        totalBlueP *= 10.
+
+        if (blueP == 10): print "All of the Blue players were captured.".
+        if (redP == 10): print "All of the Red players were captured.".
+ 
+        if (blueFlag check-if-offsides): print "The Blue flag was captured.".
+        if (redFlag check-if-offsides): print "The Red flag was captured.".
+        print "The Blue had posession for $totalBlueP percent of the game.".
+        print "The Red had posession for $totalRedP percent of the game.".
+
+    + to get-jailed-blue-count: return blueP.
+    + to get-jailed-red-count: return redP.
+
+    + to iterate:
+        rAve, bAve (double).
+        
+        if redP == 10: self win-for-blue.
+        if blueP == 10: self win-for-red.
+
+        if (blueFlag check-if-offsides): self win-for-red.
+        if (redFlag check-if-offsides): self win-for-blue.
+
+        if (blueFlag get-carrier): totalRedP++.
+        if (redFlag get-carrier): totalBlueP++.
+
+        iterations++.
+
+        if (self get-time) >= GAME_LENGTH: {
+            rAve = totalRedP / iterations.
+            bAve = totalBlueP / iterations.
+    
+            if rAve == bAve: {
+                print rAve, bAve.
+                self tie.
+            }
+
+            if rAve > bAve: self win-for-red.
+            if rAve < bAve: self win-for-blue.
+        }
+        
+        super iterate.
+
+    + to change-red-prisoners by n (int):
+        redP += n.
+        
+    + to change-blue-prisoners by n (int):
+        blueP += n.
+
+	+ to get-next-id-number for-agent agent (object):
+		if firstClass == "": firstClass = (agent get-type).
+
+		if (agent get-type) == firstClass: return idCounter1++.
+		return idCounter2++.
+}
+
+Mobile : CTFMobile {
+    + variables:
+        team (int).
+
+    + to set-team to t (int):
+		
+        team = t.
+
+		if team == 1: print "$self is on the red team".
+		else print "$self is on the blue team".
+
+        if team == 1: self set-color to (1, 0, 0).
+        else self set-color to (0, 0, 1).
+
+    + to get-team:
+        return team.
+
+    + to check-if-offsides:
+        o (int).
+
+        if team == 1 && (self get-location)::x < 0.0: o = 1.
+        if team == 0 && (self get-location)::x > 0.0: o = 1.
+
+        return o.
+}
+
+CTFMobile : Jail (aka Jails) {
+    + to init:
+        self set-shape to (new Cube init-with size (3, 1, 3)).
+        self set-color to (0, 1, 0).
+        self set-transparency to .1.
+
+    + to jail-break:
+        item (object).
+        foreach item in all CaptureTheFlagPlayers: {
+            if (item get-team) == team: item get-freed.
+        }
+}
+
+CTFMobile : CaptureTheFlagPlayer (aka CaptureTheFlagPlayers) {
+    + variables:
+        shape (object).
+        velocity (double).
+        angle (double).
+        heading (vector).
+        turningLeft, turningRight (int).
+        atEdge (int).
+        carrying (object).
+        teamHome (vector).
+        inJail (int).
+        jailedLocation (vector).
+		idNumber (int).
+
+	+ to get-id-number:
+		return idNumber.
+
+    + to set-team to t (int):
+        super set-team to t.
+
+        if team == 1: self set-color to (1, 0, 0).
+        else self set-color to (0, 0, 1).
+
+        self move-to-homeside.
+        
+    + to get-in-jail:
+        return inJail.
+
+    + to move-to-homeside:
+        r, o (vector).
+
+        if team == 1: {
+            r = (WORLD_SIZE/4.0, 0, WORLD_SIZE).
+            o = (WORLD_SIZE/4.0, 0, -WORLD_SIZE/2.0).
+            teamHome = (-1, 0, 0).
+        } else {
+            r = (WORLD_SIZE/4.0, 0, WORLD_SIZE).
+            o = (-WORLD_SIZE/2.0, 0, -WORLD_SIZE/2.0).
+            teamHome = (1, 0, 0).
+        }
+
+        self move to (random[r] + o).
+
+    + to get-my-home-location:
+        location (vector).
+
+        location = (self get-location).
+
+        if !(self check-if-offsides): return location.
+
+        location::x = 0.
+
+        return location.
+
+    + to get-other-home-location:
+        location (vector).
+
+        location = (self get-location).
+
+        if (self check-if-offsides): return location.
+
+        location::x = 0.
+
+        return location.
+
+    + to set-turning-left to i (int):
+        turningLeft = i.
+
+    + to set-turning-right to i (int):
+        turningRight = i.
+
+    + to get-heading:
+        return heading.
+
+    + to init:
+        i (int).
+        item (object).
+        type (string).
+
+		idNumber = (controller get-next-id-number for-agent self).
+
+        shape = new AgentShape.
+        self set-shape to shape.
+
+        self handle-collisions with-type "Flag" with-method "pick-up".
+        self handle-collisions with-type "Jail" with-method "jail-break".
+
+        # EMBARASSING HACK.  Ow.
+
+        foreach item in (all CaptureTheFlagPlayers): {
+            if (item get-type) != (self get-type): {
+                type = (item get-type).
+                item handle-collisions with-type (self get-type) with-method "tag".
+            }
+        }
+
+        if type: {
+            self handle-collisions with-type type with-method "tag".
+        }
+
+        self set-angle to random[6.29].
+
+    + to has-flag:
+        if carrying: return 1.
+		return 0.
+
+    + to pick-up flag f (object):
+        if (f get-team) == team: return.
+        if (f get-carrier): return.
+		if inJail: return.
+
+        if !carrying: carrying = f.
+        f set-carrier to self.
+
+    + to drop:
+        if carrying: {
+            carrying set-carrier to 0.
+        }
+        
+        carrying = 0.
+
+    + to tag agent a (object):
+        if (a get-team) == team: return.
+        
+        if (a check-if-offsides): {
+            a drop.
+            a go-to-jail.
+        } 
+        
+        if (self check-if-offsides): {
+            self drop.
+            self go-to-jail.        
+        }
+
+    + to go-to-jail:
+        if inJail == 1: return.
+
+        inJail = 1.
+
+        if team == 1: {
+            jailedLocation = (controller get-red-jail-location) + random[(1, 0, 1)] - (.5, -.5, .5).
+            controller change-red-prisoners by 1.
+        } else {
+            jailedLocation = (controller get-blue-jail-location) + random[(1, 0, 1)] - (.5, -.5, .5).
+            controller change-blue-prisoners by 1.
+        }
+        
+        self move to jailedLocation.
+
+    + to jail-break with jail (object):
+        if !inJail && (jail get-team) == team: jail jail-break.
+
+    + to get-freed:
+        if inJail == 0: return.
+
+        self move-to-homeside.
+        inJail = 0.
+
+        if team == 1: controller change-red-prisoners by -1.
+        else controller change-blue-prisoners by -1.
+
+    + to accelerate:
+        self set-speed to velocity + 0.1.
+
+    + to decelerate:
+        self set-speed to velocity - 0.1.
+
+    + to set-speed to value (double):
+        velocity = value.
+
+        if velocity > 1.0: velocity = 1.0.
+        if velocity < 0.0: velocity = 0.0.
+
+    + to set-angle to a (double):
+        angle = a.
+        self rotate around-axis (-1, 0, 0) by 1.57.
+        self relative-rotate around-axis (0, -1, 0) by angle.
+
+    + to turn-left:
+        self set-angle to angle - 0.03.
+
+    + to turn-right:
+        self set-angle to angle + 0.03.
+
+    + to iterate:
+        myrot (matrix).
+        myloc, myvel (vector).
+
+        if inJail: {
+            self move to jailedLocation.
+            return.
+        }
+        
+        if carrying: carrying move to (self get-location).
+
+        if turningLeft: self turn-left.
+        if turningRight: self turn-right.
+
+        myloc = (self get-location).
+        myvel = (self get-heading).
+
+        if myloc::x > (WORLD_SIZE / 2) && myvel::x > 0.0: {
+            self set-speed to 0.
+            atEdge = 1.
+        } else if myloc::z > (WORLD_SIZE / 2) && myvel::z > 0.0: {
+            self set-speed to 0.
+            atEdge = 1.
+        } else if myloc::x < -(WORLD_SIZE / 2) && myvel::x < 0.0: {
+            self set-speed to 0.
+            atEdge = 1.
+        } else if myloc::z < -(WORLD_SIZE / 2) && myvel::z < 0.0: {
+            self set-speed to 0.
+            atEdge = 1.
+        } else {
+            atEdge = 0.
+        }
+
+        myrot = (self get-rotation).
+
+        heading = myrot * (0, 1, 0).
+
+        self set-velocity to .5 * velocity * heading.
+
+        myloc::y = 0.2.
+
+        self move to myloc.
+        super iterate.
+
+    + to sense-my-jail:
+        result (list).
+        item (object).  
+        foreach item in all Jails: {
+            if (item get-team) == team && | (self get-location) - (item get-location) | < SENSOR_DISTANCE: return item.
+        }
+
+        return 0.
+
+    + to sense-other-jail:
+        result (list).
+        item (object).
+
+        foreach item in all Jails: {
+            if (item get-team) != team && | (self get-location) - (item get-location) | < SENSOR_DISTANCE: return item.
+        }
+
+        return 0.
+
+    + to sense-my-flag:
+        result (list).
+        item (object).
+
+        foreach item in all Flags: {
+            if (item get-team) == team && | (self get-location) - (item get-location) | < SENSOR_DISTANCE: return item.
+        }
+
+        return 0.
+
+    + to sense-other-flag:
+        result (list).
+        item (object).
+
+        foreach item in all Flags: {
+            if (item get-team) != team && | (self get-location) - (item get-location) | < SENSOR_DISTANCE: return item.
+        }
+
+        return 0.
+
+    + to sense-my-team:
+        result (list).
+        item (object).
+
+        foreach item in all CaptureTheFlagPlayers: {
+            if (item get-team) == team && !(item get-in-jail) && | (self get-location) - (item get-location) | < SENSOR_DISTANCE: push item onto result.
+        }
+
+        return result.
+
+    + to sense-other-team:
+        result (list).
+        item (object).
+
+        foreach item in all CaptureTheFlagPlayers: {
+            if (item get-team) != team && !(item get-in-jail) && | (self get-location) - (item get-location) | < SENSOR_DISTANCE: push item onto result.
+        }
+
+        return result.
+
+    + to get-closest-opponent:
+        bestDistance (double).
+        best, item (object).
+
+        bestDistance = 200.
+
+        foreach item in (self sense-other-team): {
+            if |(self get-location) - (item get-location)| < bestDistance: {
+                best = item.
+                bestDistance = |(self get-location) - (item get-location)|.
+            }
+        }
+
+        return best.
+
+    + to get-object-angle to o (object):
+        return (self get-angle to (o get-location)). 
+
+    + to get-angle to v (vector):
+        a (double).
+        toO (vector).
+
+        toO = v - (self get-location).
+
+        a = angle(heading, toO).
+
+        # see if the object is on the left or right side of us
+        # relative on our current rotation.
+
+        if (transpose((self get-rotation)) * toO)::x < 0.0: return -a.
+
+        return a. 
+
+    + to detect-edge:
+        return atEdge.
+}
+
+CTFMobile : Flag (aka Flags) {
+    + variables:
+        carrier (object).
+
+    + to get-carrier:
+        return carrier.
+
+    + to set-carrier to c (object):
+        carrier = c.
+
+    + to init:
+        self set-shape to (new Sphere init-with radius 1.5).
+        self set-bitmap to (controller load-image from "images/star.png").
+        self move to random[(WORLD_SIZE, 0, WORLD_SIZE)] - (WORLD_SIZE / 2, -.5, WORLD_SIZE / 2).
+
+    + to move to l (vector):
+        if l::x > WORLD_SIZE / 2.0: l::x = WORLD_SIZE / 2.0.
+        if l::x < -WORLD_SIZE / 2.0: l::x = -WORLD_SIZE / 2.0.
+        if l::z > WORLD_SIZE / 2.0: l::z = WORLD_SIZE / 2.0.
+        if l::z < -WORLD_SIZE / 2.0: l::z = -WORLD_SIZE / 2.0.
+
+        super move to l.        
+}
+
+CustomShape : AgentShape {
+    + to init:
+        a, b, c, d (vector).
+
+        a = (0, 1, 0).
+        b = (.25, 0, 0).
+        c = (-.25, 0, 0).
+        d = (0, -.1, .5).
+
+        self add-face with-vertex-list { a, b, c }.
+        self add-face with-vertex-list { a, b, d }.
+        self add-face with-vertex-list { a, c, d }.
+        self add-face with-vertex-list { d, c, b }.
+        self finish-shape with-density 1.0.
+}
+
+Abstract : Perceptron {
+    + variables:
+        inputs (list).
+        weights (list).
+        threshold, output (float).
+        RESTING_ACTIVATION, FIRING_ACTIVATION, INPUT_INITIALIZATION (float).
+
+    + to init:
+        RESTING_ACTIVATION = 0.0.
+        FIRING_ACTIVATION = 1.0.
+        INPUT_INITIALIZATION = 0.0.
+        self re-init.
+
+    + to re-init:
+        output = 0.0.
+        inputs = { }.
+        weights = { }.
+
+    + to set-threshold to newThreshold (float):
+        threshold = newThreshold.
+
+    + to add-weighted-input with-weight w (float):
+        % Adds a value to the weight list, and returns it's index.
+
+        push w onto weights.
+        push INPUT_INITIALIZATION onto inputs.
+        return (|weights| - 1).
+
+    + to set-inputs to inputList (list):
+        if |inputs| != |inputList|: {
+            print "Input mismatch.".
+            return.
+        } else inputs = inputList.
+
+    + to set-weights to weightList (list):
+        if |weights| != |weightList|: {
+            print "Weight mismatch.".
+            return.
+        } else weights = weightList.
+
+    + to set-input number i (int) to f (float):
+        if i >= |inputs|: {
+            print "Input number out of range.".
+            return.
+        } else inputs{i} = f.
+
+    + to set-weight number i (int) to f (float):
+        if i >= |inputs|: {
+            print "Weight number out of range.".
+            return.
+        } else weights{i} = f.
+
+    + to run:
+        i (int).
+        activationLevel (float).
+
+        for i=0, i<inputs, i++:
+        activationLevel += inputs{i} * weights{i}.
+
+        if activationLevel > threshold:
+        output = FIRING_ACTIVATION.
+        else output = RESTING_ACTIVATION.
+
+    + to get-output:
+        return output.
+
+    + to get-weights:
+        return weights.
+
+    + to get-threshold:
+        return threshold.
+}

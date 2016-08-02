@@ -1,0 +1,25 @@
+@use WUBWorld.
+
+Controller myWUBWorldControl.
+
+# 
+# Here's our custom implementation of WUBWorld
+# 
+
+WUBWorldControl : myWUBWorldControl {
+    + variables:
+
+    + to init:
+        # here we'll setup the world.  we'll probably want to
+        # make an instance of our own Agent here...
+        
+        new myAgent.
+}
+
+#
+# We'll subclass Agent below and customize its behavior
+# 
+
+Agent : myAgent {
+    
+}

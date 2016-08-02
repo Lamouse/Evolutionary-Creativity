@@ -5,6 +5,17 @@ import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
 
+def check_inf(string):
+	# bug no python 2.3
+	if string == '1.#INF\n':
+		result = 99999
+	else:
+		result = float(string)
+
+	result = max(0, result)
+
+	return result
+
 if __name__ == '__main__':
 
 	count = 0
@@ -39,7 +50,7 @@ if __name__ == '__main__':
 
 						f =  open(path, 'r')
 						for line in f:
-							temp_results.append(float(line))
+							temp_results.append(check_inf(line))
 						f.close()
 
 						results.append(temp_results)
@@ -101,12 +112,18 @@ if __name__ == '__main__':
 	ax.plot(data1, color='b', label=name1)
 	ax.plot(data2, color='g', label=name2)
 
+	#legend = ax.legend(loc='upper right')
 	legend = ax.legend(loc='lower left')
 
 	plt.errorbar(data1_x, data1_mean, yerr=data1_sem, fmt='bo', markersize=1)
 	plt.errorbar(data2_x, data2_mean, yerr=data2_sem, fmt='go', markersize=1)
 
 	plt.ylabel('fitness')
+	#plt.ylabel('number of deaths')
+	#plt.ylabel('diversity')
+	#plt.ylabel('brightness')
+	#plt.ylabel('size')
+
 	plt.xlabel('number of generations')
 	plt.savefig('data.png', bbox_inches='tight')
 	plt.close()
@@ -114,7 +131,7 @@ if __name__ == '__main__':
 	p_value = np.mean(p_value_list_equal)
 	print('\np value:\n\t' + str(p_value) + '\n\n')
 
-	if p_value >= 0.025:
+	if p_value >= 0.05:
 		# two tailed
 		print('With a confidence level of 95, there are not a difference between those results\n')
 
@@ -124,12 +141,12 @@ if __name__ == '__main__':
 		# one tailed
 
 		p_value = np.mean(p_value_list_1)
-		if p_value >= 0.05:
+		if p_value >= 0.025:
 			print('\np value:\n\t' + str(p_value) + '\n\n')
 			print('With a confidence level of 95, the result 1 (' + name1 + ') is higher than the other (' + name2 + ')')
 		else:
 			p_value = np.mean(p_value_list_2)
-			if p_value >= 0.05:
+			if p_value >= 0.025:
 				print('\np value:\n\t' + str(p_value) + '\n\n')
 				print('With a confidence level of 95, the result 2 (' + name2 + ') is higher than the other (' + name1 + ')')
 		

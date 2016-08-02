@@ -5,6 +5,20 @@ import numpy as np
 import scipy.stats as st
 import matplotlib.pyplot as plt
 
+def check_inf(string):
+	# bug no python 2.3
+	if string == '1.#INF\n':
+		result = 99999
+	else:
+		result = float(string)
+
+	result = max(0, result)
+
+	#result = min(20.0, result)
+
+	return result
+
+
 if __name__ == '__main__':
 
 	count = 0
@@ -46,7 +60,7 @@ if __name__ == '__main__':
 
 						f =  open(path, 'r')
 						for line in f:
-							temp_results.append(float(line))
+							temp_results.append(check_inf(line))
 						f.close()
 
 						results.append(temp_results)
@@ -121,13 +135,20 @@ if __name__ == '__main__':
 	ax.plot(data2, color='g', label=name2)
 	ax.plot(data3, color='r', label=name3)
 
-	legend = ax.legend(loc='upper right')
+	#legend = ax.legend(loc='upper right')
+	legend = ax.legend(loc='lower left')
 
 	plt.errorbar(data1_x, data1_mean, yerr=data1_sem, fmt='bo', markersize=1)
 	plt.errorbar(data2_x, data2_mean, yerr=data2_sem, fmt='go', markersize=1)
 	plt.errorbar(data3_x, data3_mean, yerr=data3_sem, fmt='ro', markersize=1)
 
-	plt.ylabel('fitness')
+
+	#plt.ylabel('fitness')
+	plt.ylabel('number of deaths')
+	#plt.ylabel('diversity')
+	#plt.ylabel('brightness')
+	#plt.ylabel('size')
+
 	plt.xlabel('number of generations')
 	plt.savefig('data.png', bbox_inches='tight')
 	plt.close()

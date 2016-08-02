@@ -1,0 +1,107 @@
+<title>Capture the Flag Rules</title>
+<body bgcolor="#ffffff">
+
+<style type="text/css">
+BODY, P, BLOCKQUOTE {
+    color: black;
+    font-family: Geneva,Arial,Helvetica,Swiss,SunSans-Regular;
+    font-size: 80%;
+}
+</STYLE>
+<center>
+<img src="title.png" alt="Capture the Flag">
+<br>
+in the <a href="http://www.spiderland.org/breve">breve</a> simulation environment
+</center>
+
+
+<img src="rules.png" alt="Rules">
+<blockquote>
+Below are the rules and instructions for running a Capture the Flag tournament in 
+breve.  See the sample file 
+<a href="CaptureTheFlagTemplate.tz">CaptureTheFlagTemplate.tz</a> for an sample 
+tournament with two simple team strategies.
+<p>
+<ul>
+<li>You'll need to <a href="CaptureTheFlag.tar.gz">download the Capture the Flag simulation files</a>.
+<p>
+<li>Two teams of 10 players compete, the Reds and the Blues.</li>
+<p>
+<li>Each team has a home-side&mdash;Blues on the negative side of the X-axis, Reds on the positive side.</li>
+<p>
+<li>If a player is tagged offsides, the player is sent to jail.</li>
+<p>
+<li>If a player tags the jail on the other team's side, all of the jailed teammates are freed.  The freed teammates are automatically zapped back to random locations on their home-side ("free walkbacks").  The agent that tagged the jail does not automatically return home.</li>
+<p>
+<li>Agent's cannot move their own team's flag.</li>
+<p>
+<li>The game is over when one of the following conditions has been met:</li>
+<ul>
+<li>one team's flag has been carried to the other team's side
+<li>all players from one team have been captured
+<li>500 simulated seconds have elapsed 
+</ul>
+<p>
+<li>The winning team is the team that:
+<ul>
+<li>captures the other team's flag; or, 
+<li>the one that captures all of the other team's opponents; or,
+<li>if neither of the above conditions are met, then the winning team is the one which has possession of its opponent's flag for the larger portion of the game.
+</ul>
+<p>
+<li>The results of the competition are printed to the output log.</li>
+<p>
+<li>Your entry into the competition should be a single breve class, a subclass of "CaptureTheFlagPlayer" with a unique name.</li>
+<p>
+<li>Your team will arbitrarily be assigned to be the red or blue players.  Blue players have the team number "0" and live on the negative side of the X-axis.  Red players have the team number "1" and live  on the positive side of the X-axis.</li>
+<p>
+<li>Agents can execute the following action methods:</li>
+<ul>
+<li>turn-left: turns the agent slightly to the left. 
+<li>turn-right: turns the agent slightly to the right. 
+<li>set-speed to X: sets the speed of the agent on a scale from 0.0 to 1.0. 
+</ul>
+<p>
+<li>Agents can execute the following methods to get sensor information:</li>
+<ul>
+<li>get-id-number: returns a unique number between 0 and 9 for each agent on the team.  You can use this to assign different tasks to different agents (for example: offense, flag guard and jail guard).
+<li>sense-my-team: returns a list of the players on the agent's team in the agent's sensor range. 
+<li>sense-other-team: returns a list of the players on the other team in the agent's sensor range. 
+<li>sense-my-flag: returns a single object&mdash;the flag of the agent's team, if it is in the sensor range. 
+<li>sense-other-flag: returns a single object&mdash;the flag of the other team, if it is in the sensor range.   
+<li>sense-my-jail: returns a single object&mdash;the jail where your teammates are being held, if it is in the  sensor range.  This is the jail you want to get to in order to free your teammates. 
+<li> sense-other-jail: returns a single object&mdash;the jail where the other team's players are being held, if it is  in the sensor range.  This is the jail you want to defend. 
+<li>get-my-home-location: returns a vector, the closest point to the agent on the agent's home-side.
+<li>get-angle-to <i>vector</i>: returns a number representing, in radians, the angle to the 
+specified point.  A positive number indicates that the point is to right of the agent,
+a negative number indicates that the point is to the left.
+</ul>
+<p>
+<li>Given an object, be it a player, a flag or a jail, the following method can be used:</li>
+<ul>
+<li>get-location: returns the location of an object.
+</ul>
+<p>
+<li>The CaptureTheFlagController class responds to the following useful methods:
+<ul>
+<li>get-time: returns the current time in simulated seconds.  Since the game is only 
+500.0 seconds long, you may wish to modify agent behaviors based on the current time.
+<li>get-jailed-red-count: returns the number of Red agents in jail.
+<li>get-jailed-blue-count: returns the number of Blue agents in jail.
+</ul>
+<p>
+<li>To run a match between two strategies:
+<ul>
+<li>Edit the file Tournament.tz (included with the download files).
+<li>Include the proper source files with "@use" lines
+<li>Change the two "new" lines (16 &amp; 18) to create the proper object types.  
+<li>Run the simulation!
+</ul>
+</ul>
+If you have any questions about running a Capture the Flag tournament in breve,
+<a href="jk [at] spiderland.org">mail me</a>.
+<p>
+<a href="index.html">Return</a> to the Capture the Flag page</a>.
+
+</blockquote>
+</body>

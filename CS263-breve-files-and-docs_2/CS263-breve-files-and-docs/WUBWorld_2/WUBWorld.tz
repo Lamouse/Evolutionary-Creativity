@@ -1,0 +1,605 @@
+@use Control.
+@use Shape.
+@use Mobile.
+@use Stationary.
+@use Sound.
+
+@define WUB_MOVEMENT_RANGE 	50.
+@define WUB_DRAIN_RANGE 	5.0.
+@define WUB_DRAIN_RATE 		0.008.
+@define WORLD_SIZE 			50.
+@define SENSOR_DISTANCE 	20.
+
+@define COST_OF_LIVING 		0.0004.
+
+@define STARTING_ENERGY 	1.0.
+
+@define FOOD_COUNT			10.
+
+Control : WUBWorldControl {
+	+ variables:
+		floor (object).
+		explosionSound, shotSound, chompSound, whoopSound, shotShape, drainSound (object).
+		growlSound (list).
+
+	+ to play-explosion-sound:
+		explosionSound play.
+
+	+ to play-shot-sound:
+		shotSound play.
+
+	+ to play-chomp-sound:
+		chompSound play.
+
+	+ to play-whoop-sound:
+		whoopSound play.
+
+	+ to get-shot-shape:
+		return shotShape.
+		
+	+ to play-drain-sound:
+		drainSound play.
+
+	+ to play-growl-sound:
+		growlSound{random[3]} play.
+
+	+ to init:
+		floor = (new Stationary register with-shape (new Cube init-with size (WORLD_SIZE, .2, WORLD_SIZE)) at-location (0, 0, 0)).
+
+		shotSound = new Sound load from-file "sounds/laser_cannon.wav".
+		explosionSound = new Sound load from-file "sounds/explosion.wav".
+		whoopSound = new Sound load from-file "whoopwhoop.wav".
+		chompSound = new Sound load from-file "chomp.wav".
+		drainSound = new Sound load from-file "dp_frogger_squash.wav".
+		growlSound = 4 new Sound.
+		growlSound{0} load from-file "evilaf03.wav".
+		growlSound{1} load from-file "evilaf06.wav".
+		growlSound{2} load from-file "ghost.wav".
+		growlSound{3} load from-file "monster1.wav".
+
+		shotShape = new Sphere init-with radius .3.
+
+		self set-integration-step to 0.2.
+
+		self enable-lighting.
+		self move-light to (0, 10, 0).
+		
+		self set-background-color to (0, 0, 0).
+
+		floor catch-shadows.
+
+		self enable-reflections.
+		self enable-shadow-volumes.
+		self set-background-texture to (self load-image from "images/clouds.png").
+
+		self point-camera at (0, 0, 0) from (5, 3, 5).
+
+		10 new Foods.
+
+		3 new Walls.
+		
+		3 new WUBs.
+
+	+ to iterate:
+		if random[1000] && | all Food | < FOOD_COUNT: new Food.
+
+		super iterate.
+}
+
+Mobile : Agent (aka Agents) {
+	+ variables:
+		shape (object).
+		velocity (double).
+		angle (double).
+		heading (vector).
+		turningLeft, turningRight (int).
+		dieCount (int).
+		dying (int).
+		atEdge (int).
+		energy (double).		
+		
+	+ to reduce-energy by n (double):
+		energy -= n.
+		
+		if energy <= 0.0: self kill.
+
+	+ to get-energy:
+		return energy.
+
+	+ to set-turning-left to i (int):
+		turningLeft = i.
+
+	+ to set-turning-right to i (int):
+		turningRight = i.
+
+	+ to get-heading:
+		return heading.
+
+	+ to shoot:
+		new Shot fire from (self get-location) towards heading.
+
+	+ to init:
+		shape = new AgentShape.
+		self set-shape to shape.
+
+		self set-color to (0, 0, 1).
+
+		self move to (0, .1, 0).
+
+		self set-angle to 0.
+		
+		energy = STARTING_ENERGY.
+		
+		self handle-collisions with-type "Food" with-method "eat".
+		self handle-collisions with-type "WUB" with-method "be-eaten".
+		self handle-collisions with-type "Wall" with-method "wall-stop".
+
+		heading = (self get-rotation) * (0, 1, 0).
+		
+	+ to wall-stop with w (object):
+		self move to (self get-location) - heading * .08.
+		self set-velocity to (0, 0, 0).
+
+	+ to eat food f (object):
+		print "EATING!".
+		energy = STARTING_ENERGY.
+		free f.
+		controller play-chomp-sound.
+
+	+ to be-eaten by w (object):
+		if !dying: self kill.
+
+	+ to accelerate:
+		self set-speed to velocity + 0.1.
+
+	+ to decelerate:
+		self set-speed to velocity - 0.1.
+
+	+ to set-speed to value (double):
+		velocity = value.
+
+		if velocity > 1.0: velocity = 1.0.
+		if velocity < 0.0: velocity = 0.0.
+
+	+ to set-angle to a (double):
+		angle = a.
+		self rotate around-axis (-1, 0, 0) by 1.57.
+		self relative-rotate around-axis (0, -1, 0) by angle.
+
+	+ to turn-left:
+		self set-angle to angle - 0.03.
+
+	+ to turn-right:
+		self set-angle to angle + 0.03.
+
+	+ to kill:
+		if dying: return.
+
+		controller play-whoop-sound.
+		dieCount = 200.
+		dying = 1.
+
+	+ to get-dying:
+		return dying.
+
+	+ to iterate:
+		myrot (matrix).
+		myloc, myvel (vector).
+
+		myloc = (self get-location).
+		myvel = (self get-heading).
+
+		if dying: {
+			self turn-left.
+			self turn-left.
+			self turn-left.
+			self turn-left.
+			dieCount--.
+
+			if dieCount == 0: {
+				100 new Particles move to (self get-location).
+				controller play-explosion-sound.
+				free self.
+			}
+
+			return.
+		}
+		
+		self set-color to (energy, energy, energy).
+
+		if turningLeft: self turn-left.
+		if turningRight: self turn-right.
+
+		if myloc::x > (WORLD_SIZE / 2) && myvel::x > 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else if myloc::z > (WORLD_SIZE / 2) && myvel::z > 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else if myloc::x < -(WORLD_SIZE / 2) && myvel::x < 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else if myloc::z < -(WORLD_SIZE / 2) && myvel::z < 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else {
+			atEdge = 0.
+		}
+
+		myrot = (self get-rotation).
+
+		heading = myrot * (0, 1, 0).
+
+		self set-velocity to .5 * velocity * heading.
+
+	self reduce-energy by COST_OF_LIVING.
+
+		myloc::y = 0.2.
+
+		self move to myloc.
+		
+	+ to draw-line to o (object):
+		self remove-all-lines.
+		self add-line to o with-color (1, 0, 0).
+
+	+ to sense-food:
+		result (list).
+		item (object).
+
+		foreach item in all Food: {
+			if | (self get-location) - (item get-location) | < SENSOR_DISTANCE: push item onto result.
+		}
+
+		return result.
+
+	+ to sense-wubs:
+		result (list).
+		item (object).
+
+		foreach item in all WUBs: {
+			if | (self get-location) - (item get-location) | < SENSOR_DISTANCE: push item onto result.
+		}
+
+		return result.
+
+	+ to sense-walls:
+		result (list).
+		item (object).
+
+		foreach item in all Walls: {
+			if | (self get-location) - (item get-location) | < SENSOR_DISTANCE: push item onto result.
+		}
+
+		return result.
+		
+	+ to get-closest-food:
+		bestDistance (double).
+		best, item (object).
+		
+		bestDistance = 200.
+		
+		foreach item in (self sense-food): {
+			if |(self get-location) - (item get-location)| < bestDistance: {
+				 best = item.
+				 bestDistance = |(self get-location) - (item get-location)|.
+			}
+		}
+		
+		return best.
+
+	+ to get-closest-point on-wall w (object):
+		return (w get-closest-point to (self get-location)).
+		
+	+ to get-object-angle to o (object):
+		return (self get-angle to (o get-location)). 
+
+	+ to get-angle to v (vector):
+		a (double).
+		toO (vector).
+
+		toO = v - (self get-location).
+
+		a = angle(heading, toO).
+
+		# see if the object is on the left or right side of us
+		# relative on our current rotation.
+
+		if (transpose((self get-rotation)) * toO)::x < 0.0: return -a.
+
+		return a. 
+
+	+ to detect-edge:
+		return atEdge.
+}
+
+Mobile : Food (aka Foods) {
+	+ to init:
+		self set-shape to (new Sphere init-with radius .5).
+		self set-lightmap to 3.
+		self move to random[(WORLD_SIZE, 0, WORLD_SIZE)] - (WORLD_SIZE / 2, -.5, WORLD_SIZE / 2).
+		self set-color to (0, 0, 0).
+
+	+ to iterate:
+		m (double).
+
+		m = sin((controller get-time) / 6.0).
+		self set-color to (1 - m * m, 1 - m * m, 1).
+		
+}
+
+Mobile : Shot (aka Shots) {
+	+ variables:
+		countdown (int).
+
+	+ to init: 
+		self set-shape to (controller get-shot-shape).
+		self set-bitmap to 2.
+		self set-color to (1, 0, 0).
+		countdown = 100.
+
+		self handle-collisions with-type "WUB" with-method "collide".
+
+		controller play-shot-sound.
+
+	+ to fire from source (vector) towards direction (vector):
+		self move to source.
+		self set-velocity to 2 * direction / | direction |.
+
+	+ to iterate:
+		countdown--.
+
+		if countdown == 0: free self.
+
+	+ to collide with wub (object):
+		30 new Particles move to (wub get-location).
+		controller play-explosion-sound.
+		free wub.
+}
+
+CustomShape : AgentShape {
+	+ to init:
+		a, b, c, d (vector).
+
+		a = (0, 1, 0).
+		b = (.25, 0, 0).
+		c = (-.25, 0, 0).
+		d = (0, -.1, .5).
+
+		self add-face with-vertex-list { a, b, c }.
+		self add-face with-vertex-list { a, b, d }.
+		self add-face with-vertex-list { a, c, d }.
+		self add-face with-vertex-list { d, c, b }.
+		self finish-shape with-density 1.0.
+}
+
+Mobile : Particle (aka Particles) {
+	+ variables:
+		shape (object).
+		lifetime (int).
+
+	+ to init:
+		self set-lightmap to 2.
+		shape = new Sphere init-with radius .05 + random[.3].
+		self set-color to random[(1, 1, 1)].
+
+		self set-velocity to random[(2, 2, 2)] - (1, 1, 1).
+
+		lifetime = 20 + random[30].
+
+	+ to iterate:
+		lifetime--.
+
+		if lifetime == 0: free self.
+}
+
+Mobile : Wall (aka Walls) {
+	+ variables: 
+		shape (object).
+		minX, maxX, minZ, maxZ (double).
+		topRight, bottomRight, bottomLeft, topLeft (vector).
+
+	+ to init:
+		size, location (vector).
+		location = random[(WORLD_SIZE - 10, 0, WORLD_SIZE - 10)] - (WORLD_SIZE/2 - 5, 0, WORLD_SIZE/2 - 5).
+		size = random[(9, 0, 9)] + (1, 0, 1). 
+
+		self set-color to (.3, .7, 1.0).
+
+		size::y = 1.
+		location::y = .7.
+
+		shape = new Cube init-with size size.
+		self set-shape to shape.
+
+		minX = location::x - size::x / 2.
+		maxX = location::x + size::x / 2.
+		minZ = location::z - size::z / 2.
+		maxZ = location::z + size::z / 2.
+
+		topLeft = (minX, .5, maxZ).
+		bottomLeft = (minX, .5, minZ).
+		topRight = (maxX, .5, maxZ).
+		bottomRight = (maxX, .5, minZ).
+
+		self move to location.
+
+	+ to get-distance to v (vector):
+		return | v - (self get-closest-point to v) |.
+
+	+ to get-closest-point to v (vector):
+		min, r (double).
+		closestPoint, best (vector).
+		inWall (int).
+
+		inWall = 1.
+
+		min = 100.
+
+		v::y = 0.5.
+
+		if v::x < minX: {
+			closestPoint = (self get-closest-point-to-segment v1 bottomLeft v2 topLeft from v).
+			r = | v - closestPoint |.
+			if r < min && r > 0: { best = closestPoint.  min = r. }
+			inWall = 0.
+		}
+
+		if v::z < minZ: {
+			closestPoint = (self get-closest-point-to-segment v1 bottomRight v2 bottomLeft from v).
+			r = | v - closestPoint |.
+			if r < min && r > 0: { best = closestPoint.  min = r. }
+			inWall = 0.
+		}
+
+		if v::x > maxX: {
+			closestPoint = (self get-closest-point-to-segment v1 topRight v2 bottomRight from v).
+			r = | v - closestPoint |.
+			if r < min && r > 0: { best = closestPoint.  min = r. }
+			inWall = 0.
+		}
+
+		if v::z > maxZ: {
+			closestPoint = (self get-closest-point-to-segment v1 topLeft v2 topRight from v).
+			r = | v - closestPoint |.
+			if r < min && r > 0: { best = closestPoint.  min = r. }
+			inWall = 0.
+		}
+
+		if inWall: return v.
+
+		return best.
+
+	+ to get-distance-to-line-segment v1 v1 (vector) v2 v2 (vector) from src (vector):
+		return | src - (self get-closest-point-to-segment v1 v1 v2 v2 from src) |.
+		
+
+	+ to get-closest-point-to-segment v1 v1 (vector) v2 v2 (vector) from src (vector):
+		closest, temp (vector).
+		lineVector, toV2, toSrc (vector).
+		bottom, top, u (double).
+		onSegment (vector).
+
+		toV2 = v2 - v1.
+		toSrc = src - v1.
+
+		top = dot(toV2, toSrc).
+		bottom = dot(toV2, toV2).
+
+		u = top/bottom.
+
+		if u < 0.0: u = 0.
+		if u > 1.0: u = 1.
+
+		onSegment = toV2 * u + v1.
+
+		return onSegment.
+}
+
+CustomShape : WUBShape {
+	+ to init:
+		a, b, c, d, e, f (vector).
+
+		a = (-.5,-.5,-.5).
+		b = (.5,-.5,-.5).
+		c = (-.5,-.5,.5).
+		d = (.5,-.5,.5).
+		e = (-1.25,.5,0).
+		f = (1.25,.5,0).
+
+		self add-face with-vertex-list { a, e, c }.
+		self add-face with-vertex-list { a, e, f, b }.
+		self add-face with-vertex-list { e, c, d, f }.
+		self add-face with-vertex-list { a, c, d, b }.
+		self add-face with-vertex-list { b, f, d }.
+		self finish-shape with-density 1.0.
+}
+
+Mobile : WUB (aka WUBs) {
+	+ variables:
+		shape (object).
+		movementRange, movementCount, atEdge, count, countThreshold (int).
+		heading (vector).
+		angle, velocity (double).
+
+	+ to init:
+		shape = new WUBShape.
+		self set-shape to shape.
+		self set-color to (1, 0, 0).
+		self move to random[(WORLD_SIZE, -1, WORLD_SIZE)] - (WORLD_SIZE / 2, -1, WORLD_SIZE / 2).
+		movementRange = random[WUB_MOVEMENT_RANGE] + 25.
+		self rotate around-axis (0, 1, 0) by random[3.14159].
+		heading = (self get-rotation) * (1, 0, 0).
+		countThreshold = 50 + random[1000].
+
+	+ to iterate:
+		myloc, myvel (vector).
+		tempDouble (double).
+
+		myloc = (self get-location).
+
+		count++.
+		if count > countThreshold: {
+			# print "WUB INFO".
+			# print "--------".
+			# print "movementCount: $movementCount".
+			# print "heading: $heading".
+			# print "angle: $angle".
+			# print "".
+			(controller play-growl-sound).
+			count = 0.
+			countThreshold = 50 + random[1000].
+		}
+
+		if movementCount > movementRange: {
+			movementCount = 0.
+			heading = -heading.
+			self set-speed to 0.
+		}
+
+		self set-speed to 1.0.
+		movementCount++.
+
+		if myloc::x > (WORLD_SIZE / 2) && myvel::x > 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else if myloc::z > (WORLD_SIZE / 2) && myvel::z > 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else if myloc::x < -(WORLD_SIZE / 2) && myvel::x < 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else if myloc::z < -(WORLD_SIZE / 2) && myvel::z < 0.0: {
+			self set-speed to 0.
+			atEdge = 1.
+		} else {
+			atEdge = 0.
+		}
+
+		myloc::y = 1.0.
+		self move to myloc.
+		self drain-nearby-objects.
+		self set-velocity to velocity * heading.
+		super iterate.
+
+	+ to drain-nearby-objects:
+		% Nothing yet.
+		item (object).
+
+		foreach item in all Agents: {
+			if !(item get-dying) && (|((item get-location) - (self get-location))| <= WUB_DRAIN_RANGE): {
+				item reduce-energy by WUB_DRAIN_RATE.
+				if random[50] == 0: controller play-drain-sound.
+			}
+		}
+
+	+ to set-speed to value (double):
+		value /= 2.
+
+		velocity = value.
+
+		if velocity > .5: velocity = .5.
+		if velocity < 0: velocity = 0.
+
+	+ to get-heading:
+		return heading.
+}
