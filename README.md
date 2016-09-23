@@ -15,7 +15,7 @@ The objective of this project is to combine the ideas from algorithms of flockin
 This program runs in BREVE simulation environment and therefore it's necessary to have BREVE installed to run this project.
 
 1. If you are a Windows user download this repository and open the following executable "Evolutionary-Creativity/breveIDE_windows_2.7.2_2/breveIDE_2.7.2/breveIDE.exe".
-2. If you use another OS or if you are not able to open the executable, then you need to download a version of BREVE. BREVE is available for free in [BREVE](http://www.spiderland.org/s/), also some versions are available within this repository in the folder named "Software". After you finished downloading the framework launch the framework.
+2. If you use another OS or if you are not able to open the executable, then you need to download a version of BREVE. BREVE is available for free in [BREVE](http://www.spiderland.org/s/), also some versions are available within this repository in the folder named "Software". After you finished downloading the framework copy the following folder [Thesis](https://github.com/Lamouse/Evolutionary-Creativity/tree/master/breveIDE_windows_2.7.2_2/breveIDE_2.7.2/demos/Thesis) to inside your Demos folder, then launch the framework.
 3. At the top bar you need to navigate between "Demos > Thesis > BOID_v2.0.py" to open the developed simulation.
 4. Now you can change the properties of the simulation through the alteration of their variables or you can run the simulation with the default properties.
 6. Finally to run the simulation you must press the "play button" that lies at the bottom bar to run the simulation.
